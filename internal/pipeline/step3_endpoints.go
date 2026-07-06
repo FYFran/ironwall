@@ -73,6 +73,17 @@ func (s *Step3Endpoints) Run(ctx context.Context, target string) ([]report.Findi
 			return nil
 		}
 
+		// Skip test files and testdata
+		fn := filepath.Base(path)
+		lf := strings.ToLower(fn)
+		if strings.Contains(lf, "_test.") || strings.HasPrefix(lf, "test_") {
+			return nil
+		}
+		if strings.Contains(path, "/testdata/") || strings.Contains(path, "\\testdata\\") ||
+			strings.Contains(path, "/fixtures/") || strings.Contains(path, "\\fixtures\\") {
+			return nil
+		}
+
 		routes := extractRoutes(path, target)
 		allRoutes = append(allRoutes, routes...)
 		return nil
@@ -129,6 +140,14 @@ func extractRoutes(path, target string) []routeInfo {
 		recentLines = append(recentLines, line)
 		if len(recentLines) > 10 {
 			recentLines = recentLines[1:]
+		}
+
+		// Skip comment lines
+		t := strings.TrimSpace(line)
+		if strings.HasPrefix(t, "//") || strings.HasPrefix(t, "#") ||
+			strings.HasPrefix(t, "/*") || strings.HasPrefix(t, "*") ||
+			strings.HasPrefix(t, "<!--") {
+			continue
 		}
 
 		// Skip common false positives

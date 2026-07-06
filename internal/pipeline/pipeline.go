@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 
 	"github.com/FYFran/ironwall/internal/config"
@@ -80,7 +81,10 @@ func (p *Pipeline) Run(ctx context.Context, target string) (*report.ScanResult, 
 		}
 
 		for i := range findings {
-			if findings[i].ID == "" {
+			if isTestFile(findings[i].FilePath) {
+			findings[i].Severity = downgradeTestSeverity(findings[i].Severity)
+		}
+		if findings[i].ID == "" {
 				findings[i].ID = fmt.Sprintf("IRON-%03d", result.Summary.Total+1)
 			}
 			result.Summary.AddFinding(findings[i])
@@ -121,4 +125,27 @@ func (p *Pipeline) checkTools(tools []string) bool {
 func isToolAvailable(name string) bool {
 	_, err := exec.LookPath(name)
 	return err == nil
+}
+
+// isTestFile checks if a file path is a test file or in a test directory.
+func isTestFile(path string) bool {
+	lower := strings.ToLower(path)
+	return strings.Contains(lower, "_test.") || strings.HasPrefix(lower, "test_") ||
+		strings.Contains(lower, "/testdata/") || strings.Contains(lower, "\\testdata\\") ||
+		strings.Contains(lower, "/fixtures/") || strings.Contains(lower, "\\fixtures\\") ||
+		strings.Contains(lower, "/test/") || strings.Contains(lower, "\\test\\")
+}
+
+// downgradeTestSeverity drops severity by one level for test files.
+func downgradeTestSeverity(s report.Severity) report.Severity {
+	switch s {
+	case report.SevCritical:
+		return report.SevHigh
+	case report.SevHigh:
+		return report.SevMedium
+	case report.SevMedium:
+		return report.SevLow
+	default:
+		return report.SevInfo
+	}
 }
