@@ -138,8 +138,9 @@ Read the full methodology: [docs/methodology.md](docs/methodology.md)
 - [x] v0.2.0 — Steps 2+4: SAST + Hardcoded secrets with AI (545x faster)
 - [x] v0.3.0 — Steps 3+5+6+7: Endpoint audit + Dependencies + Server + Database
 - [x] v0.3.1 — Nuclei scanner, review command (diff-only), gitleaks tests, Fiverr gig
-- [ ] v0.4.0 — CI integration (GitHub Actions, SARIF output)
-- [ ] v1.0.0 — Full 7-step pipeline, stable API
+- [x] v0.4.0 — 8-step pipeline: Betterleaks (98.6% recall), CodeQL, KICS, Syft/Grype, supply chain, AI engine (dual-model V3+R1), SARIF, CI templates
+- [ ] v0.5.0 — Custom rule engine, plugin system, language-specific gotchas expansion
+- [ ] v1.0.0 — Stable API, comprehensive benchmarks, marketplace integration
 
 ## 🤝 Contributing
 
