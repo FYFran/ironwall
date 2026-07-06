@@ -61,7 +61,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json")
+	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json, sarif")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file path (auto-generated if empty)")
 	cmd.Flags().BoolVar(&quickMode, "quick", false, "Quick scan: only steps 1+4 (gitleaks + hardcoded secrets)")
 	cmd.Flags().BoolVar(&fullMode, "full", true, "Full scan: all 7 steps (default)")
@@ -109,10 +109,12 @@ func newVersionCmd() *cobra.Command {
 }
 
 func runScan(cfg *config.Config) error {
-	// Build AI client if enabled
-	var aiClient *ai.Client
+	// Build AI engine if enabled (dual-model: triage + deep verify)
+	var engine *ai.Engine
 	if cfg.AIEnabled && cfg.AIKey != "" {
-		aiClient = ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
+		triageClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
+		deepClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIDeepModel)
+		engine = ai.NewEngine(triageClient, deepClient)
 	}
 
 	// Build pipeline
@@ -120,16 +122,17 @@ func runScan(cfg *config.Config) error {
 
 	// Register steps based on mode
 	if cfg.QuickMode {
-		pipe.Register(&pipeline.Step1Gitleaks{})
-		pipe.Register(pipeline.NewStep4Hardcoded(aiClient))
+		pipe.Register(&pipeline.Step1Secrets{})
+		pipe.Register(pipeline.NewStep4Hardcoded(engine))
 	} else {
-		pipe.Register(&pipeline.Step1Gitleaks{})
-		pipe.Register(pipeline.NewStep2SAST(aiClient))
-		pipe.Register(pipeline.NewStep3Endpoints(aiClient))
-		pipe.Register(pipeline.NewStep4Hardcoded(aiClient))
+		pipe.Register(&pipeline.Step1Secrets{})
+		pipe.Register(pipeline.NewStep2SAST(engine))
+		pipe.Register(pipeline.NewStep3Endpoints(engine))
+		pipe.Register(pipeline.NewStep4Hardcoded(engine))
 		pipe.Register(&pipeline.Step5Deps{})
 		pipe.Register(&pipeline.Step6Server{})
 		pipe.Register(&pipeline.Step7Database{})
+		pipe.Register(&pipeline.Step8SupplyChain{})
 	}
 
 	// Handle interrupt signal
@@ -156,6 +159,8 @@ func runScan(cfg *config.Config) error {
 		return report.WriteJSON(result, cfg)
 	case "markdown":
 		return report.WriteMarkdown(result, cfg)
+	case "sarif":
+		return report.WriteSARIF(result, cfg)
 	default:
 		report.PrintTerminal(result, cfg)
 		if cfg.OutputFile != "" || cfg.OutputFormat == "markdown" {

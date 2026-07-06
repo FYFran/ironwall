@@ -14,16 +14,16 @@ import (
 	"github.com/FYFran/ironwall/internal/report"
 )
 
-// Step4Hardcoded detects hardcoded secrets that gitleaks may have missed.
+// Step4Hardcoded detects hardcoded secrets that Betterleaks may have missed.
 type Step4Hardcoded struct {
-	aiClient *ai.Client
+	engine   *ai.Engine
 	verifier *classify.Verifier
 }
 
-func NewStep4Hardcoded(aiClient *ai.Client) *Step4Hardcoded {
+func NewStep4Hardcoded(engine *ai.Engine) *Step4Hardcoded {
 	return &Step4Hardcoded{
-		aiClient: aiClient,
-		verifier: classify.NewVerifier(aiClient),
+		engine:   engine,
+		verifier: classify.NewVerifier(engine),
 	}
 }
 
@@ -34,7 +34,7 @@ func (s *Step4Hardcoded) Description() string {
 func (s *Step4Hardcoded) IsSkippable() bool       { return true }
 func (s *Step4Hardcoded) RequiredTools() []string { return nil } // Pure Go + AI
 
-// Secret patterns that gitleaks might miss.
+// Secret patterns that Betterleaks might miss (context-specific, project-specific).
 var hardcodedPatterns = []struct {
 	name     string
 	regex    *regexp.Regexp
@@ -95,6 +95,43 @@ var hardcodedPatterns = []struct {
 		severity: report.SevHigh,
 		category: "hardcoded-secret",
 	},
+	// NEW patterns for better detection
+	{
+		name:     "GitHub Personal Access Token",
+		regex:    regexp.MustCompile(`(?i)(gh[pousr]_[a-zA-Z0-9_]{36,255}|github_pat_[a-zA-Z0-9_]{22,255})`),
+		severity: report.SevCritical,
+		category: "hardcoded-secret",
+	},
+	{
+		name:     "Slack Bot/Webhook Token",
+		regex:    regexp.MustCompile(`(?i)(xox[baprs]-[a-zA-Z0-9-]{10,}|T[a-zA-Z0-9_]{8,}/B[a-zA-Z0-9_]{8,}/[a-zA-Z0-9_]{24,})`),
+		severity: report.SevCritical,
+		category: "hardcoded-secret",
+	},
+	{
+		name:     "Stripe API Key",
+		regex:    regexp.MustCompile(`(?i)(sk_live_[a-zA-Z0-9]{24,}|pk_live_[a-zA-Z0-9]{24,}|rk_live_[a-zA-Z0-9]{24,})`),
+		severity: report.SevCritical,
+		category: "hardcoded-secret",
+	},
+	{
+		name:     "JWT Secret Key",
+		regex:    regexp.MustCompile(`(?i)(jwt|jwt_access|jwt_refresh|jwt_secret)[_\s]*(secret|key|token)?[_\s]*[:=]\s*["'][a-zA-Z0-9_-]{16,}["']`),
+		severity: report.SevHigh,
+		category: "hardcoded-secret",
+	},
+	{
+		name:     "Generic API key in config",
+		regex:    regexp.MustCompile(`(?i)(api[_\s]?key|apikey|api_secret|api_token)\s*[:=]\s*["'][a-zA-Z0-9_-]{16,}["']`),
+		severity: report.SevHigh,
+		category: "hardcoded-secret",
+	},
+	{
+		name:     "Webhook URL with secret",
+		regex:    regexp.MustCompile(`https://hooks\.(slack|discord|teams)\.com/services/[a-zA-Z0-9/_-]{20,}`),
+		severity: report.SevHigh,
+		category: "hardcoded-secret",
+	},
 }
 
 // Extensions to scan for hardcoded secrets.
@@ -111,14 +148,12 @@ var scanExtensions = map[string]bool{
 func (s *Step4Hardcoded) Run(ctx context.Context, target string) ([]report.Finding, error) {
 	var findings []report.Finding
 
-	// Walk the target directory
 	err := filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return nil // Skip files we can't read
+			return nil
 		}
 		if info.IsDir() {
 			base := filepath.Base(path)
-			// Skip common non-source directories
 			if base == ".git" || base == "node_modules" || base == "vendor" ||
 				base == "__pycache__" || base == ".venv" || base == "venv" ||
 				base == "dist" || base == "build" || base == ".next" ||
@@ -133,7 +168,6 @@ func (s *Step4Hardcoded) Run(ctx context.Context, target string) ([]report.Findi
 			return nil
 		}
 
-		// Limit file size to 1MB
 		if info.Size() > 1024*1024 {
 			return nil
 		}
@@ -150,18 +184,22 @@ func (s *Step4Hardcoded) Run(ctx context.Context, target string) ([]report.Findi
 	// Apply severity classification
 	for i := range findings {
 		findings[i].Severity = classify.DowngradeForTestFile(findings[i].FilePath, findings[i].Severity)
+	}
 
-		// Run attack scenario verification for higher-severity findings
-		if findings[i].Severity >= report.SevMedium {
-			at := s.verifier.Verify(ctx, &findings[i])
-			findings[i].AttackScenario = at
+	// Multi-stage AI verification
+	if s.engine != nil && s.engine.Available() && len(findings) > 0 {
+		findings = s.engine.Analyze(ctx, findings)
+	} else {
+		for i := range findings {
+			if findings[i].Severity >= report.SevMedium {
+				findings[i].AttackScenario = classify.HeuristicAttackTest(&findings[i])
+			}
 		}
 	}
 
 	return findings, nil
 }
 
-// scanFileForSecrets scans a single file for hardcoded secret patterns.
 func scanFileForSecrets(path, target string) []report.Finding {
 	f, err := os.Open(path)
 	if err != nil {
@@ -183,7 +221,6 @@ func scanFileForSecrets(path, target string) []report.Finding {
 
 		for _, pattern := range hardcodedPatterns {
 			if loc := pattern.regex.FindStringIndex(line); loc != nil {
-				// Skip if this is in a comment (heuristic: line starts with comment char)
 				trimmed := strings.TrimSpace(line)
 				if strings.HasPrefix(trimmed, "//") || strings.HasPrefix(trimmed, "#") ||
 					strings.HasPrefix(trimmed, "/*") || strings.HasPrefix(trimmed, "*") ||
@@ -200,7 +237,7 @@ func scanFileForSecrets(path, target string) []report.Finding {
 					CodeSnippet: fmt.Sprintf("  %d | %s", lineNum, strings.TrimSpace(line)),
 					Step:        4,
 					Category:    pattern.category,
-					CWE:         "CWE-798", // Hardcoded Credentials
+					CWE:         "CWE-798",
 					CVSS:        severityToCVSS(pattern.severity),
 				})
 			}

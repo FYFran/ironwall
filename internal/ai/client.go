@@ -22,22 +22,22 @@ type Client struct {
 // NewClient creates a new AI client.
 // endpoint is the API base URL (e.g. "https://api.deepseek.com/v1").
 // apiKey is the authentication key.
-// model is the model name (e.g. "deepseek-chat").
+// model is the model name (e.g. "deepseek-chat", "deepseek-reasoner").
 func NewClient(endpoint, apiKey, model string) *Client {
 	return &Client{
 		endpoint: strings.TrimRight(endpoint, "/"),
 		apiKey:   apiKey,
 		model:    model,
 		httpClient: &http.Client{
-			Timeout: 60 * time.Second,
+			Timeout: 120 * time.Second, // Longer timeout for R1 reasoning
 		},
 	}
 }
 
 // Message represents a chat message.
 type Message struct {
-	Role    string `json:"role"`    // "system", "user", or "assistant"
-	Content string `json:"content"` // The message text
+	Role    string `json:"role"`
+	Content string `json:"content"`
 }
 
 // ChatRequest is the request body for the chat completions API.
@@ -70,6 +70,15 @@ type Usage struct {
 
 // Chat sends a chat completion request and returns the response text.
 func (c *Client) Chat(ctx context.Context, systemPrompt string, userMessage string) (string, error) {
+	return c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, 1024)
+}
+
+// ChatWithTemp sends a chat completion with custom temperature and max tokens.
+func (c *Client) ChatWithTemp(ctx context.Context, systemPrompt string, userMessage string, temp float64, maxTokens int) (string, error) {
+	return c.chatWithTemp(ctx, systemPrompt, userMessage, temp, maxTokens)
+}
+
+func (c *Client) chatWithTemp(ctx context.Context, systemPrompt, userMessage string, temp float64, maxTokens int) (string, error) {
 	messages := []Message{
 		{Role: "system", Content: systemPrompt},
 		{Role: "user", Content: userMessage},
@@ -78,8 +87,8 @@ func (c *Client) Chat(ctx context.Context, systemPrompt string, userMessage stri
 	reqBody := ChatRequest{
 		Model:       c.model,
 		Messages:    messages,
-		MaxTokens:   1024,
-		Temperature: 0.1, // Low temperature for deterministic security analysis
+		MaxTokens:   maxTokens,
+		Temperature: temp,
 	}
 
 	body, err := json.Marshal(reqBody)
@@ -123,7 +132,126 @@ func (c *Client) Chat(ctx context.Context, systemPrompt string, userMessage stri
 	return chatResp.Choices[0].Message.Content, nil
 }
 
+// ChatJSON sends a chat request and unmarshals the response into the given target struct.
+// Uses proper JSON unmarshal — not string matching.
+func (c *Client) ChatJSON(ctx context.Context, systemPrompt string, userMessage string, target interface{}) error {
+	response, err := c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, 2048)
+	if err != nil {
+		return err
+	}
+
+	// Extract JSON from response (handle markdown code blocks)
+	jsonStr := extractJSON(response)
+	if jsonStr == "" {
+		return fmt.Errorf("no JSON found in AI response: %s", truncateStr(response, 200))
+	}
+
+	if err := json.Unmarshal([]byte(jsonStr), target); err != nil {
+		return fmt.Errorf("unmarshal AI JSON response: %w\nJSON: %s", err, truncateStr(jsonStr, 500))
+	}
+
+	return nil
+}
+
 // Available returns true if the client is configured with an API key.
 func (c *Client) Available() bool {
 	return c.apiKey != ""
+}
+
+// Model returns the model name used by this client.
+func (c *Client) Model() string {
+	return c.model
+}
+
+// extractJSON extracts JSON content from an AI response, handling markdown code blocks.
+func extractJSON(response string) string {
+	response = strings.TrimSpace(response)
+
+	// Try to extract from ```json ... ``` block
+	if idx := strings.Index(response, "```json"); idx >= 0 {
+		start := idx + len("```json")
+		if end := strings.Index(response[start:], "```"); end >= 0 {
+			return strings.TrimSpace(response[start : start+end])
+		}
+	}
+	// Try ``` ... ``` block (no language tag)
+	if idx := strings.Index(response, "```"); idx >= 0 {
+		start := idx + len("```")
+		// Skip newline after ```
+		if start < len(response) && response[start] == '\n' {
+			start++
+		}
+		if end := strings.Index(response[start:], "```"); end >= 0 {
+			return strings.TrimSpace(response[start : start+end])
+		}
+	}
+
+	// Try to find JSON object or array directly
+	response = strings.TrimSpace(response)
+	if (strings.HasPrefix(response, "{") || strings.HasPrefix(response, "[")) &&
+		(strings.HasSuffix(response, "}") || strings.HasSuffix(response, "]")) {
+		return response
+	}
+
+	// Last resort: find first { or [ and matching closing
+	for i, ch := range response {
+		if ch == '{' || ch == '[' {
+			return findMatchingJSON(response, i)
+		}
+	}
+
+	return ""
+}
+
+// findMatchingJSON finds the matching closing bracket from start index.
+func findMatchingJSON(s string, start int) string {
+	if start >= len(s) {
+		return ""
+	}
+	open := s[start]
+	var close byte
+	if open == '{' {
+		close = '}'
+	} else {
+		close = ']'
+	}
+
+	depth := 0
+	inString := false
+	escaped := false
+
+	for i := start; i < len(s); i++ {
+		ch := s[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if ch == '\\' && inString {
+			escaped = true
+			continue
+		}
+		if ch == '"' {
+			inString = !inString
+			continue
+		}
+		if inString {
+			continue
+		}
+		if ch == open {
+			depth++
+		} else if ch == close {
+			depth--
+			if depth == 0 {
+				return s[start : i+1]
+			}
+		}
+	}
+	return ""
+}
+
+func truncateStr(s string, maxLen int) string {
+	if len(s) <= maxLen {
+		return s
+	}
+	return s[:maxLen] + "..."
 }

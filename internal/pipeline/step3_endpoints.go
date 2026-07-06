@@ -15,11 +15,11 @@ import (
 
 // Step3Endpoints analyzes API route definitions for security issues.
 type Step3Endpoints struct {
-	aiClient *ai.Client
+	engine *ai.Engine
 }
 
-func NewStep3Endpoints(aiClient *ai.Client) *Step3Endpoints {
-	return &Step3Endpoints{aiClient: aiClient}
+func NewStep3Endpoints(engine *ai.Engine) *Step3Endpoints {
+	return &Step3Endpoints{engine: engine}
 }
 
 func (s *Step3Endpoints) Name() string        { return "Step 3: Endpoint Audit" }
@@ -86,6 +86,11 @@ func (s *Step3Endpoints) Run(ctx context.Context, target string) ([]report.Findi
 	var findings []report.Finding
 	for _, route := range allRoutes {
 		findings = append(findings, analyzeRoute(route)...)
+	}
+
+	// AI-enhanced context analysis for findings
+	if s.engine != nil && s.engine.Available() && len(findings) > 0 {
+		findings = s.engine.Analyze(ctx, findings)
 	}
 
 	return findings, nil

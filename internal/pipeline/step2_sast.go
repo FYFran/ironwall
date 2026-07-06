@@ -4,8 +4,8 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/FYFran/ironwall/internal/ai"
 	"github.com/FYFran/ironwall/internal/classify"
@@ -16,21 +16,21 @@ import (
 // Step2SAST runs static analysis with AI false-positive filtering.
 // Uses embedded gosec (Go AST) for Go projects, falls back to semgrep for other languages.
 type Step2SAST struct {
-	aiClient *ai.Client
+	engine   *ai.Engine
 	verifier *classify.Verifier
 }
 
-func NewStep2SAST(aiClient *ai.Client) *Step2SAST {
+func NewStep2SAST(engine *ai.Engine) *Step2SAST {
 	return &Step2SAST{
-		aiClient: aiClient,
-		verifier: classify.NewVerifier(aiClient),
+		engine:   engine,
+		verifier: classify.NewVerifier(engine),
 	}
 }
 
 func (s *Step2SAST) Name() string        { return "Step 2: SAST Analysis" }
 func (s *Step2SAST) Description() string { return "Static analysis via gosec (Go) / semgrep (multi-lang) with AI false-positive filtering" }
 func (s *Step2SAST) IsSkippable() bool   { return true }
-func (s *Step2SAST) RequiredTools() []string { return nil } // gosec is embedded, semgrep is optional fallback
+func (s *Step2SAST) RequiredTools() []string { return nil } // gosec is embedded, semgrep is optional
 
 func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, error) {
 	var allFindings []report.Finding
@@ -39,12 +39,19 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 	isGoProject := hasGoFiles(target)
 
 	if isGoProject {
-		// Use embedded gosec — zero external dependency, fast
+		// Layer 1: Embedded gosec — zero external dependency, fastest (77ms)
 		gosecFindings, err := s.runGosec(ctx, target)
 		if err == nil {
 			allFindings = append(allFindings, gosecFindings...)
 		}
-		// On gosec error, try semgrep as fallback
+		// Layer 2: CodeQL — deep semantic data flow analysis (optional, if installed)
+		if _, lookErr := exec.LookPath("codeql"); lookErr == nil {
+			codeqlFindings, codeqlErr := s.runCodeQL(ctx, target)
+			if codeqlErr == nil {
+				allFindings = append(allFindings, codeqlFindings...)
+			}
+		}
+		// Layer 3: Semgrep fallback — broad pattern matching
 		if err != nil && isToolAvailable("semgrep") {
 			semgrepFindings, semgrepErr := s.runSemgrep(ctx, target)
 			if semgrepErr == nil {
@@ -52,7 +59,13 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 			}
 		}
 	} else {
-		// Non-Go project: use semgrep if available
+		// Non-Go: try CodeQL first (deepest), then semgrep (broad)
+		if _, lookErr := exec.LookPath("codeql"); lookErr == nil {
+			codeqlFindings, codeqlErr := s.runCodeQL(ctx, target)
+			if codeqlErr == nil {
+				allFindings = append(allFindings, codeqlFindings...)
+			}
+		}
 		if isToolAvailable("semgrep") {
 			semgrepFindings, err := s.runSemgrep(ctx, target)
 			if err == nil {
@@ -61,16 +74,19 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 		}
 	}
 
-	// Apply severity classification + test-file downgrade + AI verification
+	// Apply severity classification + test-file downgrade
 	for i := range allFindings {
 		allFindings[i].Severity = classify.DowngradeForTestFile(allFindings[i].FilePath, allFindings[i].Severity)
+	}
 
-		if allFindings[i].Severity >= report.SevMedium {
-			at := s.verifier.Verify(ctx, &allFindings[i])
-			allFindings[i].AttackScenario = at
-			if !at.IsReal {
-				allFindings[i].Severity = report.SevInfo
-				allFindings[i].Description += "\n[AI Review: Likely false positive — attack scenario could not be verified.]"
+	// Run multi-stage AI verification on all findings at once (batch)
+	if s.engine != nil && s.engine.Available() && len(allFindings) > 0 {
+		allFindings = s.engine.Analyze(ctx, allFindings)
+	} else {
+		// No AI: apply heuristic verification to medium+ findings
+		for i := range allFindings {
+			if allFindings[i].Severity >= report.SevMedium {
+				allFindings[i].AttackScenario = classify.HeuristicAttackTest(&allFindings[i])
 			}
 		}
 	}
@@ -87,51 +103,22 @@ func (s *Step2SAST) runGosec(ctx context.Context, target string) ([]report.Findi
 	return result.ToFindings(target), nil
 }
 
+// runCodeQL runs CodeQL for deep semantic analysis (data flow, taint tracking).
+func (s *Step2SAST) runCodeQL(ctx context.Context, target string) ([]report.Finding, error) {
+	result, err := scanner.RunCodeQL(target)
+	if err != nil {
+		return nil, fmt.Errorf("codeql: %w", err)
+	}
+	return result.ToFindings(), nil
+}
+
 // runSemgrep runs semgrep as a fallback scanner.
 func (s *Step2SAST) runSemgrep(ctx context.Context, target string) ([]report.Finding, error) {
 	result, err := scanner.RunSemgrep(target, "auto")
 	if err != nil {
 		return nil, fmt.Errorf("semgrep: %w", err)
 	}
-	findings := result.ToFindings(target)
-
-	// AI false-positive filtering
-	if s.aiClient != nil && s.aiClient.Available() && len(findings) > 0 {
-		filtered, err := s.filterWithAI(ctx, findings)
-		if err == nil {
-			findings = filtered
-		}
-	}
-	return findings, nil
-}
-
-// filterWithAI uses AI to review findings and identify false positives.
-func (s *Step2SAST) filterWithAI(ctx context.Context, findings []report.Finding) ([]report.Finding, error) {
-	summary := "SAST findings to review:\n\n"
-	for i, f := range findings {
-		summary += fmt.Sprintf("[%d] %s | File: %s:%d | %s\n    Code: %s\n\n",
-			i, f.Title, f.FilePath, f.LineNumber, f.Category,
-			report.TruncateString(f.CodeSnippet, 120))
-	}
-
-	response, err := s.aiClient.Chat(ctx, ai.SystemPromptBase, ai.PromptSASTReview+"\n\n"+summary)
-	if err != nil {
-		return nil, err
-	}
-
-	aiLower := strings.ToLower(response)
-	for i := range findings {
-		idPattern := fmt.Sprintf("[%d]", i)
-		if strings.Contains(aiLower, idPattern+" false") ||
-			strings.Contains(aiLower, idPattern+" not real") ||
-			strings.Contains(aiLower, idPattern+" safe") {
-			findings[i].Severity = report.SevInfo
-			findings[i].AIConfidence = 0.2
-			findings[i].Description += "\n[AI Review: Flagged as likely false positive.]"
-		}
-	}
-
-	return findings, nil
+	return result.ToFindings(target), nil
 }
 
 // hasGoFiles checks if the target directory contains any .go files (not in vendor/testdata).

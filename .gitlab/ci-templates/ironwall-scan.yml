@@ -1,0 +1,28 @@
+# GitLab CI template for Ironwall Security Audit
+# Include in your .gitlab-ci.yml:
+#   include:
+#     - remote: https://raw.githubusercontent.com/FYFran/ironwall/main/.gitlab/ci-templates/ironwall-scan.yml
+
+ironwall:security:
+  stage: test
+  image: golang:1.25-alpine
+  script:
+    # Install ironwall
+    - go install github.com/FYFran/ironwall/cmd/ironwall@latest
+    # Install optional tools
+    - apk add --no-cache curl
+    # Betterleaks (MIT, 98.6% recall)
+    - curl -sSfL https://raw.githubusercontent.com/zricethezav/betterleaks/main/install.sh | sh
+    # Run 8-step audit
+    - ironwall scan . --format sarif --output ironwall-results.sarif.json
+  artifacts:
+    reports:
+      sast: ironwall-results.sarif.json
+    paths:
+      - ironwall-results.sarif.json
+      - ironwall-report-*.md
+    expire_in: 30 days
+  only:
+    - main
+    - master
+    - merge_requests

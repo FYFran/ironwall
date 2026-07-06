@@ -29,10 +29,11 @@ type Config struct {
 	Verbose bool
 
 	// AI config
-	AIModel    string // Model name (e.g. "deepseek-chat")
-	AIEndpoint string // API endpoint base URL
-	AIKey      string // API key (from env: IRONWALL_AI_KEY or DEEPSEEK_API_KEY)
-	AIEnabled  bool   // Whether AI analysis is enabled
+	AIModel     string // Triage model (e.g. "deepseek-chat") — fast, cheap
+	AIDeepModel string // Deep verify model (e.g. "deepseek-reasoner") — reasoning, adversarial
+	AIEndpoint  string // API endpoint base URL
+	AIKey       string // API key (from env: IRONWALL_AI_KEY or DEEPSEEK_API_KEY)
+	AIEnabled   bool   // Whether AI analysis is enabled
 
 	// TimeoutSeconds is the max time for the full scan (0 = no limit).
 	TimeoutSeconds int
@@ -51,6 +52,7 @@ func Defaults() *Config {
 		Verbose:        false,
 		AIEnabled:      false,
 		AIModel:        "deepseek-chat",
+		AIDeepModel:    "deepseek-reasoner",
 		AIEndpoint:     "https://api.deepseek.com/v1",
 		TimeoutSeconds: 300,
 		GitCloneDepth:  0,
