@@ -1,0 +1,9 @@
+# Gitleaks configuration for ironwall self-scan
+# Exclude testdata and docs which contain intentional example secrets
+
+[allowlist]
+  description = "Skip testdata and docs — intentional example secrets"
+  paths = [
+    '''testdata/''',
+    '''docs/''',
+  ]
