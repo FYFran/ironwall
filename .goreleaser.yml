@@ -1,0 +1,88 @@
+# GoReleaser configuration for ironwall
+# Build: goreleaser release --clean
+# Snapshot: goreleaser release --snapshot --clean
+
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go vet ./...
+
+builds:
+  - id: ironwall
+    main: ./cmd/ironwall
+    binary: ironwall
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/FYFran/ironwall/internal/config.Version={{.Version}}
+    mod_timestamp: '{{ .CommitTimestamp }}'
+
+archives:
+  - format: tar.gz
+    name_template: >-
+      ironwall_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch -}}
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - README.md
+      - README_zh.md
+      - LICENSE
+      - docs/*
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  version_template: '{{ incpatch .Version }}-dev'
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^chore:'
+      - '^ci:'
+      - Merge pull request
+      - Merge branch
+
+release:
+  github:
+    owner: FYFran
+    name: ironwall
+  draft: true
+  prerelease: auto
+  footer: |
+    ## Installation
+
+    ### Go
+    ```bash
+    go install github.com/FYFran/ironwall/cmd/ironwall@{{.Version}}
+    ```
+
+    ### Binary
+    Download the archive for your platform from below.
+
+    ### Requirements
+    - [gitleaks](https://github.com/gitleaks/gitleaks) — `go install github.com/gitleaks/gitleaks/v8@latest`
+    - [semgrep](https://semgrep.dev) — `pip install semgrep` (optional)
+
+    ---
+    Built with ❤️ by [@FYFran](https://github.com/FYFran)

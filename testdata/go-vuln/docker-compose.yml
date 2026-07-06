@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  app:
+    build: .
+    ports:
+      - "8080:8080"
+    # VULN: Docker socket mounted
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DEBUG=true
+      - CORS_ORIGIN=*
+
+  db:
+    image: postgres:16
+    # VULN: Database port exposed publicly
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: insecure_password_123
