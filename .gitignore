@@ -16,3 +16,4 @@ ironwall-report-*.json
 # OS
 .DS_Store
 Thumbs.db
+.github/workflows/
