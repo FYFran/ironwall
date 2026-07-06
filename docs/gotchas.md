@@ -193,6 +193,162 @@ r.Get("/api/users/{id}", getUser)  // id=1,2,3,... enumerable
 **Why missed:** IDOR detection requires understanding data model relationships.
 **Ironwall detection:** Step 3 + Step 7 (endpoint audit flags autoincrement PKs, cross-references with GET by ID routes).
 
+## Rust Gotchas
+
+### R1: unsafe block wrapping safe operations
+
+```rust
+// ❌ unsafe block hides the actual safe operation — reviewers get fatigued
+unsafe {
+    let slice = std::slice::from_raw_parts(ptr, len); // actually safe here
+    do_something_dangerous(ptr); // but THIS is dangerous — buried in noise
+}
+```
+
+**Why missed:** Scanners flag all `unsafe` blocks equally. The real danger is when dangerous ops are hidden among safe ones.
+**Ironwall detection:** Step 2 (AI review of unsafe block content, flagging multiple operations in one block).
+
+### R2: cargo-audit blind spot — git dependencies
+
+```toml
+# ❌ cargo-audit only checks crates.io — git deps skip verification
+[dependencies]
+my-internal-lib = { git = "https://github.com/org/repo", branch = "legacy" }
+```
+
+**Why missed:** `cargo audit` only checks published crate versions. Git dependencies bypass the advisory database entirely.
+**Ironwall detection:** Step 5 (flags git dependencies in Cargo.toml for manual review).
+
+## Infrastructure as Code Gotchas
+
+### I1: Terraform state with hardcoded secrets
+
+```hcl
+# ❌ secrets in terraform state are stored in plaintext
+resource "aws_db_instance" "main" {
+  password = "MySecretPass123"  # ends up in tfstate!
+}
+```
+
+**Why missed:** IaC scanners check for best practices, not embedded secrets within resource definitions.
+**Ironwall detection:** Step 4 (regex picks up `password = "..."` in .tf files).
+
+### I2: Kubernetes secret in deployment YAML
+
+```yaml
+# ❌ secret defined directly in deployment instead of using Secret resource
+env:
+  - name: DATABASE_URL
+    value: "postgres://user:pass123@db:5432/mydb"
+```
+
+**Why missed:** kube-linter checks for pod security, not credential hygiene.
+**Ironwall detection:** Step 6 (scans .yaml/.yml for embedded credentials in env values).
+
+## CI/CD Gotchas
+
+### C1: GitHub Actions workflow injection
+
+```yaml
+# ❌ user-controlled PR title used in shell command — command injection
+- name: Process PR
+  run: |
+    echo "PR title: ${{ github.event.pull_request.title }}"
+    ./scripts/process.sh "${{ github.event.pull_request.title }}"
+```
+
+**Why missed:** Standard SAST doesn't scan workflow YAML. But this is RCE on your CI runners.
+**Ironwall detection:** Step 6 (AI review of workflow YAML for shell injection patterns).
+
+### C2: Artifact poisoning via unverified upload
+
+```yaml
+# ❌ uploads artifact without verifying source
+- uses: actions/upload-artifact@v4
+  with:
+    name: build-output
+    path: ./dist  # what if a prior step was compromised?
+```
+
+**Why missed:** CI scanning tools focus on secrets, not artifact provenance.
+**Ironwall detection:** Step 6 (flags `upload-artifact` without prior verification step).
+
+## API Security Gotchas
+
+### A3: GraphQL introspection enabled in production
+
+```go
+// ❌ introspection leaks entire API schema to attackers
+h := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+    Resolvers: &resolver{},
+}))
+// Default enables introspection + playground
+```
+
+**Why missed:** GraphQL security is niche — most SAST tools focus on REST.
+**Ironwall detection:** Step 3 (flags GraphQL handler setup without explicit introspection disable).
+
+### A4: WebSocket upgrade without origin check
+
+```go
+// ❌ any website can open a WebSocket to your server
+var upgrader = websocket.Upgrader{
+    CheckOrigin: func(r *http.Request) bool { return true },
+}
+```
+
+**Why missed:** WebSocket security is not covered by standard SAST rules.
+**Ironwall detection:** Step 3 (flags `CheckOrigin: return true` patterns).
+
+## Crypto Gotchas
+
+### CR1: Using math/rand for security tokens
+
+```go
+// ❌ math/rand is NOT cryptographically secure
+import "math/rand"
+token := fmt.Sprintf("%x", rand.Int63())
+```
+
+**Why missed:** Scanners flag `math/rand` usage but don't trace to token generation context.
+**Ironwall detection:** Step 2 (gosec G404: use of math/rand + AI context review for token generation).
+
+### CR2: AES in ECB mode
+
+```go
+// ❌ ECB mode leaks plaintext patterns in ciphertext
+block, _ := aes.NewCipher(key)
+cipher.NewECBEncrypter(block).CryptBlocks(ciphertext, plaintext)
+```
+
+**Why missed:** AES usage looks correct at first glance. Only crypto experts catch ECB mode issues.
+**Ironwall detection:** Step 2 (gosec catches weak cipher modes + Step 7 AI review).
+
+## Logging Gotchas
+
+### L1: PII in error messages
+
+```go
+// ❌ error message leaks user email and internal paths
+if err != nil {
+    log.Printf("user %s failed to read %s: %v", user.Email, filePath, err)
+    http.Error(w, err.Error(), 500)
+}
+```
+
+**Why missed:** Error handling checks exist (good!) but don't catch information leakage in messages.
+**Ironwall detection:** Step 3 (flags fmt.Sprintf in error responses with user-controlled variables).
+
+### L2: Token in URL query parameters
+
+```go
+// ❌ tokens in URLs are logged by proxies, caches, and browsers
+resp, _ := http.Get("https://api.example.com/data?token=" + apiKey)
+```
+
+**Why missed:** `http.Get` with query params looks normal. Token leakage via URL is subtle.
+**Ironwall detection:** Step 4 (flags URL query params containing "token", "key", "auth", "secret").
+
 ## Contributing Gotchas
 
 Found a pattern that scanners miss? Add it here!

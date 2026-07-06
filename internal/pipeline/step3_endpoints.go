@@ -22,14 +22,11 @@ func NewStep3Endpoints(aiClient *ai.Client) *Step3Endpoints {
 	return &Step3Endpoints{aiClient: aiClient}
 }
 
-func (s *Step3Endpoints) Name() string { return "Step 3: Endpoint Audit" }
-func (s *Step3Endpoints) Description() string {
-	return "Analyze API routes for auth, access control, and input validation issues"
-}
-func (s *Step3Endpoints) IsSkippable() bool       { return true }
+func (s *Step3Endpoints) Name() string        { return "Step 3: Endpoint Audit" }
+func (s *Step3Endpoints) Description() string { return "Analyze API routes for auth, access control, and input validation issues" }
+func (s *Step3Endpoints) IsSkippable() bool   { return true }
 func (s *Step3Endpoints) RequiredTools() []string { return nil }
 
-// Route pattern matchers for different frameworks.
 var routePatterns = []struct {
 	framework string
 	regex     *regexp.Regexp
@@ -44,7 +41,6 @@ var routePatterns = []struct {
 	{"Node-Express-Router", regexp.MustCompile(`router\.(get|post|put|delete|patch|use)\s*\(\s*["']([^"']+)["']`)},
 }
 
-// Auth middleware indicators.
 var authIndicators = []string{
 	"auth", "Auth", "middleware", "Middleware",
 	"jwt", "JWT", "token", "Token",
@@ -53,7 +49,6 @@ var authIndicators = []string{
 	"authenticate", "Authenticate",
 }
 
-// EndpointExtensions are file types to scan for routes.
 var endpointExtensions = map[string]bool{
 	".go": true, ".py": true, ".js": true, ".ts": true,
 	".rb": true, ".java": true, ".kt": true, ".php": true,
@@ -86,7 +81,8 @@ func (s *Step3Endpoints) Run(ctx context.Context, target string) ([]report.Findi
 		return nil, fmt.Errorf("walk error: %w", err)
 	}
 
-	// Analyze each route
+	allRoutes = deduplicateRoutes(allRoutes)
+
 	var findings []report.Finding
 	for _, route := range allRoutes {
 		findings = append(findings, analyzeRoute(route)...)
@@ -120,7 +116,7 @@ func extractRoutes(path, target string) []routeInfo {
 
 	scanner := bufio.NewScanner(f)
 	lineNum := 0
-	recentLines := make([]string, 0, 10) // Track recent lines for auth context
+	recentLines := make([]string, 0, 10)
 
 	for scanner.Scan() {
 		lineNum++
@@ -128,6 +124,11 @@ func extractRoutes(path, target string) []routeInfo {
 		recentLines = append(recentLines, line)
 		if len(recentLines) > 10 {
 			recentLines = recentLines[1:]
+		}
+
+		// Skip common false positives
+		if strings.Contains(line, ".Query().") {
+			continue
 		}
 
 		for _, pattern := range routePatterns {
@@ -147,7 +148,6 @@ func extractRoutes(path, target string) []routeInfo {
 				continue
 			}
 
-			// Check if route is protected by auth middleware
 			hasAuth := checkRecentLinesForAuth(recentLines) || checkLineForAuth(line)
 
 			routes = append(routes, routeInfo{
@@ -164,6 +164,19 @@ func extractRoutes(path, target string) []routeInfo {
 	return routes
 }
 
+func deduplicateRoutes(routes []routeInfo) []routeInfo {
+	seen := make(map[string]bool)
+	var result []routeInfo
+	for _, r := range routes {
+		key := fmt.Sprintf("%s:%d", r.File, r.Line)
+		if !seen[key] {
+			seen[key] = true
+			result = append(result, r)
+		}
+	}
+	return result
+}
+
 func checkRecentLinesForAuth(lines []string) bool {
 	for _, line := range lines {
 		if checkLineForAuth(line) {
@@ -174,18 +187,43 @@ func checkRecentLinesForAuth(lines []string) bool {
 }
 
 func checkLineForAuth(line string) bool {
+	trimmed := strings.TrimSpace(line)
+	if strings.HasPrefix(trimmed, "//") || strings.HasPrefix(trimmed, "#") ||
+		strings.HasPrefix(trimmed, "/*") || strings.HasPrefix(trimmed, "*") {
+		return false
+	}
 	for _, indicator := range authIndicators {
-		if strings.Contains(line, indicator) {
+		if matchWord(line, indicator) {
 			return true
 		}
 	}
 	return false
 }
 
+func matchWord(line, word string) bool {
+	idx := strings.Index(line, word)
+	if idx < 0 {
+		return false
+	}
+	if idx > 0 {
+		prev := line[idx-1]
+		if (prev >= 'a' && prev <= 'z') || (prev >= 'A' && prev <= 'Z') || (prev >= '0' && prev <= '9') {
+			return false
+		}
+	}
+	end := idx + len(word)
+	if end < len(line) {
+		next := line[end]
+		if (next >= 'a' && next <= 'z') || (next >= 'A' && next <= 'Z') || (next >= '0' && next <= '9') {
+			return false
+		}
+	}
+	return true
+}
+
 func analyzeRoute(route routeInfo) []report.Finding {
 	var findings []report.Finding
 
-	// Auth check for sensitive operations
 	method := strings.ToUpper(route.Method)
 	isWriteOp := method == "POST" || method == "PUT" || method == "PATCH" || method == "DELETE"
 	isSensitive := strings.Contains(strings.ToLower(route.Path), "admin") ||
