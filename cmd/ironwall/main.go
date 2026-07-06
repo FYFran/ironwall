@@ -33,6 +33,7 @@ AI analysis sends only code snippets to the API (you bring your own key).`,
 
 	rootCmd.AddCommand(newScanCmd())
 	rootCmd.AddCommand(newQuickCmd())
+	rootCmd.AddCommand(newReviewCmd())
 	rootCmd.AddCommand(newDoctorCmd())
 	rootCmd.AddCommand(newVersionCmd())
 
