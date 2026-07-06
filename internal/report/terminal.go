@@ -19,7 +19,7 @@ func PrintTerminal(result *ScanResult, cfg *config.Config) {
 
 	// Header
 	bold := color.New(color.Bold)
-	bold.Fprintf(os.Stdout, "\n🔍 ironwall v%s — 7-Step Security Audit\n", result.Version)
+	bold.Fprintf(os.Stdout, "\n🔍 ironwall v%s — 8-Step Security Audit\n", result.Version)
 	fmt.Println(strings.Repeat("━", 60))
 	fmt.Printf("Target:    %s\n", result.Target)
 	fmt.Printf("Started:   %s\n", result.StartedAt)
