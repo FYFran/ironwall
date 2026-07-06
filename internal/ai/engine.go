@@ -43,6 +43,8 @@ func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) []repor
 		return findings
 	}
 
+	// AI analysis running
+
 	// Stage 1: Fast triage — filter obvious false positives
 	var triaged []report.Finding
 	if e.triageClient != nil && e.triageClient.Available() {
@@ -67,11 +69,11 @@ func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) []repor
 
 // runTriage runs the fast triage stage.
 func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []report.Finding {
-	// Filter to only medium+ severity for AI review (low/info don't need verification)
+	// Filter: Critical(0), High(1), Medium(2) → review. Low(3), Info(4) → skip.
 	var reviewList []report.Finding
 	var passThrough []report.Finding
 	for _, f := range findings {
-		if f.Severity >= report.SevMedium {
+		if f.Severity <= report.SevMedium { // lower number = higher severity in iota enum
 			reviewList = append(reviewList, f)
 		} else {
 			passThrough = append(passThrough, f)
@@ -90,7 +92,6 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []rep
 	var result TriageResult
 	err := e.triageClient.ChatJSON(ctx, SystemPromptTriage, prompt, &result)
 	if err != nil {
-		// On error, pass all findings through (fail open — don't drop real vulns)
 		return findings
 	}
 
@@ -100,9 +101,11 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []rep
 		triageMap[strings.TrimSpace(tv.ID)] = tv
 	}
 
+	filtered := 0
 	for i := range reviewList {
 		f := &reviewList[i]
-		tv, ok := triageMap[f.ID]
+		key := findingKey(f)
+		tv, ok := triageMap[key]
 		if !ok {
 			continue
 		}
@@ -110,6 +113,7 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []rep
 			f.Severity = report.SevInfo
 			f.AIConfidence = tv.Confidence
 			f.Description += fmt.Sprintf("\n[AI Triage: Likely false positive — %s]", tv.Reason)
+			filtered++
 		}
 		// Apply severity override if provided
 		if tv.SeverityOverride != "" {
@@ -119,6 +123,7 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []rep
 		}
 	}
 
+	_ = filtered // AI triage complete — findings updated in-place
 	return append(reviewList, passThrough...)
 }
 
@@ -133,7 +138,7 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	var reviewList []report.Finding
 	var passThrough []report.Finding
 	for _, f := range findings {
-		if f.Severity >= report.SevMedium && f.AIConfidence == 0 { // Don't re-verify findings already triaged as FP
+		if f.Severity <= report.SevMedium && f.AIConfidence == 0 { // Critical/High/Medium only
 			reviewList = append(reviewList, f)
 		} else {
 			passThrough = append(passThrough, f)
@@ -163,7 +168,8 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 
 	for i := range reviewList {
 		f := &reviewList[i]
-		dv, ok := verifyMap[f.ID]
+		key := findingKey(f)
+		dv, ok := verifyMap[key]
 		if !ok {
 			continue
 		}
@@ -253,11 +259,20 @@ func (e *Engine) VerifySingle(ctx context.Context, f *report.Finding) *report.At
 	}
 }
 
+// findingKey returns a unique key for a finding, preferring ID but falling back to file:line.
+func findingKey(f *report.Finding) string {
+	if f.ID != "" {
+		return f.ID
+	}
+	return fmt.Sprintf("%s:%d", f.FilePath, f.LineNumber)
+}
+
 // buildFindingSummary creates a compact summary of findings for AI review.
 func buildFindingSummary(findings []report.Finding) string {
 	var sb strings.Builder
 	for _, f := range findings {
-		sb.WriteString(fmt.Sprintf("[ID: %s] %s\n", f.ID, f.Title))
+		key := findingKey(&f)
+		sb.WriteString(fmt.Sprintf("[ID: %s] %s\n", key, f.Title))
 		sb.WriteString(fmt.Sprintf("  File: %s:%d\n", f.FilePath, f.LineNumber))
 		sb.WriteString(fmt.Sprintf("  Category: %s | Severity: %s\n", f.Category, f.Severity.String()))
 		if f.CodeSnippet != "" {

@@ -191,7 +191,7 @@ func (s *Step4Hardcoded) Run(ctx context.Context, target string) ([]report.Findi
 		findings = s.engine.Analyze(ctx, findings)
 	} else {
 		for i := range findings {
-			if findings[i].Severity >= report.SevMedium {
+			if findings[i].Severity <= report.SevMedium { // Critical/High/Medium only
 				findings[i].AttackScenario = classify.HeuristicAttackTest(&findings[i])
 			}
 		}

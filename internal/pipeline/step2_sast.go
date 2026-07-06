@@ -85,7 +85,7 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 	} else {
 		// No AI: apply heuristic verification to medium+ findings
 		for i := range allFindings {
-			if allFindings[i].Severity >= report.SevMedium {
+			if allFindings[i].Severity <= report.SevMedium { // Critical/High/Medium only (lower=more severe)
 				allFindings[i].AttackScenario = classify.HeuristicAttackTest(&allFindings[i])
 			}
 		}

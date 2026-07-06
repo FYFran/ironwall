@@ -135,19 +135,19 @@ func (c *Client) chatWithTemp(ctx context.Context, systemPrompt, userMessage str
 // ChatJSON sends a chat request and unmarshals the response into the given target struct.
 // Uses proper JSON unmarshal — not string matching.
 func (c *Client) ChatJSON(ctx context.Context, systemPrompt string, userMessage string, target interface{}) error {
-	response, err := c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, 2048)
+	response, err := c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, 4096)
 	if err != nil {
 		return err
 	}
 
-	// Extract JSON from response (handle markdown code blocks)
+	// Extract JSON from response (handle markdown code blocks, embedded JSON)
 	jsonStr := extractJSON(response)
 	if jsonStr == "" {
-		return fmt.Errorf("no JSON found in AI response: %s", truncateStr(response, 200))
+		return fmt.Errorf("no JSON found in AI response (len=%d): %s", len(response), truncateStr(response, 300))
 	}
 
 	if err := json.Unmarshal([]byte(jsonStr), target); err != nil {
-		return fmt.Errorf("unmarshal AI JSON response: %w\nJSON: %s", err, truncateStr(jsonStr, 500))
+		return fmt.Errorf("unmarshal AI JSON response (len=%d): %w\nJSON: %s", len(jsonStr), err, truncateStr(jsonStr, 500))
 	}
 
 	return nil
@@ -167,37 +167,40 @@ func (c *Client) Model() string {
 func extractJSON(response string) string {
 	response = strings.TrimSpace(response)
 
-	// Try to extract from ```json ... ``` block
+	// Strategy 1: Extract from ```json ... ``` block (most common)
 	if idx := strings.Index(response, "```json"); idx >= 0 {
 		start := idx + len("```json")
 		if end := strings.Index(response[start:], "```"); end >= 0 {
 			return strings.TrimSpace(response[start : start+end])
 		}
 	}
-	// Try ``` ... ``` block (no language tag)
+	// Strategy 2: ``` ... ``` block (no language tag)
 	if idx := strings.Index(response, "```"); idx >= 0 {
 		start := idx + len("```")
-		// Skip newline after ```
 		if start < len(response) && response[start] == '\n' {
 			start++
 		}
 		if end := strings.Index(response[start:], "```"); end >= 0 {
 			return strings.TrimSpace(response[start : start+end])
 		}
+		// Single backtick: response starts with ```, use findMatchingJSON after it
+		return findMatchingJSON(response, start)
 	}
 
-	// Try to find JSON object or array directly
-	response = strings.TrimSpace(response)
+	// Strategy 3: Find first { or [ and use bracket matching (handles embedded JSON)
+	for i, ch := range response {
+		if ch == '{' || ch == '[' {
+			result := findMatchingJSON(response, i)
+			if result != "" {
+				return result
+			}
+		}
+	}
+
+	// Strategy 4: Clean JSON that starts and ends with brackets
 	if (strings.HasPrefix(response, "{") || strings.HasPrefix(response, "[")) &&
 		(strings.HasSuffix(response, "}") || strings.HasSuffix(response, "]")) {
 		return response
-	}
-
-	// Last resort: find first { or [ and matching closing
-	for i, ch := range response {
-		if ch == '{' || ch == '[' {
-			return findMatchingJSON(response, i)
-		}
 	}
 
 	return ""
