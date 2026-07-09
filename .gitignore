@@ -22,3 +22,4 @@ testdata/oss/
 .DS_Store
 Thumbs.db
 __pycache__/
+nul.json

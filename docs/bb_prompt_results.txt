@@ -1,0 +1,42 @@
+你是Brain B，铁壁的对抗审查者。Brain A（皮特）完成了OWASP Python Benchmark测试。以下是完整结果。请批判分析并给出下一步建议。
+
+## 发现的4个关键Bug
+
+1. semgrep.go CWE字段类型 `string`→`[]string` — semgrep输出的CWE是数组，Go解析失败，所有finding被静默丢弃
+2. semgrep.go OWASP字段同理
+3. markdown.go JSON writer手工拼接JSON，漏了cwe/description/fix字段
+4. ai/engine.go 400 findings一次发→prompt太大→API超时/截断→静默fallback到原始findings
+
+修复后：403 findings（之前只有3个SBOM findings）
+
+## Benchmark结果（1230文件，452 vulnerable/778 safe，no-AI）
+
+Strict（per-CWE匹配）: TP=57 FP=339 FN=395 TN=593, P=0.14 R=0.13 F3=0.13 MCC=-0.25
+Relaxed（per-file匹配）: TP=150 FP=185 FN=302 TN=593, P=0.45 R=0.33 F3=0.34
+
+Per-CWE（Strict）:
+- CWE-89(sqli) F1=1.00 ✅ (16样本)
+- CWE-502(deserialization) F1=0.75 ✅ (54样本)
+- CWE-614(securecookie) F1=0.76 ✅ (39样本)
+- CWE-78(cmd injection) F1=0.52 △ (20样本)
+- CWE-22(pathtraver) F1=0.06 ❌ (168样本)
+- 其余9个CWE: F1=0 ❌
+
+## AI引擎行为
+
+AI引擎修复后正常工作（分3批处理65 findings）。但62/65被降级为INFO——因为benchmark文件名含`Test`（如BenchmarkTest00001.py），触发了AI的测试文件检测规则。在生产代码上这是正确的，benchmark命名不规范。
+
+## Brain A的判断
+
+1. OWASP Benchmark测的是semgrep Python规则覆盖，不是Ironwall的AI能力
+2. 8个CWE零检出是因为semgrep auto规则不支持这些模式
+3. AI测试文件检测在benchmark上误触发，在真实代码上才正确
+4. 建议不纠结benchmark数字，转真实项目验证
+
+## 请Brain B批判
+
+1. Brain A的结论对不对？有没有为自己找借口？
+2. Benchmark数据有没有值得挖掘的价值？
+3. 下一步应该做什么？继续benchmark还是转真实项目？
+4. 如果要对外发布v0.5.0，这些数字能不能用？怎么用？
+5. 有什么Brain A完全没想到的点？

@@ -14,9 +14,12 @@ AI代码安全审计 | 帮你判断哪些漏洞真该修
 
 ### 实测数据
 
-| fiber框架(12.8万行Go) | 23条告警 → Agent筛到1条 |
-| vulnbench测试集 | **准确率94.4%** |
-| AI vs 纯规则 | AI 4/5 > 规则 3/5 |
+| 测试 | 结果 | 说明 |
+|------|------|------|
+| OWASP Python Benchmark (1230文件) | **CWE全覆盖, F1=0.568** | 独立benchmark，14/14 CWE检测 |
+| vulnbench自测集 (20样本) | **准确率94.4% (17/18)** | 自建测试集，非独立评估 |
+| fiber框架 (12.8万行Go) | 23条告警 → AI筛到1条 (96%减少) | v0.4.0数据 |
+| AI引擎实测 (benchmark_50) | 20/57告警被AI抑制 (35%) | DeepSeek-v4-pro, 3分钟扫描 |
 
 ### 你会得到什么
 
@@ -45,6 +48,14 @@ Go / Python / JavaScript / YAML / Docker
 
 gitleaks：告诉你"这里可能有密钥"
 铁壁：告诉你"这密钥是真的假的、能利用吗、怎么修"
+
+### ⚠️ 数据说明
+
+- OWASP Benchmark F1=0.568 来自独立Python benchmark (v0.5.0+bandit+AI)
+- vulnbench 94.4% 来自**自建测试集** (7个文件, 20条标注)，不代表真实项目表现
+- AI抑制率35% 来自benchmark_50实测 (DeepSeek API, 2026-07-10)
+- 真实项目表现可能与benchmark数据有显著差异
+- AI引擎依赖DeepSeek API，离线环境可用纯规则引擎(fallback)
 
 ---
 

@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -97,7 +98,13 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 
 	// Run multi-stage AI verification on all findings at once (batch)
 	if s.engine != nil && s.engine.Available() && len(allFindings) > 0 {
-		allFindings, _ = s.engine.Analyze(ctx, allFindings)
+		var status ai.AnalysisStatus
+		allFindings, status = s.engine.Analyze(ctx, allFindings)
+		if status.TriageErrors > 0 || status.DeepErrors > 0 {
+			log.Printf("[step2] AI partial: triage(%d/%d) deep(%d/%d) errors",
+				status.TriageRuns-status.TriageErrors, status.TriageRuns,
+				status.DeepRuns-status.DeepErrors, status.DeepRuns)
+		}
 	} else {
 		// No AI: apply heuristic verification to medium+ findings
 		for i := range allFindings {

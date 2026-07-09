@@ -1,0 +1,67 @@
+Brain B，这是铁壁最后2个CWE盲区。我们需要深度思考修补方案。
+
+## 当前状态
+
+铁壁已覆盖12/14 CWE。剩2个：
+- CWE-501 信任边界 (37样本): F1=0.000
+- CWE-90 LDAP注入 (29样本): F1=0.000
+
+## CWE-501 信任边界 模式分析
+
+Vulnerable模式:
+```python
+param = request.cookies.get("id")
+bar = param  # user input flows through
+flask.session['userid'] = bar  # trusted store gets untrusted data
+```
+
+Safe模式:
+```python
+param = request.cookies.get("id")
+bar = configparser.ConfigParser().get('section', 'keyA')  # safe source
+flask.session['userid'] = bar
+```
+
+**问题本质：** taint tracking从source(request)到sink(session write)。简单模式匹配分不清bar来自request还是configparser。
+
+## CWE-90 LDAP注入 模式分析
+
+Vulnerable模式:
+```python
+bar = param  # user input
+filter = f'(&(objectclass=person)(|(uid={bar})(street=...)))'
+conn.search(base, filter, attributes=...)
+```
+
+Safe模式:
+```python
+bar = 'bob'  # constant
+filter = f'(&(objectclass=person)(|(uid={bar})(street=...)))'
+conn.search(base, filter, attributes=...)
+```
+
+**问题本质：** 同样是taint tracking。source→sink路径相同，只有source不同。
+
+## 方案思路（Brain A初稿）
+
+### 方案A: Semgrep taint mode规则
+Semgrep支持 `mode: taint` 可以定义source→sink路径。但OWASP Benchmark的Python文件使用复杂控制流(match/case, configparser)可能超出semgrep taint能力。
+
+### 方案B: AI引擎介入
+Ironwall已有AI引擎。可以让AI对semgrep的"可能"finding做深度分析——给AI看到完整函数代码，让它判断source是否是用户输入。
+
+### 方案C: 简单启发式
+直接标记所有 `flask.session['x'] = y` 和 `conn.search(...)` 为potential finding，然后让AI triage决定是否真实。
+
+### 方案D: Bandit扩展
+编写自定义bandit插件，AST级别追踪变量赋值链。
+
+## 讨论要点
+
+1. 哪个方案最可行？各自优缺点？
+2. 是否需要新工具依赖？是否兼容离线定位？
+3. 实施时间估算
+4. 预期能覆盖多少benchmark样本？
+5. 是否有Brain A没想到的方案？
+
+请深度思考，不要泛泛而谈。

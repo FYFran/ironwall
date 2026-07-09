@@ -8,19 +8,23 @@
 
 | Metric | Value | Target |
 |---|---|---|
-| Precision | 94.4% | ≥ 70% |
-| Recall | 94.4% | — |
-| F1 | 0.944 | — |
+| Precision | 92.9% | ≥ 70% |
+| Recall | 72.2% | — |
+| F1 | 0.813 | — |
 
 | | Count |
 |---|---|
-| True Positives | 17 |
+| True Positives | 13 |
 | False Positives | 1 |
 | True Negatives | 1 |
-| False Negatives | 1 |
+| False Negatives | 5 |
 
 ## Disagreements (Noted for Transparency)
 
+- secrets.py:5 Agent=NOT_EXPLOITABLE Truth=REAL_VULN (AWS access key)
+- secrets.py:7 Agent=NOT_EXPLOITABLE Truth=REAL_VULN (GitHub token)
+- secrets.py:8 Agent=NOT_EXPLOITABLE Truth=REAL_VULN (Stripe key)
+- secrets.py:9 Agent=NOT_EXPLOITABLE Truth=REAL_VULN (Slack webhook)
 - secrets.py:22 Agent=NOT_EXPLOITABLE Truth=REAL_VULN (DB password in connection string)
 - injection.py:64 Agent=EXPLOITABLE Truth=FP (ElementTree is XXE-safe, parse() takes filepath not string)
 

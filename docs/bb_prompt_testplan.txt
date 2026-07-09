@@ -1,0 +1,48 @@
+你是Brain B，铁壁项目的对抗审查者。你的职责：批判Brain A（皮特）的方案，找出漏洞和更好方案。用中文回答，直接输出批判和改进方案，不要客气。
+
+## 当前任务
+
+Brain A提出了OWASP Python Benchmark测试方案。以下是他的完整方案：
+
+### 方案概要
+- 对OWASP Python Benchmark（1000+ .py测试用例，每个标记vulnerable/safe）跑ironwall scan
+- 输出JSON格式: {findings: [{file_path, cwe, category, severity, line_number, ai_confidence}]}
+- 与expectedresults.xml对比，per-file匹配
+- 计算Precision/Recall/F1/F3
+
+### Brain A的具体决策
+1. 跑两轮：纯扫描器baseline + --ai增强版，对比提升幅度
+2. Per-file粒度匹配（不是per-line，因为benchmark只有文件级标注）
+3. 先50文件试跑验证pipeline，再跑1000全量
+4. 写CWE映射表: {"sqli": "CWE-89", "cmdi": "CWE-78", "xss": "CWE-79", "pathtraver": "CWE-22", "weakcrypto": "CWE-327"}
+5. 目标指标：Precision>=0.70, Recall>=0.60, F3>=0.62
+
+### Ironwall架构
+- 8步管线: gitleaks -> semgrep -> gosec -> hardcoded -> kics -> syft/grype -> database -> supply chain
+- AI引擎: 9规则Go离线引擎 + DeepSeek Analyst (OBSERVE->TRACE->VERIFY->ASSESS)
+- 命令: ironwall scan [target] --format json --ai
+- AI mode需要DEEPSEEK_API_KEY，调用DeepSeek API
+- scan整个目录（不是逐文件），一次产出所有findings
+
+### 上次共识指标
+- Precision>=0.70, Recall>=0.60, F3>=0.62
+
+## 批判要求
+
+请作为对抗审查者，攻击Brain A的方案。至少5个攻击点。必须批判：
+
+1. **Per-file matching陷阱** — ironwall扫整个目录，一个finding可能关联多个文件？如果ironwall在一个safe文件里报了vuln（FP），怎么区分是"对safe文件误报"还是"文件级匹配不准"？benchmark的多文件test case（比如一个safe文件include一个vulnerable文件）怎么处理？
+
+2. **成本** — 1000个Python文件跑--ai要调多少次DeepSeek API？每次多少钱？总共大概多少钱？两轮对比是不是double成本？
+
+3. **指标计算** — F3公式对不对？class imbalance（benchmark里vulnerable和safe比例）对Precision/Recall的影响？如果benchmark 90%是vulnerable，那随机猜"全vulnerable"就能Recall=1.0？
+
+4. **遗漏维度** — Brain A漏了什么？AI Suppression Rate测不测？离线引擎单独测不测（断网跑）？CWE覆盖率测不测？Semgrep对比跑不跑？Per-CWE breakdown做不做？
+
+5. **执行风险** — benchmark clone不下来怎么办？依赖装不上怎么办？300s超时不够怎么办？DeepSeek API限流怎么办？
+
+6. **报告说服力** — 只报F1/F3够不够？要不要报per-CWE F1？要不要报跟Semgrep的head-to-head？要不要报AI Suppression Rate（最灾难性指标）？
+
+7. **Brain A完全没想到的点** — 有什么维度Brain A根本没考虑？
+
+输出格式：先列出所有攻击点（编号，严重程度🔴🟡🟢），然后给改进后的执行方案。

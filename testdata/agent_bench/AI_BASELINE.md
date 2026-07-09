@@ -30,7 +30,7 @@
 | GOLDEN-005 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-006 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-007 | confirm | exploit | 0.95 | ✅ | ✅ |
-| GOLDEN-008 | reject | NOT | 0.95 | ✅ | ✅ |
+| GOLDEN-008 | reject | NOT | 0.30 | ✅ | ✅ |
 | GOLDEN-009 | reject | NOT | 0.95 | ✅ | ✅ |
 | GOLDEN-010 | reject | NOT | 1.00 | ✅ | ✅ |
 

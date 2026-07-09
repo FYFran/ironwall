@@ -1,0 +1,46 @@
+你是Brain B，铁壁的对抗审查者。以下是Ironwall当前状态和已知缺陷。请使用web_search能力搜索最新解决方案，然后给出深度分析和建议。
+
+## 当前状态
+
+Ironwall v0.4.0 → v0.5.0-dev，Go语言离线AI代码审计工具。
+- 8步扫描管线: gitleaks→semgrep→gosec→hardcoded→kics→syft→database→supplychain
+- AI引擎: DeepSeek Chat (triage) + DeepSeek Reasoner (deep verify)
+- OWASP Python Benchmark: P=0.144 R=0.126 F3=0.128（超过bare semgrep的P=0.134）
+- 5/14 CWE有覆盖，9/14零覆盖
+
+## 5个已知缺陷
+
+### 缺陷1: 9个CWE零覆盖
+XSS(CWE-79), 弱加密(CWE-327), 弱随机(CWE-330), TrustBoundary(CWE-501), XXE(CWE-611), XPath注入(CWE-643), LDAP注入(CWE-90), 代码注入(CWE-94), 重定向(CWE-601)
+
+当前完全依赖semgrep auto规则。Ironwall没有自研Python规则。这些CWE占benchmark样本的70%+。
+
+### 缺陷2: AI DeepVerify不完整
+19个batch只完成4个。API限流(429) + 超时(300s)。需要retry/backoff逻辑。DeepSeek API的具体限流策略是什么？
+
+### 缺陷3: 仅benchmark验证
+没跑过真实项目。需要找一个合适的Python vulnerable app做验证。
+
+### 缺陷4: Python检测完全依赖semgrep
+Go有gosec(嵌入，77ms)，Python只有semgrep。开源Python SAST工具有哪些？bandit? pyre?
+
+### 缺陷5: AI成本未量化
+没有$/scan数据。DeepSeek API定价是多少？扫描1230个文件用了多少tokens？
+
+## 搜索任务
+
+请搜索以下内容（每个搜索独立、具体）：
+1. "semgrep custom rules Python XSS path traversal weak cryptography 2025 2026"
+2. "bandit vs semgrep Python SAST comparison 2025 2026"
+3. "DeepSeek API rate limits pricing tokens 2026"
+4. "vulnerable Flask Django app security testing benchmark 2025"
+5. "AI SAST cost per scan estimation LLM token usage 2026"
+6. "custom semgrep rule CWE-79 XSS Python flask 2025"
+
+## 要求
+
+1. 每个缺陷给出具体解决方案（不是泛泛而谈）
+2. 区分"立即可做"和"需要研发"
+3. 考虑Ironwall的离线定位——有些方案可能不适合
+4. 给出优先级排序
+5. 如果搜索结果不够新/不够具体，明确说出来

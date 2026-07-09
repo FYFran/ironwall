@@ -7,7 +7,7 @@
 
 |  | Predicted Exploitable | Predicted NOT Exploitable |
 |---|---|---|
-| **Actually Exploitable** | TP=7 | FN=0 |
+| **Actually Exploitable** | TP=6 | FN=1 |
 | **Actually NOT Exploitable** | FP=0 | TN=3 |
 
 ## Metrics
@@ -15,8 +15,8 @@
 | Metric | Value | Target |
 |---|---|---|
 | Precision | 1.000 | >0.7 |
-| Recall | 1.000 | >0.7 |
-| F1 | 1.000 | >0.7 |
+| Recall | 0.857 | >0.7 |
+| F1 | 0.923 | >0.7 |
 
 ## Per-Finding Results
 
@@ -24,7 +24,7 @@
 |---|---|---|---|---|
 | GOLDEN-001 | confirm | exploitable | 0.70 | ✅ |
 | GOLDEN-002 | confirm | exploitable | 0.70 | ✅ |
-| GOLDEN-003 | confirm | exploitable | 0.40 | ✅ |
+| GOLDEN-003 | confirm | not exploitable | 0.85 | ❌ |
 | GOLDEN-004 | confirm | exploitable | 0.85 | ✅ |
 | GOLDEN-005 | confirm | exploitable | 0.75 | ✅ |
 | GOLDEN-006 | confirm | exploitable | 0.90 | ✅ |

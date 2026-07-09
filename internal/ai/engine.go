@@ -84,15 +84,22 @@ func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) ([]repo
 
 	// Stage 2: Deep adversarial verification on remaining findings
 	var verified []report.Finding
+	var deepStatus AnalysisStatus
 	if e.deepClient != nil && e.deepClient.Available() {
-		verified, _ = e.runDeepVerify(ctx, triaged)
+		verified, deepStatus = e.runDeepVerify(ctx, triaged)
 	} else if e.triageClient != nil && e.triageClient.Available() {
-		verified, _ = e.runDeepVerifyWithClient(ctx, triaged, e.triageClient)
+		verified, deepStatus = e.runDeepVerifyWithClient(ctx, triaged, e.triageClient)
 	} else {
 		verified = triaged
 		if status.Status == "full" {
 			status.Status = "partial"
 		}
+	}
+	// Merge deep verify status
+	status.DeepRuns = deepStatus.DeepRuns
+	status.DeepErrors = deepStatus.DeepErrors
+	if deepStatus.Status == "partial" {
+		status.Status = "partial"
 	}
 
 	return verified, status
@@ -206,11 +213,14 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	}
 
 	if len(reviewList) == 0 {
+		log.Printf("[AI DeepVerify] no findings to review (checked %d: %d passed severity filter, %d had AIConfidence>0)",
+			len(findings), countBySeverity(findings, report.SevMedium), countWithAIConfidence(findings))
 		return findings, status
 	}
 
 	batches := batchFindings(reviewList, aiBatchSize)
 	status.DeepRuns = len(batches)
+	log.Printf("[AI DeepVerify] reviewing %d findings in %d batches", len(reviewList), len(batches))
 
 	for batchIdx, batch := range batches {
 		summary := buildFindingSummary(batch)
@@ -229,7 +239,6 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 		for _, dv := range result.Findings {
 			verifyMap[strings.TrimSpace(dv.ID)] = dv
 		}
-
 		verified := 0
 		for i := range batch {
 			f := &batch[i]
@@ -380,6 +389,26 @@ func parseSeverity(s string) report.Severity {
 	default:
 		return report.SevInfo // unrecognized → info (don't escalate)
 	}
+}
+
+func countBySeverity(findings []report.Finding, maxSev report.Severity) int {
+	n := 0
+	for _, f := range findings {
+		if f.Severity <= maxSev {
+			n++
+		}
+	}
+	return n
+}
+
+func countWithAIConfidence(findings []report.Finding) int {
+	n := 0
+	for _, f := range findings {
+		if f.AIConfidence > 0 {
+			n++
+		}
+	}
+	return n
 }
 
 // heuristicAttackTest provides a rule-based attack assessment when AI is unavailable.

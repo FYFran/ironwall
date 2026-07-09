@@ -209,17 +209,31 @@ type CustomScannerFinding struct {
 
 // RunIronwallCustomScanner runs the standalone CWE-501/CWE-90 Python AST scanner.
 func RunIronwallCustomScanner(target string) ([]BanditFinding, error) {
-	// Resolve scanner script path.
-	// Priority: IRONWALL_CUSTOM_SCANNER env var → relative to cwd → relative to exe
+	// Resolve scanner script path. Search order:
+	// 1. IRONWALL_CUSTOM_SCANNER env var (explicit override)
+	// 2. Relative to CWD (source layout: internal/scanner/bandit_plugins/)
+	// 3. Relative to executable (installed layout)
+	// 4. Relative to source root (go run from repo root)
 	scannerScript := os.Getenv("IRONWALL_CUSTOM_SCANNER")
 	if scannerScript == "" {
-		// Try source layout: internal/scanner/bandit_plugins/ironwall_custom_scanner.py
-		scannerScript = filepath.Join("internal", "scanner", "bandit_plugins", "ironwall_custom_scanner.py")
+		candidates := []string{
+			filepath.Join("internal", "scanner", "bandit_plugins", "ironwall_custom_scanner.py"),
+		}
+		if exe, err := os.Executable(); err == nil {
+			candidates = append(candidates,
+				filepath.Join(filepath.Dir(exe), "scanner", "bandit_plugins", "ironwall_custom_scanner.py"),
+				filepath.Join(filepath.Dir(exe), "internal", "scanner", "bandit_plugins", "ironwall_custom_scanner.py"),
+			)
+		}
+		for _, c := range candidates {
+			if _, err := os.Stat(c); err == nil {
+				scannerScript = c
+				break
+			}
+		}
 	}
-	// Verify existence, fall back to exe-relative
-	if _, err := os.Stat(scannerScript); os.IsNotExist(err) {
-		exe, _ := os.Executable()
-		scannerScript = filepath.Join(filepath.Dir(exe), "scanner", "bandit_plugins", "ironwall_custom_scanner.py")
+	if scannerScript == "" {
+		scannerScript = filepath.Join("internal", "scanner", "bandit_plugins", "ironwall_custom_scanner.py")
 	}
 
 	cmd := exec.Command("python", scannerScript, target)

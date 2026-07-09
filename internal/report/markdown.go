@@ -1,6 +1,7 @@
 package report
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -137,32 +138,14 @@ func WriteJSON(result *ScanResult, cfg *config.Config) error {
 		filename = strings.TrimSuffix(filename, ".md") + ".json"
 	}
 
-	f, err := os.Create(filename)
+	data, err := json.MarshalIndent(result, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to create JSON report: %w", err)
+		return fmt.Errorf("failed to marshal JSON: %w", err)
 	}
-	defer f.Close()
 
-	file := f
-	file.WriteString("{\n")
-	file.WriteString(fmt.Sprintf("  \"version\": \"%s\",\n", result.Version))
-	file.WriteString(fmt.Sprintf("  \"target\": \"%s\",\n", escapeJSON(result.Target)))
-	file.WriteString(fmt.Sprintf("  \"duration\": \"%s\",\n", result.Duration))
-	file.WriteString(fmt.Sprintf("  \"summary\": {\"critical\":%d,\"high\":%d,\"medium\":%d,\"low\":%d,\"info\":%d,\"total\":%d},\n",
-		result.Summary.Critical, result.Summary.High, result.Summary.Medium, result.Summary.Low, result.Summary.Info, result.Summary.Total))
-	file.WriteString(fmt.Sprintf("  \"analysis_status\": \"%s\",\n", result.AnalysisStatus))
-	file.WriteString(fmt.Sprintf("  \"findings_count\": %d,\n", len(result.Findings)))
-	file.WriteString("  \"findings\": [\n")
-	for i, finding := range result.Findings {
-		comma := ","
-		if i == len(result.Findings)-1 {
-			comma = ""
-		}
-		file.WriteString(fmt.Sprintf("    {\"id\":\"%s\",\"title\":\"%s\",\"severity\":\"%s\",\"file\":\"%s\",\"line\":%d,\"category\":\"%s\",\"cwe\":\"%s\",\"description\":\"%s\",\"fix\":\"%s\"}%s\n",
-			finding.ID, escapeJSON(finding.Title), finding.Severity.String(), escapeJSON(finding.FilePath), finding.LineNumber, finding.Category, finding.CWE, escapeJSON(finding.Description), escapeJSON(finding.FixSuggestion), comma))
+	if err := os.WriteFile(filename, data, 0644); err != nil {
+		return fmt.Errorf("failed to write JSON report: %w", err)
 	}
-	file.WriteString("  ]\n")
-	file.WriteString("}\n")
 
 	fmt.Printf("  📄 JSON report saved: %s\n", filename)
 	return nil
