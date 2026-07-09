@@ -27,8 +27,8 @@ type SemgrepFinding struct {
 		Message  string `json:"message"`
 		Severity string `json:"severity"`
 		Metadata struct {
-			CWE      []string `json:"cwe"`
-			OWASP    []string `json:"owasp"`
+			CWE      interface{} `json:"cwe"`
+			OWASP    interface{} `json:"owasp"`
 			Category string `json:"category"`
 		} `json:"metadata"`
 		Lines string `json:"lines"`
@@ -98,8 +98,15 @@ func (r *SemgrepResult) ToFindings(target string) []report.Finding {
 	for i, f := range r.Results {
 		sev := mapSemgrepSeverity(f.Extra.Severity)
 		cwe := ""
-		if len(f.Extra.Metadata.CWE) > 0 {
-			cwe = f.Extra.Metadata.CWE[0]
+		switch v := f.Extra.Metadata.CWE.(type) {
+		case string:
+			cwe = v
+		case []interface{}:
+			if len(v) > 0 {
+				if s, ok := v[0].(string); ok {
+					cwe = s
+				}
+			}
 		}
 		category := f.Extra.Metadata.Category
 		if category == "" {

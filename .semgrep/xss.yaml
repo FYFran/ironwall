@@ -1,0 +1,25 @@
+rules:
+  - id: ironwall.xss.flask-request-to-response
+    metadata:
+      cwe: "CWE-79: Cross-site Scripting"
+      category: security
+      technology: [python, flask]
+      confidence: LOW
+    message: >-
+      User input from request.form.get flows to a string response without
+      visible HTML escaping. Use render_template() or markupsafe.escape().
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $VAR = request.form.get(...)
+              ...
+              return $RESP
+          - pattern: |
+              $VAR = request.args.get(...)
+              ...
+              return $RESP
+    paths:
+      include:
+        - "*.py"

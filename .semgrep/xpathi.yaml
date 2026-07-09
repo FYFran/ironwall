@@ -1,0 +1,23 @@
+rules:
+  - id: ironwall.injection.xpath-dynamic-query
+    metadata:
+      cwe: "CWE-643: Improper Neutralization of Data within XPath Expressions"
+      category: security
+      technology: [python]
+      confidence: MEDIUM
+    message: >-
+      User input flows into an XPath query via f-string without sanitization.
+      Use parameterized XPath queries or validate input against a whitelist.
+    severity: WARNING
+    languages: [python]
+    patterns:
+      - pattern-either:
+          - pattern: |
+              $Q = f"..."
+              ...
+              lxml.etree.XPath($Q)
+          - pattern: |
+              lxml.etree.XPath(f"...")
+    paths:
+      include:
+        - "*.py"

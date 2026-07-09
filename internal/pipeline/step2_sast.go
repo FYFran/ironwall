@@ -74,9 +74,9 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 		}
 		if isToolAvailable("semgrep") {
 			// Use both auto + p/python for maximum Python coverage
-			rules := "auto"
+			rules := "auto,.semgrep/"
 			if hasPythonFiles(target) {
-				rules = "auto,p/python"
+				rules = "auto,p/python,.semgrep/"
 			}
 			semgrepFindings, err := s.runSemgrepWithRules(ctx, target, rules)
 			if err == nil {

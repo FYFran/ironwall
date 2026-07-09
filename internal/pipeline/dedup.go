@@ -8,10 +8,33 @@ import (
 )
 
 // dedupKey generates a deduplication key from a finding.
-// Findings with the same file, line, and normalized category are considered duplicates.
+// Findings with the same file, line, CWE, and normalized category are considered duplicates.
+// Different CWEs on the same line are NOT merged (they represent distinct vulnerability types).
 func dedupKey(f report.Finding) string {
 	cat := normalizeCategory(f.Category)
-	return fmt.Sprintf("%s:%d:%s", f.FilePath, f.LineNumber, cat)
+	cwe := normalizeCWE(f.CWE)
+	return fmt.Sprintf("%s:%d:%s:%s", f.FilePath, f.LineNumber, cat, cwe)
+}
+
+// normalizeCWE extracts the numeric CWE identifier for dedup purposes.
+func normalizeCWE(cwe string) string {
+	cwe = strings.TrimSpace(cwe)
+	if strings.HasPrefix(cwe, "CWE-") {
+		return cwe
+	}
+	if cwe != "" {
+		// Try to extract digits
+		digits := ""
+		for _, ch := range cwe {
+			if ch >= '0' && ch <= '9' {
+				digits += string(ch)
+			}
+		}
+		if digits != "" {
+			return "CWE-" + digits
+		}
+	}
+	return cwe
 }
 
 // normalizeCategory maps similar categories to a canonical form for dedup.

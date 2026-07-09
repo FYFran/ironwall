@@ -77,7 +77,7 @@ var banditCWE = map[string]string{
 	"B202": "CWE-89",  // sql_injection — SQLi via sqlalchemy raw
 	"B301": "CWE-502", // pickle — unsafe deserialization
 	"B302": "CWE-502", // marshal — unsafe deserialization
-	"B303": "CWE-327", // md5 — weak hash
+	"B303": "CWE-328", // md5 — weak hash
 	"B304": "CWE-327", // ciphers — weak encryption
 	"B305": "CWE-327", // cipher_modes — weak encryption mode
 	"B306": "CWE-327", // mktemp_q — unsafe temp file
@@ -98,7 +98,7 @@ var banditCWE = map[string]string{
 	"B321": "CWE-327", // ftplib — weak encryption
 	"B322": "CWE-78",  // input — command injection
 	"B323": "CWE-327", // unverified_context — weak SSL
-	"B324": "CWE-327", // hashlib — weak hash (MD4/MD5/SHA1)
+	"B324": "CWE-328", // hashlib — weak hash (MD4/MD5/SHA1)
 	"B325": "CWE-327", // tempnam — unsafe temp file
 	"B401": "CWE-327", // telnet — weak protocol
 	"B402": "CWE-327", // ftp — weak protocol
