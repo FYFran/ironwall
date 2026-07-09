@@ -81,7 +81,7 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 
 	// Run multi-stage AI verification on all findings at once (batch)
 	if s.engine != nil && s.engine.Available() && len(allFindings) > 0 {
-		allFindings = s.engine.Analyze(ctx, allFindings)
+		allFindings, _ = s.engine.Analyze(ctx, allFindings)
 	} else {
 		// No AI: apply heuristic verification to medium+ findings
 		for i := range allFindings {

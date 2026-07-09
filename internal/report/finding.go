@@ -78,14 +78,15 @@ type Finding struct {
 
 // ScanResult holds the complete result of one scan run.
 type ScanResult struct {
-	Version      string      `json:"version"`
-	Target       string      `json:"target"`
-	StartedAt    string      `json:"started_at"`
-	CompletedAt  string      `json:"completed_at"`
-	Duration     string      `json:"duration"`
-	Summary      ScanSummary `json:"summary"`
-	Findings     []Finding   `json:"findings"`
-	SkippedSteps []string    `json:"skipped_steps,omitempty"`
+	Version        string      `json:"version"`
+	Target         string      `json:"target"`
+	StartedAt      string      `json:"started_at"`
+	CompletedAt    string      `json:"completed_at"`
+	Duration       string      `json:"duration"`
+	Summary        ScanSummary `json:"summary"`
+	Findings       []Finding   `json:"findings"`
+	SkippedSteps   []string    `json:"skipped_steps,omitempty"`
+	AnalysisStatus string      `json:"analysis_status"` // "full" | "partial" | "skipped" | "error"
 }
 
 // ScanSummary is the aggregated count of findings by severity.

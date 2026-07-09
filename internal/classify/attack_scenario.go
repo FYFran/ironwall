@@ -30,7 +30,8 @@ func (v *Verifier) VerifyBatch(findings []report.Finding) []report.Finding {
 	if v.engine == nil || !v.engine.Available() {
 		return findings
 	}
-	return v.engine.Analyze(nil, findings)
+	result, _ := v.engine.Analyze(nil, findings)
+	return result
 }
 
 // HeuristicAttackTest provides rule-based attack assessment when AI is unavailable.

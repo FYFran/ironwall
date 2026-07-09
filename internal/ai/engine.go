@@ -3,30 +3,30 @@ package ai
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/FYFran/ironwall/internal/report"
 )
 
+const aiBatchSize = 25 // findings per AI API call
+
 // Engine orchestrates multi-stage AI analysis for security findings.
-// Stage 1: Fast triage (V3) — filter obvious false positives
-// Stage 2: Deep verification (R1) — adversarial reasoning on remaining findings
-//
-// Falls back gracefully: if one model is unavailable, uses the other.
-// If no AI is available, uses heuristic analysis.
 type Engine struct {
 	triageClient *Client // Fast model (DeepSeek V3 / deepseek-chat)
 	deepClient   *Client // Reasoning model (DeepSeek R1 / deepseek-reasoner)
+	noTestFilter bool    // Skip test-file heuristic (for benchmarks)
 }
 
 // NewEngine creates a new multi-stage AI engine.
 // triageClient: fast model for initial filtering
 // deepClient: reasoning model for adversarial verification
 // Either can be nil — the engine degrades gracefully.
-func NewEngine(triageClient, deepClient *Client) *Engine {
+func NewEngine(triageClient, deepClient *Client, noTestFilter bool) *Engine {
 	return &Engine{
 		triageClient: triageClient,
 		deepClient:   deepClient,
+		noTestFilter: noTestFilter,
 	}
 }
 
@@ -36,44 +36,61 @@ func (e *Engine) Available() bool {
 		(e.deepClient != nil && e.deepClient.Available())
 }
 
+// AnalysisStatus summarizes the AI analysis outcome.
+type AnalysisStatus struct {
+	Status        string // "full", "partial", "skipped", "error"
+	TriageRuns    int    // number of triage batches attempted
+	TriageErrors  int    // number of triage batch failures
+	DeepRuns      int    // number of deep verify batches attempted
+	DeepErrors    int    // number of deep verify batch failures
+	FindingsAnalyzed int // total findings sent to AI
+	FindingsFiltered int // findings downgraded by AI
+}
+
 // Analyze runs the full multi-stage analysis on a batch of findings.
-// Returns findings with updated severity, AI confidence, and attack scenarios.
-func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) []report.Finding {
+// Returns findings with updated severity, AI confidence, and attack scenarios,
+// along with the analysis status.
+func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) ([]report.Finding, AnalysisStatus) {
+	status := AnalysisStatus{Status: "skipped"}
 	if len(findings) == 0 || !e.Available() {
-		return findings
+		return findings, status
 	}
 
-	// AI analysis running
+	status.Status = "full"
 
 	// Stage 1: Fast triage — filter obvious false positives
 	var triaged []report.Finding
 	if e.triageClient != nil && e.triageClient.Available() {
-		triaged = e.runTriage(ctx, findings)
+		triaged, status = e.runTriage(ctx, findings)
 	} else {
 		triaged = findings
+		status.Status = "partial"
 	}
 
 	// Stage 2: Deep adversarial verification on remaining findings
 	var verified []report.Finding
 	if e.deepClient != nil && e.deepClient.Available() {
-		verified = e.runDeepVerify(ctx, triaged)
+		verified, _ = e.runDeepVerify(ctx, triaged)
 	} else if e.triageClient != nil && e.triageClient.Available() {
-		// Fallback: use triage model for verification too
-		verified = e.runDeepVerifyWithClient(ctx, triaged, e.triageClient)
+		verified, _ = e.runDeepVerifyWithClient(ctx, triaged, e.triageClient)
 	} else {
 		verified = triaged
+		if status.Status == "full" {
+			status.Status = "partial"
+		}
 	}
 
-	return verified
+	return verified, status
 }
 
-// runTriage runs the fast triage stage.
-func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []report.Finding {
+// runTriage runs the fast triage stage in batches.
+func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) ([]report.Finding, AnalysisStatus) {
+	status := AnalysisStatus{}
 	// Filter: Critical(0), High(1), Medium(2) → review. Low(3), Info(4) → skip.
 	var reviewList []report.Finding
 	var passThrough []report.Finding
 	for _, f := range findings {
-		if f.Severity <= report.SevMedium { // lower number = higher severity in iota enum
+		if f.Severity <= report.SevMedium {
 			reviewList = append(reviewList, f)
 		} else {
 			passThrough = append(passThrough, f)
@@ -81,64 +98,92 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) []rep
 	}
 
 	if len(reviewList) == 0 {
-		return findings
+		return findings, status
 	}
 
-	// Build the triage prompt
-	summary := buildFindingSummary(reviewList)
-	prompt := fmt.Sprintf(PromptTriage, summary)
+	batches := batchFindings(reviewList, aiBatchSize)
+	status.TriageRuns = len(batches)
+	status.FindingsAnalyzed = len(reviewList)
 
-	// Call AI for triage
-	var result TriageResult
-	err := e.triageClient.ChatJSON(ctx, SystemPromptTriage, prompt, &result)
-	if err != nil {
-		return findings
+	sysPrompt := SystemPromptTriage
+	if e.noTestFilter {
+		sysPrompt = SystemPromptTriageNoTestFilter
 	}
 
-	// Apply triage results
-	triageMap := make(map[string]TriageVerdict)
-	for _, tv := range result.Findings {
-		triageMap[strings.TrimSpace(tv.ID)] = tv
-	}
+	for batchIdx, batch := range batches {
+		summary := buildFindingSummary(batch)
+		prompt := fmt.Sprintf(PromptTriage, summary)
 
-	filtered := 0
-	for i := range reviewList {
-		f := &reviewList[i]
-		key := findingKey(f)
-		tv, ok := triageMap[key]
-		if !ok {
+		var result TriageResult
+		err := e.triageClient.ChatJSON(ctx, sysPrompt, prompt, &result)
+		if err != nil {
+			log.Printf("[AI Triage] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
+			status.TriageErrors++
 			continue
 		}
-		if tv.IsFalsePositive && tv.Confidence >= 0.8 {
-			f.Severity = report.SevInfo
-			f.AIConfidence = tv.Confidence
-			f.Description += fmt.Sprintf("\n[AI Triage: Likely false positive — %s]", tv.Reason)
-			filtered++
+
+		triageMap := make(map[string]TriageVerdict)
+		for _, tv := range result.Findings {
+			triageMap[strings.TrimSpace(tv.ID)] = tv
 		}
-		// Apply severity override if provided
-		if tv.SeverityOverride != "" {
-			if sev := parseSeverity(tv.SeverityOverride); sev != report.SevInfo {
-				f.Severity = sev
+
+		for i := range batch {
+			f := &batch[i]
+			key := findingKey(f)
+			tv, ok := triageMap[key]
+			if !ok {
+				continue
+			}
+			if tv.IsFalsePositive && tv.Confidence >= 0.8 {
+				f.Severity = report.SevInfo
+				f.AIConfidence = tv.Confidence
+				f.Description += fmt.Sprintf("\n[AI Triage: Likely false positive — %s]", tv.Reason)
+				status.FindingsFiltered++
+			}
+			if tv.SeverityOverride != "" {
+				if sev := parseSeverity(tv.SeverityOverride); sev != report.SevInfo {
+					f.Severity = sev
+				}
 			}
 		}
 	}
 
-	_ = filtered // AI triage complete — findings updated in-place
-	return append(reviewList, passThrough...)
+	if status.FindingsFiltered > 0 {
+		log.Printf("[AI Triage] filtered %d findings across %d batches (%d total reviewed)", status.FindingsFiltered, len(batches), len(reviewList))
+	}
+	if status.TriageErrors > 0 {
+		status.Status = "partial"
+	} else {
+		status.Status = "full"
+	}
+	return append(reviewList, passThrough...), status
+}
+
+// batchFindings splits findings into batches of at most batchSize.
+func batchFindings(findings []report.Finding, batchSize int) [][]report.Finding {
+	var batches [][]report.Finding
+	for i := 0; i < len(findings); i += batchSize {
+		end := i + batchSize
+		if end > len(findings) {
+			end = len(findings)
+		}
+		batches = append(batches, findings[i:end])
+	}
+	return batches
 }
 
 // runDeepVerify runs adversarial verification on findings that survived triage.
-func (e *Engine) runDeepVerify(ctx context.Context, findings []report.Finding) []report.Finding {
+func (e *Engine) runDeepVerify(ctx context.Context, findings []report.Finding) ([]report.Finding, AnalysisStatus) {
 	return e.runDeepVerifyWithClient(ctx, findings, e.deepClient)
 }
 
-// runDeepVerifyWithClient runs deep verification using the specified client.
-func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.Finding, client *Client) []report.Finding {
-	// Only verify medium+ severity findings
+// runDeepVerifyWithClient runs deep verification using the specified client in batches.
+func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.Finding, client *Client) ([]report.Finding, AnalysisStatus) {
+	status := AnalysisStatus{}
 	var reviewList []report.Finding
 	var passThrough []report.Finding
 	for _, f := range findings {
-		if f.Severity <= report.SevMedium && f.AIConfidence == 0 { // Critical/High/Medium only
+		if f.Severity <= report.SevMedium && f.AIConfidence == 0 {
 			reviewList = append(reviewList, f)
 		} else {
 			passThrough = append(passThrough, f)
@@ -146,54 +191,76 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	}
 
 	if len(reviewList) == 0 {
-		return findings
+		return findings, status
 	}
 
-	// Build deep verify prompt
-	summary := buildFindingSummary(reviewList)
-	prompt := fmt.Sprintf(PromptDeepVerifyBatch, summary)
+	batches := batchFindings(reviewList, aiBatchSize)
+	status.DeepRuns = len(batches)
 
-	var result DeepVerifyResult
-	err := client.ChatJSON(ctx, SystemPromptDeepVerify, prompt, &result)
-	if err != nil {
-		// On error, verify one-by-one with simpler prompt
-		return e.verifyOneByOne(ctx, reviewList, passThrough, client)
-	}
+	for batchIdx, batch := range batches {
+		summary := buildFindingSummary(batch)
+		prompt := fmt.Sprintf(PromptDeepVerifyBatch, summary)
 
-	// Apply verification results
-	verifyMap := make(map[string]DeepVerifyVerdict)
-	for _, dv := range result.Findings {
-		verifyMap[strings.TrimSpace(dv.ID)] = dv
-	}
-
-	for i := range reviewList {
-		f := &reviewList[i]
-		key := findingKey(f)
-		dv, ok := verifyMap[key]
-		if !ok {
+		var result DeepVerifyResult
+		err := client.ChatJSON(ctx, SystemPromptDeepVerify, prompt, &result)
+		if err != nil {
+			log.Printf("[AI DeepVerify] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
+			status.DeepErrors++
+			e.verifyBatchOneByOne(ctx, batch)
 			continue
 		}
-		f.AttackScenario = &report.AttackTest{
-			Actor:       dv.Actor,
-			Path:        dv.Path,
-			Impact:      dv.Impact,
-			IsReal:      dv.IsReal,
-			Explanation: dv.Explanation,
+
+		verifyMap := make(map[string]DeepVerifyVerdict)
+		for _, dv := range result.Findings {
+			verifyMap[strings.TrimSpace(dv.ID)] = dv
 		}
-		f.AIConfidence = dv.Confidence
-		if !dv.IsReal && dv.Confidence >= 0.7 {
-			f.Severity = report.SevInfo
-			f.Description += fmt.Sprintf("\n[AI Deep Verify: Attack scenario not viable — %s]", dv.Explanation)
+
+		verified := 0
+		for i := range batch {
+			f := &batch[i]
+			key := findingKey(f)
+			dv, ok := verifyMap[key]
+			if !ok {
+				continue
+			}
+			f.AttackScenario = &report.AttackTest{
+				Actor:       dv.Actor,
+				Path:        dv.Path,
+				Impact:      dv.Impact,
+				IsReal:      dv.IsReal,
+				Explanation: dv.Explanation,
+			}
+			f.AIConfidence = dv.Confidence
+			if !dv.IsReal && dv.Confidence >= 0.7 {
+				f.Severity = report.SevInfo
+				f.Description += fmt.Sprintf("\n[AI Deep Verify: Attack scenario not viable — %s]", dv.Explanation)
+				verified++
+			}
+		}
+		if verified > 0 {
+			log.Printf("[AI DeepVerify] batch %d/%d: %d suppressed (%d findings)", batchIdx+1, len(batches), verified, len(batch))
 		}
 	}
 
-	return append(reviewList, passThrough...)
+	if status.DeepErrors > 0 {
+		status.Status = "partial"
+	} else {
+		status.Status = "full"
+	}
+	return append(reviewList, passThrough...), status
 }
 
-// verifyOneByOne falls back to individual verification when batch fails.
-func (e *Engine) verifyOneByOne(ctx context.Context, reviewList, passThrough []report.Finding, client *Client) []report.Finding {
-	for i := range reviewList {
-		f := &reviewList[i]
+// verifyBatchOneByOne verifies findings individually when batch fails.
+func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding) {
+	client := e.deepClient
+	if client == nil || !client.Available() {
+		client = e.triageClient
+	}
+	if client == nil {
+		return
+	}
+	for i := range batch {
+		f := &batch[i]
 		findingDesc := fmt.Sprintf(
 			"Title: %s\nFile: %s:%d\nCategory: %s\nCode:\n%s\nDescription: %s",
 			f.Title, f.FilePath, f.LineNumber, f.Category, f.CodeSnippet, f.Description,
@@ -219,7 +286,6 @@ func (e *Engine) verifyOneByOne(ctx context.Context, reviewList, passThrough []r
 			f.Description += fmt.Sprintf("\n[AI Deep Verify: Attack scenario not viable — %s]", result.Explanation)
 		}
 	}
-	return append(reviewList, passThrough...)
 }
 
 // VerifySingle runs deep verification on a single finding.

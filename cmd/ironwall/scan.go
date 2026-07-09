@@ -22,9 +22,10 @@ func newScanCmd() *cobra.Command {
 		fullMode     bool
 		noColor      bool
 		verbose      bool
-		aiEnabled    bool
-		aiModel      string
-		timeout      int
+		aiEnabled     bool
+		aiModel       string
+		timeout       int
+		noTestFilter  bool
 	)
 
 	cmd := &cobra.Command{
@@ -55,6 +56,7 @@ Examples:
 			cfg.AIEnabled = aiEnabled
 			cfg.AIModel = aiModel
 			cfg.TimeoutSeconds = timeout
+			cfg.NoTestFilter = noTestFilter
 			cfg.ResolveAIKey()
 
 			return runScan(cfg)
@@ -70,6 +72,7 @@ Examples:
 	cmd.Flags().BoolVar(&aiEnabled, "ai", false, "Enable AI-assisted analysis (requires IRONWALL_AI_KEY or DEEPSEEK_API_KEY)")
 	cmd.Flags().StringVar(&aiModel, "ai-model", "deepseek-chat", "AI model to use")
 	cmd.Flags().IntVar(&timeout, "timeout", 300, "Scan timeout in seconds")
+	cmd.Flags().BoolVar(&noTestFilter, "no-test-filter", false, "Disable AI test-file heuristic (for benchmarks)")
 
 	return cmd
 }
@@ -123,7 +126,7 @@ func runScan(cfg *config.Config) error {
 	if cfg.AIEnabled && cfg.AIKey != "" {
 		triageClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
 		deepClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIDeepModel)
-		engine = ai.NewEngine(triageClient, deepClient)
+		engine = ai.NewEngine(triageClient, deepClient, cfg.NoTestFilter)
 	}
 
 	// Build pipeline

@@ -105,6 +105,9 @@ func (p *Pipeline) Run(ctx context.Context, target string) (*report.ScanResult, 
 		result.Summary.AddFinding(f)
 	}
 
+	// Infer AI analysis status from findings
+	result.AnalysisStatus = inferAIStatus(result.Findings, p.cfg.AIEnabled)
+
 	result.CompletedAt = time.Now().Format(time.RFC3339)
 	result.Duration = time.Since(startTime).Round(time.Millisecond).String()
 	return result, nil
@@ -120,6 +123,25 @@ func (p *Pipeline) checkTools(tools []string) bool {
 		}
 	}
 	return true
+}
+
+func inferAIStatus(findings []report.Finding, aiEnabled bool) string {
+	if !aiEnabled {
+		return "skipped"
+	}
+	aiMarkers := 0
+	for _, f := range findings {
+		if f.AIConfidence > 0 || strings.Contains(f.Description, "[AI Triage") || strings.Contains(f.Description, "[AI Deep Verify") {
+			aiMarkers++
+		}
+	}
+	if aiMarkers == 0 {
+		return "error" // AI enabled but no findings show AI processing
+	}
+	if aiMarkers < len(findings) {
+		return "partial"
+	}
+	return "full"
 }
 
 func isToolAvailable(name string) bool {

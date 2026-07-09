@@ -27,6 +27,22 @@ Rules for false positive:
 
 If in doubt, mark as NOT false positive. Better to escalate than miss a real issue.`
 
+// SystemPromptTriageNoTestFilter is the same but without the test-file heuristic.
+// Use when scanning benchmarks or test suites where test files ARE the target.
+const SystemPromptTriageNoTestFilter = `You are a security triage engineer. Your job is to quickly identify OBVIOUS false positives.
+Respond ONLY with valid JSON.
+
+Rules for false positive:
+- Finding is in example/demo/documentation code
+- Code is commented out or unreachable
+- Pattern matches but has proper sanitization right next to it
+- Variable name looks like a secret but value is clearly a placeholder ("password", "changeme", "example")
+
+IMPORTANT: Files named like "BenchmarkTest*" or in /testcode/ directories ARE legitimate targets in this scan.
+Do NOT flag them as false positives based on filename alone.
+
+If in doubt, mark as NOT false positive. Better to escalate than miss a real issue.`
+
 // SystemPromptDeepVerify is for the deep adversarial verification stage (DeepSeek R1).
 const SystemPromptDeepVerify = `You are a senior penetration tester. Your job is adversarial verification:
 try to prove a vulnerability is exploitable. Answer three questions.

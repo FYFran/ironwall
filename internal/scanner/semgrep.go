@@ -27,8 +27,8 @@ type SemgrepFinding struct {
 		Message  string `json:"message"`
 		Severity string `json:"severity"`
 		Metadata struct {
-			CWE      string `json:"cwe"`
-			OWASP    string `json:"owasp"`
+			CWE      []string `json:"cwe"`
+			OWASP    []string `json:"owasp"`
 			Category string `json:"category"`
 		} `json:"metadata"`
 		Lines string `json:"lines"`
@@ -92,7 +92,10 @@ func (r *SemgrepResult) ToFindings(target string) []report.Finding {
 	var findings []report.Finding
 	for i, f := range r.Results {
 		sev := mapSemgrepSeverity(f.Extra.Severity)
-		cwe := f.Extra.Metadata.CWE
+		cwe := ""
+		if len(f.Extra.Metadata.CWE) > 0 {
+			cwe = f.Extra.Metadata.CWE[0]
+		}
 		category := f.Extra.Metadata.Category
 		if category == "" {
 			category = f.CheckID
@@ -115,7 +118,7 @@ func (r *SemgrepResult) ToFindings(target string) []report.Finding {
 			Category:      category,
 			CWE:           cwe,
 			CVSS:          report.SeverityToCVSS(sev),
-			ToolOutput:    fmt.Sprintf("Rule: %s | Severity: %s | OWASP: %s", f.CheckID, f.Extra.Severity, f.Extra.Metadata.OWASP),
+			ToolOutput:    fmt.Sprintf("Rule: %s | Severity: %s | OWASP: %v", f.CheckID, f.Extra.Severity, f.Extra.Metadata.OWASP),
 			FixSuggestion: f.Extra.Fix,
 			References:    []string{"https://semgrep.dev/r/" + f.CheckID},
 		})

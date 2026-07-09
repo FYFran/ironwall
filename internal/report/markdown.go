@@ -150,6 +150,7 @@ func WriteJSON(result *ScanResult, cfg *config.Config) error {
 	file.WriteString(fmt.Sprintf("  \"duration\": \"%s\",\n", result.Duration))
 	file.WriteString(fmt.Sprintf("  \"summary\": {\"critical\":%d,\"high\":%d,\"medium\":%d,\"low\":%d,\"info\":%d,\"total\":%d},\n",
 		result.Summary.Critical, result.Summary.High, result.Summary.Medium, result.Summary.Low, result.Summary.Info, result.Summary.Total))
+	file.WriteString(fmt.Sprintf("  \"analysis_status\": \"%s\",\n", result.AnalysisStatus))
 	file.WriteString(fmt.Sprintf("  \"findings_count\": %d,\n", len(result.Findings)))
 	file.WriteString("  \"findings\": [\n")
 	for i, finding := range result.Findings {
@@ -157,8 +158,8 @@ func WriteJSON(result *ScanResult, cfg *config.Config) error {
 		if i == len(result.Findings)-1 {
 			comma = ""
 		}
-		file.WriteString(fmt.Sprintf("    {\"id\":\"%s\",\"title\":\"%s\",\"severity\":\"%s\",\"file\":\"%s\",\"line\":%d,\"category\":\"%s\"}%s\n",
-			finding.ID, escapeJSON(finding.Title), finding.Severity.String(), escapeJSON(finding.FilePath), finding.LineNumber, finding.Category, comma))
+		file.WriteString(fmt.Sprintf("    {\"id\":\"%s\",\"title\":\"%s\",\"severity\":\"%s\",\"file\":\"%s\",\"line\":%d,\"category\":\"%s\",\"cwe\":\"%s\",\"description\":\"%s\",\"fix\":\"%s\"}%s\n",
+			finding.ID, escapeJSON(finding.Title), finding.Severity.String(), escapeJSON(finding.FilePath), finding.LineNumber, finding.Category, finding.CWE, escapeJSON(finding.Description), escapeJSON(finding.FixSuggestion), comma))
 	}
 	file.WriteString("  ]\n")
 	file.WriteString("}\n")

@@ -101,7 +101,7 @@ func (s *Step3Endpoints) Run(ctx context.Context, target string) ([]report.Findi
 
 	// AI-enhanced context analysis for findings
 	if s.engine != nil && s.engine.Available() && len(findings) > 0 {
-		findings = s.engine.Analyze(ctx, findings)
+		findings, _ = s.engine.Analyze(ctx, findings)
 	}
 
 	return findings, nil

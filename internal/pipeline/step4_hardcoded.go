@@ -188,7 +188,7 @@ func (s *Step4Hardcoded) Run(ctx context.Context, target string) ([]report.Findi
 
 	// Multi-stage AI verification
 	if s.engine != nil && s.engine.Available() && len(findings) > 0 {
-		findings = s.engine.Analyze(ctx, findings)
+		findings, _ = s.engine.Analyze(ctx, findings)
 	} else {
 		for i := range findings {
 			if findings[i].Severity <= report.SevMedium { // Critical/High/Medium only
