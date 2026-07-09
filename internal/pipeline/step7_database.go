@@ -113,6 +113,10 @@ var dbChecks = []struct {
 func (s *Step7Database) Run(ctx context.Context, target string) ([]report.Finding, error) {
 	var findings []report.Finding
 
+	// Track AUTOINCREMENT per file for merging
+	type incKey struct{ file, cat string }
+	autoIncLines := make(map[incKey][]int)
+
 	err := filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return nil
@@ -162,6 +166,13 @@ func (s *Step7Database) Run(ctx context.Context, target string) ([]report.Findin
 						continue
 					}
 
+					// Merge AUTOINCREMENT: collect lines per file, emit once at end
+					if check.name == "AUTOINCREMENT without protection" {
+						key := incKey{relPath, check.category}
+						autoIncLines[key] = append(autoIncLines[key], lineNum)
+						continue
+					}
+
 					findings = append(findings, report.Finding{
 						Title:         fmt.Sprintf("%s in %s", check.name, filepath.Base(path)),
 						Description:   fmt.Sprintf("%s\nFound at line %d: %s", check.message, lineNum, strings.TrimSpace(line)),
@@ -180,6 +191,30 @@ func (s *Step7Database) Run(ctx context.Context, target string) ([]report.Findin
 		}
 		return nil
 	})
+
+	// Merge AUTOINCREMENT findings: one finding per file with all line numbers
+	for key, lines := range autoIncLines {
+		if len(lines) == 0 {
+			continue
+		}
+		lineStrs := make([]string, len(lines))
+		for i, l := range lines {
+			lineStrs[i] = fmt.Sprintf("%d", l)
+		}
+		findings = append(findings, report.Finding{
+			Title:         fmt.Sprintf("AUTOINCREMENT without protection in %s (x%d occurrences)", filepath.Base(key.file), len(lines)),
+			Description:   fmt.Sprintf("Autoincrement IDs can leak information (order of creation, total count). Found at lines: %s", strings.Join(lineStrs, ", ")),
+			Severity:      report.SevLow,
+			FilePath:      key.file,
+			LineNumber:    lines[0],
+			CodeSnippet:   fmt.Sprintf("  %d locations with AUTOINCREMENT in %s", len(lines), filepath.Base(key.file)),
+			Step:          7,
+			Category:      key.cat,
+			CWE:           "CWE-200",
+			CVSS:          2.5,
+			FixSuggestion: "Consider using UUID or ULID for primary keys in user-facing tables.",
+		})
+	}
 
 	return findings, err
 }

@@ -49,7 +49,7 @@ var hardcodedPatterns = []struct {
 	},
 	{
 		name:     "AWS account ID (12 digits)",
-		regex:    regexp.MustCompile(`\b\d{12}\b`),
+		regex:    regexp.MustCompile(`\b[1-9]\d{11}\b`),
 		severity: report.SevMedium,
 		category: "information-disclosure",
 	},
@@ -226,6 +226,24 @@ func scanFileForSecrets(path, target string) []report.Finding {
 					strings.HasPrefix(trimmed, "/*") || strings.HasPrefix(trimmed, "*") ||
 					strings.HasPrefix(trimmed, "<!--") {
 					continue
+				}
+
+				// False positive: CDN/font URLs matching "Internal URL with credentials"
+				if pattern.name == "Internal URL with credentials" {
+					low := strings.ToLower(trimmed)
+					if strings.Contains(low, "fonts.") || strings.Contains(low, "cdn.") ||
+						strings.Contains(low, "css") || strings.Contains(low, "googleapis") ||
+						strings.Contains(low, "stylesheet") {
+						continue
+					}
+				}
+
+				// False positive: 12-digit phone/test numbers as AWS account ID
+				if pattern.name == "AWS account ID (12 digits)" {
+					match := pattern.regex.FindString(trimmed)
+					if strings.HasPrefix(match, "0") {
+						continue
+					}
 				}
 
 				findings = append(findings, report.Finding{

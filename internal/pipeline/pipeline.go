@@ -82,9 +82,9 @@ func (p *Pipeline) Run(ctx context.Context, target string) (*report.ScanResult, 
 
 		for i := range findings {
 			if isTestFile(findings[i].FilePath) {
-			findings[i].Severity = downgradeTestSeverity(findings[i].Severity)
-		}
-		if findings[i].ID == "" {
+				findings[i].Severity = downgradeTestSeverity(findings[i].Severity)
+			}
+			if findings[i].ID == "" {
 				findings[i].ID = fmt.Sprintf("IRON-%03d", result.Summary.Total+1)
 			}
 			result.Summary.AddFinding(findings[i])
