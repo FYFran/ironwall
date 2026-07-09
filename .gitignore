@@ -6,6 +6,11 @@
 # Generated reports
 ironwall-report-*.md
 ironwall-report-*.json
+gitleaks_*.json
+ironwall_self_scan.json
+
+# Test data (generated)
+testdata/oss/
 
 # IDE
 .idea/
