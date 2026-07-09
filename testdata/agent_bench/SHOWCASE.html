@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>铁壁 Ironwall — AI代码安全审计</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif; background: #0d1117; color: #c9d1d9; padding: 40px; max-width: 900px; margin: 0 auto; }
+  h1 { font-size: 2em; background: linear-gradient(135deg, #58a6ff, #bc8cff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+  h2 { font-size: 1.3em; color: #58a6ff; margin: 32px 0 12px; padding-bottom: 8px; border-bottom: 1px solid #21262d; }
+  .subtitle { color: #8b949e; font-size: 1.1em; margin-bottom: 24px; }
+  .card { background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 16px 0; }
+  .big-number { font-size: 3em; font-weight: 800; background: linear-gradient(135deg, #3fb950, #58a6ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .metric-label { color: #8b949e; font-size: 0.9em; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+  th { background: #21262d; padding: 10px 14px; text-align: left; font-weight: 600; color: #58a6ff; }
+  td { padding: 10px 14px; border-top: 1px solid #21262d; }
+  .tag { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 0.85em; font-weight: 600; margin: 2px; }
+  .tag-green { background: #1a3a2a; color: #3fb950; }
+  .tag-red { background: #3a1a1a; color: #f85149; }
+  .tag-blue { background: #1a2a3a; color: #58a6ff; }
+  .report-block { background: #0d1117; border: 1px solid #30363d; border-radius: 6px; padding: 16px; margin: 12px 0; font-family: 'SF Mono', 'Cascadia Code', monospace; font-size: 0.9em; line-height: 1.6; }
+  .report-block h3 { color: #58a6ff; margin-bottom: 8px; font-family: -apple-system, sans-serif; }
+  .attack-step { padding: 6px 12px; margin: 4px 0; border-left: 3px solid #f85149; background: #1a1115; }
+  .evidence { padding: 6px 12px; margin: 4px 0; border-left: 3px solid #3fb950; background: #111a13; }
+  .tier { display: inline-block; width: 32%; vertical-align: top; background: #161b22; border: 1px solid #30363d; border-radius: 8px; padding: 20px; margin: 8px 1% 8px 0; text-align: center; }
+  .tier h3 { font-size: 1.2em; margin-bottom: 8px; }
+  .tier .price { font-size: 2em; font-weight: 800; margin: 12px 0; }
+  .tier-popular { border-color: #58a6ff; }
+  .footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #21262d; color: #8b949e; font-size: 0.85em; text-align: center; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin: 16px 0; }
+  .stat { text-align: center; padding: 16px; background: #161b22; border-radius: 8px; border: 1px solid #30363d; }
+  .stat .num { font-size: 2.2em; font-weight: 800; }
+</style>
+</head>
+<body>
+
+<h1>🛡️ 铁壁 Ironwall</h1>
+<p class="subtitle">AI代码安全审计 — 不只是扫描，帮你判断哪些漏洞真的需要修</p>
+
+<div class="grid">
+  <div class="stat">
+    <div class="num" style="color:#3fb950;">94.4%</div>
+    <div class="metric-label">Precision (20样本验证)</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#58a6ff;">4/5</div>
+    <div class="metric-label">AI > 规则 (灰色地带)</div>
+  </div>
+  <div class="stat">
+    <div class="num" style="color:#bc8cff;">23→1</div>
+    <div class="metric-label">fiber告警削减 (12.8万行)</div>
+  </div>
+</div>
+
+<h2>📊 实测数据</h2>
+
+<table>
+  <tr><th>测试</th><th>结果</th><th>说明</th></tr>
+  <tr>
+    <td>vulnbench漏洞测试集</td>
+    <td><span class="tag tag-green">94.4% Precision</span></td>
+    <td>20个已知漏洞，17/18正确确认，2个分歧已注记</td>
+  </tr>
+  <tr>
+    <td>fiber框架实战</td>
+    <td><span class="tag tag-blue">23条→1条</span></td>
+    <td>12.8万行Go代码，Agent过滤96%扫描噪音</td>
+  </tr>
+  <tr>
+    <td>灰色地带测试</td>
+    <td><span class="tag tag-green">AI 4/5 > 规则 3/5</span></td>
+    <td>模糊case上AI比纯规则多对1个</td>
+  </tr>
+  <tr>
+    <td>消融实验</td>
+    <td><span class="tag tag-green">4-step > 一锅端</span></td>
+    <td>完整推理链在关键FP case上纠正简化prompt</td>
+  </tr>
+  <tr>
+    <td>gitleaks对比</td>
+    <td><span class="tag tag-green">覆盖率3x+</span></td>
+    <td>gitleaks仅找密钥，铁壁覆盖加密/注入/配置/供应链</td>
+  </tr>
+</table>
+
+<h2>📋 报告样例 — fiber真实扫描</h2>
+
+<div class="card">
+  <div class="report-block">
+    <h3>🔍 Ironwall Security Audit — Agent Report</h3>
+    <p><strong>Target:</strong> gofiber/fiber &nbsp;|&nbsp; <strong>Findings:</strong> 23 total &nbsp;|&nbsp; <strong>Agent Confirmed:</strong> 1</p>
+  </div>
+
+  <div class="report-block">
+    <h3>📋 Executive Summary</h3>
+    <p><strong>Verdict:</strong> <span style="color:#f85149;">REJECTED — NOT EXPLOITABLE</span> (confidence: 85%)</p>
+    <p>Test SSL key in <code>.github/testdata/ssl.key</code>. This is a test artifact, not a real private key. No exploitable vulnerability.</p>
+  </div>
+
+  <div class="report-block">
+    <h3>🔍 Evidence</h3>
+    <div class="evidence"><strong>Evidence 1:</strong> scanner (likely confidence)<br>
+    Private key detected at <code>.github/testdata/ssl.key:1</code><br>
+    <code>-----BEGIN RSA PRIVATE KEY-----</code></div>
+    <div class="evidence"><strong>Evidence 2:</strong> context (certain confidence)<br>
+    File path contains <code>.github/testdata/</code> — test data directory</div>
+  </div>
+
+  <div class="report-block">
+    <h3>🎯 Attack Path</h3>
+    <p style="color:#8b949e;"><em>No attack path constructed. The finding could not be linked to an exploitable chain.</em></p>
+  </div>
+
+  <div class="report-block">
+    <h3>🔧 Remediation</h3>
+    <p>No action required — this is a test artifact. Consider adding <code>.github/testdata/</code> to scanner exclusions.</p>
+  </div>
+</div>
+
+<h2>📋 报告样例 — CRITICAL漏洞 (vulnbench)</h2>
+
+<div class="card">
+  <div class="report-block">
+    <h3># Security Finding: Command Injection via shell=True</h3>
+    <table>
+      <tr><td><strong>ID</strong></td><td>CASE-001</td></tr>
+      <tr><td><strong>Severity</strong></td><td><span class="tag tag-red">CRITICAL</span></td></tr>
+      <tr><td><strong>Status</strong></td><td><span style="color:#f85149;">CONFIRMED — EXPLOITABLE</span></td></tr>
+      <tr><td><strong>Confidence</strong></td><td>97%</td></tr>
+      <tr><td><strong>CWE</strong></td><td>CWE-78</td></tr>
+      <tr><td><strong>CVSS</strong></td><td>9.8</td></tr>
+    </table>
+  </div>
+
+  <div class="report-block">
+    <h3>📖 Analysis Narrative</h3>
+    <p>The <code>/exec</code> endpoint passes user-controlled input directly to <code>subprocess.check_output()</code> with <code>shell=True</code>.</p>
+    <p><strong>What makes this exploitable:</strong></p>
+    <p>1. <code>request.args.get('cmd')</code> — attacker-controlled, no validation<br>
+    2. <code>shell=True</code> — passes string to /bin/sh -c<br>
+    3. <code>check_output()</code> — executes and returns output</p>
+    <p><strong>Impact:</strong> Full remote code execution on the server.</p>
+  </div>
+
+  <div class="report-block">
+    <h3>🎯 Attack Path</h3>
+    <div class="attack-step"><strong>Step 1:</strong> Attacker discovers /exec endpoint (injection.py:29)</div>
+    <div class="attack-step"><strong>Step 2:</strong> Sends GET /exec?cmd=cat+/etc/passwd — shell=True executes via /bin/sh (injection.py:32)</div>
+    <div class="attack-step"><strong>Step 3:</strong> Confirms RCE. Escalates: reverse shell, data exfiltration</div>
+    <div class="attack-step"><strong>Step 4:</strong> Full server compromise — ransomware, crypto mining, lateral movement</div>
+  </div>
+
+  <div class="report-block">
+    <h3>🔧 Remediation</h3>
+    <p><strong>Immediate:</strong> Remove shell=True. Use argument list:</p>
+    <code style="display:block;padding:8px;background:#0d1117;border-radius:4px;margin:8px 0;">
+    result = subprocess.check_output(['ping', '-c', '1', host], shell=False)
+    </code>
+    <p><strong>Better:</strong> Avoid subprocess entirely. Use Python-native libraries.</p>
+  </div>
+</div>
+
+<h2>💰 三档服务</h2>
+
+<div class="tier">
+  <h3>基础版</h3>
+  <div class="price" style="color:#8b949e;">¥99</div>
+  <p>8步扫描pipeline<br>基础报告<br>适合快速自查</p>
+</div>
+<div class="tier tier-popular">
+  <h3>专业版 ⭐</h3>
+  <div class="price" style="color:#58a6ff;">¥299</div>
+  <p>+ AI Agent分析<br>+ 6段式攻击路径报告<br>+ 修复建议+代码示例<br>适合上线前检查</p>
+</div>
+<div class="tier">
+  <h3>旗舰版</h3>
+  <div class="price" style="color:#bc8cff;">¥599</div>
+  <p>+ 人工复核<br>+ 全部专业版功能<br>适合重要项目/融资审计</p>
+</div>
+
+<div style="clear:both;"></div>
+
+<div class="card" style="text-align:center; margin-top:24px;">
+  <h3 style="color:#3fb950;">🎉 前3单免费</h3>
+  <p style="color:#8b949e;">你提供代码 → 24小时内交付报告 → 满意再给钱</p>
+</div>
+
+<h2>🆚 和直接用gitleaks有什么区别？</h2>
+
+<table>
+  <tr><th></th><th>gitleaks</th><th>铁壁 Ironwall</th></tr>
+  <tr><td>找密钥</td><td>✅</td><td>✅</td></tr>
+  <tr><td>找弱加密/注入/配置</td><td>❌</td><td>✅</td></tr>
+  <tr><td>判断是不是真的漏洞</td><td>❌ 你自己看</td><td>✅ AI分析</td></tr>
+  <tr><td>攻击路径</td><td>❌</td><td>✅ 第1步→第4步</td></tr>
+  <tr><td>修复代码示例</td><td>❌</td><td>✅</td></tr>
+  <tr><td>误报率</td><td>80-95%</td><td>~6%</td></tr>
+</table>
+
+<div class="footer">
+  <p>🛡️ 铁壁 Ironwall v0.5.0 | AI Agent自研引擎</p>
+  <p>不是套壳。从扫描引擎到AI Agent全部自己写的。</p>
+</div>
+
+</body>
+</html>

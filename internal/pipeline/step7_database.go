@@ -147,8 +147,8 @@ func (s *Step7Database) Run(ctx context.Context, target string) ([]report.Findin
 		defer f.Close()
 
 		relPath, _ := filepath.Rel(target, path)
-		if relPath == "" {
-			relPath = path
+		if relPath == "" || relPath == "." {
+			relPath = filepath.Base(path)
 		}
 
 		scanner := bufio.NewScanner(f)

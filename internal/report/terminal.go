@@ -27,32 +27,32 @@ func PrintTerminal(result *ScanResult, cfg *config.Config) {
 	fmt.Println(strings.Repeat("━", 60))
 	fmt.Println()
 
-	// Step-wise summary (group findings by step)
+	// Step-wise summary — only show steps that have findings or were skipped.
 	stepFindings := groupByStep(result.Findings)
-	for step := 1; step <= 7; step++ {
-		fs, ok := stepFindings[step]
-		if !ok {
-			// Check if skipped
-			skipped := false
-			for _, s := range result.SkippedSteps {
-				if strings.Contains(s, config.StepNames[step]) || (step == 1 && strings.Contains(s, "Secret Scanning")) {
-					skipped = true
-					break
-				}
-			}
+	shownSteps := map[int]bool{}
+
+	// Show steps with findings
+	for step := 1; step <= 8; step++ {
+		fs, hasFindings := stepFindings[step]
+		if hasFindings && len(fs) > 0 {
 			name := config.StepNames[step]
 			emoji := config.StepEmoji[step]
-			if skipped {
-				fmt.Printf("  %s %-45s SKIP\n", emoji, name+" ")
-			} else {
-				fmt.Printf("  %s %-45s 0 found\n", emoji, name+" ")
-			}
-			continue
+			fmt.Printf("  %s %-45s %d found\n", emoji, name+" ", len(fs))
+			shownSteps[step] = true
 		}
-		name := config.StepNames[step]
-		emoji := config.StepEmoji[step]
-		count := len(fs)
-		fmt.Printf("  %s %-45s %d found\n", emoji, name+" ", count)
+	}
+
+	// Show skipped steps (only if not already shown)
+	for _, s := range result.SkippedSteps {
+		for step := 1; step <= 8; step++ {
+			if shownSteps[step] {
+				continue
+			}
+			if strings.Contains(s, config.StepNames[step]) || (step == 1 && strings.Contains(s, "Secret Scanning")) {
+				fmt.Printf("  %s %-45s SKIP\n", config.StepEmoji[step], config.StepNames[step]+" ")
+				shownSteps[step] = true
+			}
+		}
 	}
 
 	// Summary

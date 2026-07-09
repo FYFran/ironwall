@@ -211,8 +211,8 @@ func scanFileForSecrets(path, target string) []report.Finding {
 	scanner := bufio.NewScanner(f)
 	lineNum := 0
 	relPath, _ := filepath.Rel(target, path)
-	if relPath == "" {
-		relPath = path
+	if relPath == "" || relPath == "." {
+		relPath = filepath.Base(path)
 	}
 
 	for scanner.Scan() {

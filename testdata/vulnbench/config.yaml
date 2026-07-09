@@ -1,0 +1,27 @@
+# Vulnerability Test 3: Misconfigurations & Hardcoded Settings
+database:
+  host: production-db.internal
+  password: "ProdDB_P@ssw0rd_2024"
+  port: 5432
+
+aws:
+  access_key_id: "AKIAIOSFODNN7EXAMPLE2"
+  secret_access_key: "abcdefghijklmnopqrstuvwxyz1234567890ABCD"
+  region: us-east-1
+
+api_keys:
+  sendgrid: "SG.xxxxxxxxxxxxxxxxxxxxxx.yyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+  twilio: "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  datadog: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+
+debug: true  # should be false in production
+log_level: DEBUG
+cors_allow_all: true
+
+tls:
+  enabled: false  # should be true
+  min_version: "TLSv1.0"  # weak — should be 1.2+
+
+jwt:
+  secret: "not-so-secret-jwt-key"
+  algorithm: "none"  # should not allow 'none'

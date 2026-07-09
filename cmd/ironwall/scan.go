@@ -61,7 +61,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json, sarif")
+	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json, sarif, agent-report")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file path (auto-generated if empty)")
 	cmd.Flags().BoolVar(&quickMode, "quick", false, "Quick scan: only steps 1+4 (gitleaks + hardcoded secrets)")
 	cmd.Flags().BoolVar(&fullMode, "full", true, "Full scan: all 7 steps (default)")
@@ -75,7 +75,9 @@ Examples:
 }
 
 func newQuickCmd() *cobra.Command {
-	return &cobra.Command{
+	var formatFlag, outputFlag string
+
+	cmd := &cobra.Command{
 		Use:   "quick [target]",
 		Short: "Quick scan: gitleaks + hardcoded secrets only (< 30s)",
 		Args:  cobra.MaximumNArgs(1),
@@ -90,11 +92,18 @@ func newQuickCmd() *cobra.Command {
 			cfg.QuickMode = true
 			cfg.FullMode = false
 			cfg.TimeoutSeconds = 60
+			cfg.OutputFormat = formatFlag
+			cfg.OutputFile = outputFlag
 			cfg.ResolveAIKey()
 
 			return runScan(cfg)
 		},
 	}
+
+	cmd.Flags().StringVarP(&formatFlag, "format", "f", "terminal", "Output format: terminal, markdown, json, sarif")
+	cmd.Flags().StringVarP(&outputFlag, "output", "o", "", "Output file path")
+
+	return cmd
 }
 
 func newVersionCmd() *cobra.Command {
@@ -161,6 +170,8 @@ func runScan(cfg *config.Config) error {
 		return report.WriteMarkdown(result, cfg)
 	case "sarif":
 		return report.WriteSARIF(result, cfg)
+	case "agent-report":
+		return report.WriteAgentReport(result, cfg)
 	default:
 		report.PrintTerminal(result, cfg)
 		if cfg.OutputFile != "" || cfg.OutputFormat == "markdown" {

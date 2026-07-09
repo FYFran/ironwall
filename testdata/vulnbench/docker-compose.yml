@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  web:
+    build: .
+    ports:
+      - "0.0.0.0:80:3000"  # binds to all interfaces
+    environment:
+      - NODE_ENV=production
+      - JWT_SECRET=in-docker-compose-plaintext
+      - DB_PASSWORD=root_password_123
+    privileged: true  # dangerous
+    cap_add:
+      - ALL  # too many capabilities
+    security_opt: []  # no security options
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Docker socket exposed
+      - /:/host  # root filesystem mount
+
+  db:
+    image: postgres:9.6  # very old version
+    environment:
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"  # exposed to world
+
+  redis:
+    image: redis:alpine
+    command: redis-server --requirepass ""  # no password
+    ports:
+      - "6379:6379"
