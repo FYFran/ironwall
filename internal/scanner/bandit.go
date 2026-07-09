@@ -3,7 +3,9 @@ package scanner
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
 	"github.com/FYFran/ironwall/internal/report"
@@ -134,6 +136,9 @@ var banditCWE = map[string]string{
 	"B701": "CWE-94",  // jinja2_autoescape_false — XSS via Jinja2
 	"B702": "CWE-79",  // use_of_mako_templates — XSS via Mako
 	"B703": "CWE-79",  // django_mark_safe — XSS via Django
+	// Ironwall custom plugins
+	"B901": "CWE-501", // trust_boundary_violation
+	"B902": "CWE-90",  // ldap_injection
 }
 
 // ToFindings converts bandit findings to ironwall Finding structs.
@@ -187,4 +192,71 @@ func mapBanditSeverity(severity, confidence string) report.Severity {
 	default:
 		return report.SevInfo
 	}
+}
+
+// CustomScannerFinding mirrors BanditFinding but for ironwall_custom_scanner.py output.
+type CustomScannerFinding struct {
+	Filename        string `json:"filename"`
+	TestID          string `json:"test_id"`
+	TestName        string `json:"test_name"`
+	IssueSeverity   string `json:"issue_severity"`
+	IssueConfidence string `json:"issue_confidence"`
+	IssueText       string `json:"issue_text"`
+	LineNumber      int    `json:"line_number"`
+	Code            string `json:"code"`
+	MoreInfo        string `json:"more_info"`
+}
+
+// RunIronwallCustomScanner runs the standalone CWE-501/CWE-90 Python AST scanner.
+func RunIronwallCustomScanner(target string) ([]BanditFinding, error) {
+	// Resolve scanner script path.
+	// Priority: IRONWALL_CUSTOM_SCANNER env var → relative to cwd → relative to exe
+	scannerScript := os.Getenv("IRONWALL_CUSTOM_SCANNER")
+	if scannerScript == "" {
+		// Try source layout: internal/scanner/bandit_plugins/ironwall_custom_scanner.py
+		scannerScript = filepath.Join("internal", "scanner", "bandit_plugins", "ironwall_custom_scanner.py")
+	}
+	// Verify existence, fall back to exe-relative
+	if _, err := os.Stat(scannerScript); os.IsNotExist(err) {
+		exe, _ := os.Executable()
+		scannerScript = filepath.Join(filepath.Dir(exe), "scanner", "bandit_plugins", "ironwall_custom_scanner.py")
+	}
+
+	cmd := exec.Command("python", scannerScript, target)
+	out, err := cmd.Output()
+	if err != nil {
+		// Scanner may exit non-zero on findings — parse output anyway
+		if len(out) == 0 {
+			return nil, fmt.Errorf("ironwall custom scanner failed: %w", err)
+		}
+	}
+
+	var findings []CustomScannerFinding
+	if err := json.Unmarshal(out, &findings); err != nil {
+		return nil, fmt.Errorf("failed to parse custom scanner JSON: %w (output: %s)", err, string(out[:min(len(out), 200)]))
+	}
+
+	// Convert to BanditFinding format for unified processing
+	result := make([]BanditFinding, len(findings))
+	for i, f := range findings {
+		result[i] = BanditFinding{
+			Filename:        f.Filename,
+			TestID:          f.TestID,
+			TestName:        f.TestName,
+			IssueSeverity:   f.IssueSeverity,
+			IssueConfidence: f.IssueConfidence,
+			IssueText:       f.IssueText,
+			LineNumber:      f.LineNumber,
+			Code:            f.Code,
+			MoreInfo:        f.MoreInfo,
+		}
+	}
+	return result, nil
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }

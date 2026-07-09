@@ -65,6 +65,11 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 			if banditErr == nil {
 				allFindings = append(allFindings, banditFindings...)
 			}
+			// Ironwall custom: CWE-501 trust boundary + CWE-90 LDAP injection
+			customFindings, customErr := s.runIronwallCustom(ctx, target)
+			if customErr == nil {
+				allFindings = append(allFindings, customFindings...)
+			}
 		}
 		if _, lookErr := exec.LookPath("codeql"); lookErr == nil {
 			codeqlFindings, codeqlErr := s.runCodeQL(ctx, target)
@@ -144,6 +149,16 @@ func (s *Step2SAST) runBandit(ctx context.Context, target string) ([]report.Find
 		return nil, fmt.Errorf("bandit: %w", err)
 	}
 	return result.ToFindings(), nil
+}
+
+// runIronwallCustom runs the standalone CWE-501/CWE-90 AST scanner for Python.
+func (s *Step2SAST) runIronwallCustom(ctx context.Context, target string) ([]report.Finding, error) {
+	results, err := scanner.RunIronwallCustomScanner(target)
+	if err != nil {
+		return nil, fmt.Errorf("ironwall-custom: %w", err)
+	}
+	br := &scanner.BanditResult{Results: results}
+	return br.ToFindings(), nil
 }
 
 // hasGoFiles checks if the target directory contains any .go files (not in vendor/testdata).
