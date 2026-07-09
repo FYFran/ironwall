@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/FYFran/ironwall/internal/report"
 )
 
-const aiBatchSize = 25 // findings per AI API call
+const aiBatchSize = 15      // findings per AI API call (reduced for reliability)
+const batchInterval = 1500 * time.Millisecond // pause between batches to avoid rate limits
+const maxConcurrency = 3   // max concurrent API calls
 
 // Engine orchestrates multi-stage AI analysis for security findings.
 type Engine struct {
@@ -133,6 +136,9 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) ([]re
 	}
 
 	for batchIdx, batch := range batches {
+		if batchIdx > 0 {
+			time.Sleep(batchInterval)
+		}
 		summary := buildFindingSummary(batch)
 		prompt := fmt.Sprintf(PromptTriage, summary)
 
@@ -223,6 +229,9 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	log.Printf("[AI DeepVerify] reviewing %d findings in %d batches", len(reviewList), len(batches))
 
 	for batchIdx, batch := range batches {
+		if batchIdx > 0 {
+			time.Sleep(batchInterval)
+		}
 		summary := buildFindingSummary(batch)
 		prompt := fmt.Sprintf(PromptDeepVerifyBatch, summary)
 

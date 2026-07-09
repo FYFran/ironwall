@@ -63,7 +63,7 @@ Examples:
 		},
 	}
 
-	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json, sarif, agent-report")
+	cmd.Flags().StringVarP(&outputFormat, "format", "f", "terminal", "Report format: terminal, markdown, json, html, sarif, agent-report")
 	cmd.Flags().StringVarP(&outputFile, "output", "o", "", "Output file path (auto-generated if empty)")
 	cmd.Flags().BoolVar(&quickMode, "quick", false, "Quick scan: only steps 1+4 (gitleaks + hardcoded secrets)")
 	cmd.Flags().BoolVar(&fullMode, "full", true, "Full scan: all 7 steps (default)")
@@ -171,6 +171,8 @@ func runScan(cfg *config.Config) error {
 		return report.WriteJSON(result, cfg)
 	case "markdown":
 		return report.WriteMarkdown(result, cfg)
+	case "html":
+		return report.WriteHTML(result, cfg)
 	case "sarif":
 		return report.WriteSARIF(result, cfg)
 	case "agent-report":
