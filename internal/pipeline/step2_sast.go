@@ -59,7 +59,13 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 			}
 		}
 	} else {
-		// Non-Go: try CodeQL first (deepest), then semgrep (broad)
+		// Non-Go: try bandit first (Python-specific, fastest), then CodeQL, then semgrep
+		if hasPythonFiles(target) && isToolAvailable("bandit") {
+			banditFindings, banditErr := s.runBandit(ctx, target)
+			if banditErr == nil {
+				allFindings = append(allFindings, banditFindings...)
+			}
+		}
 		if _, lookErr := exec.LookPath("codeql"); lookErr == nil {
 			codeqlFindings, codeqlErr := s.runCodeQL(ctx, target)
 			if codeqlErr == nil {
@@ -67,7 +73,12 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 			}
 		}
 		if isToolAvailable("semgrep") {
-			semgrepFindings, err := s.runSemgrep(ctx, target)
+			// Use both auto + p/python for maximum Python coverage
+			rules := "auto"
+			if hasPythonFiles(target) {
+				rules = "auto,p/python"
+			}
+			semgrepFindings, err := s.runSemgrepWithRules(ctx, target, rules)
 			if err == nil {
 				allFindings = append(allFindings, semgrepFindings...)
 			}
@@ -112,13 +123,27 @@ func (s *Step2SAST) runCodeQL(ctx context.Context, target string) ([]report.Find
 	return result.ToFindings(), nil
 }
 
-// runSemgrep runs semgrep as a fallback scanner.
+// runSemgrep runs semgrep with auto-detection rules.
 func (s *Step2SAST) runSemgrep(ctx context.Context, target string) ([]report.Finding, error) {
-	result, err := scanner.RunSemgrep(target, "auto")
+	return s.runSemgrepWithRules(ctx, target, "auto")
+}
+
+// runSemgrepWithRules runs semgrep with specified rule set.
+func (s *Step2SAST) runSemgrepWithRules(ctx context.Context, target string, rules string) ([]report.Finding, error) {
+	result, err := scanner.RunSemgrep(target, rules)
 	if err != nil {
 		return nil, fmt.Errorf("semgrep: %w", err)
 	}
 	return result.ToFindings(target), nil
+}
+
+// runBandit runs bandit for Python-specific security analysis.
+func (s *Step2SAST) runBandit(ctx context.Context, target string) ([]report.Finding, error) {
+	result, err := scanner.RunBandit(target)
+	if err != nil {
+		return nil, fmt.Errorf("bandit: %w", err)
+	}
+	return result.ToFindings(), nil
 }
 
 // hasGoFiles checks if the target directory contains any .go files (not in vendor/testdata).
@@ -139,6 +164,28 @@ func hasGoFiles(target string) bool {
 			return nil
 		}
 		if filepath.Ext(path) == ".go" {
+			found = true
+		}
+		return nil
+	})
+	return found
+}
+
+// hasPythonFiles checks if target contains .py files.
+func hasPythonFiles(target string) bool {
+	var found bool
+	_ = filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
+		if err != nil || found {
+			return nil
+		}
+		if info.IsDir() {
+			base := filepath.Base(path)
+			if base == "vendor" || base == ".git" || base == "node_modules" || base == "__pycache__" || base == ".venv" {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if filepath.Ext(path) == ".py" {
 			found = true
 		}
 		return nil

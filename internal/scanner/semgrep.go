@@ -53,7 +53,12 @@ func RunSemgrep(target string, rules string) (*SemgrepResult, error) {
 		"--no-git-ignore",
 	}
 	if rules != "" {
-		args = append(args, "--config", rules)
+		for _, r := range strings.Split(rules, ",") {
+			r = strings.TrimSpace(r)
+			if r != "" {
+				args = append(args, "--config", r)
+			}
+		}
 	} else {
 		args = append(args, "--config", "auto")
 	}

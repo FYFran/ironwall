@@ -30,6 +30,21 @@ func NewEngine(triageClient, deepClient *Client, noTestFilter bool) *Engine {
 	}
 }
 
+// CostSummary returns a human-readable cost summary of all AI calls.
+func (e *Engine) CostSummary() string {
+	parts := []string{}
+	if e.triageClient != nil && e.triageClient.Cost.Calls > 0 {
+		parts = append(parts, "triage: "+e.triageClient.Cost.Summary(e.triageClient.model))
+	}
+	if e.deepClient != nil && e.deepClient.Cost.Calls > 0 {
+		parts = append(parts, "deep: "+e.deepClient.Cost.Summary(e.deepClient.model))
+	}
+	if len(parts) == 0 {
+		return "no AI calls"
+	}
+	return strings.Join(parts, ", ")
+}
+
 // Available returns true if at least one AI client is configured.
 func (e *Engine) Available() bool {
 	return (e.triageClient != nil && e.triageClient.Available()) ||

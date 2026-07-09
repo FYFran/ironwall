@@ -11,12 +11,46 @@ import (
 	"time"
 )
 
+// CostTracker accumulates token usage and computes cost.
+type CostTracker struct {
+	PromptTokens     int
+	CompletionTokens int
+	Calls            int
+	Errors           int
+}
+
+// Add records usage from a single API call.
+func (ct *CostTracker) Add(prompt, completion int) {
+	ct.PromptTokens += prompt
+	ct.CompletionTokens += completion
+	ct.Calls++
+}
+
+// CostUSD estimates cost in USD using DeepSeek pricing (2026).
+func (ct *CostTracker) CostUSD(model string) float64 {
+	rates := map[string][2]float64{ // per 1M tokens: [prompt, completion]
+		"deepseek-chat":     {0.27, 1.10},
+		"deepseek-reasoner": {0.55, 2.19},
+	}
+	if r, ok := rates[model]; ok {
+		return float64(ct.PromptTokens)/1e6*r[0] + float64(ct.CompletionTokens)/1e6*r[1]
+	}
+	return 0
+}
+
+// Summary returns a human-readable summary.
+func (ct *CostTracker) Summary(model string) string {
+	return fmt.Sprintf("%d calls, %d prompt + %d completion tokens, $%.4f",
+		ct.Calls, ct.PromptTokens, ct.CompletionTokens, ct.CostUSD(model))
+}
+
 // Client is a minimal OpenAI-compatible API client for AI analysis.
 type Client struct {
 	endpoint   string
 	apiKey     string
 	model      string
 	httpClient *http.Client
+	Cost       CostTracker
 }
 
 // NewClient creates a new AI client.
@@ -124,6 +158,9 @@ func (c *Client) chatWithTemp(ctx context.Context, systemPrompt, userMessage str
 	if err := json.Unmarshal(respBody, &chatResp); err != nil {
 		return "", fmt.Errorf("unmarshal response: %w", err)
 	}
+
+	// Track token usage
+	c.Cost.Add(chatResp.Usage.PromptTokens, chatResp.Usage.CompletionTokens)
 
 	if len(chatResp.Choices) == 0 {
 		return "", fmt.Errorf("no choices in response")

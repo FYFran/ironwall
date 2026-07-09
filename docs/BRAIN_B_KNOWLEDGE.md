@@ -488,5 +488,46 @@ Ironwall dedup improves Precision +7.5% over bare semgrep with zero Recall loss.
 
 ---
 
-*End of Knowledge Base — v3.2*
+---
+
+## 11. P1: Bandit Integration Results (2026-07-09)
+
+### 11.1 What was done
+- Integrated bandit 1.9.4 as Python-specific scanner (complements semgrep)
+- Added `p/python` semgrep ruleset alongside auto
+- Fixed bandit JSON parsing (metrics field type)
+- Fixed semgrep multi-config support (comma → separate --config flags)
+- Added CostTracker to AI client (token counting + USD estimation)
+
+### 11.2 Results: OWASP Python Benchmark
+
+| Metric | Before (semgrep only) | After (+bandit+p/python) | Δ |
+|--------|:---:|:---:|:---:|
+| Strict TP | 57 | **168** | +195% |
+| Strict Recall | 0.126 | **0.372** | +195% |
+| Strict F3 | 0.128 | **0.339** | +165% |
+| Relaxed TP | 150 | **265** | +77% |
+| Relaxed Recall | 0.332 | **0.586** | +77% |
+| Relaxed F3 | 0.341 | **0.583** | +71% |
+| Relaxed MCC | 0.102 | **0.313** | +207% |
+| CWE covered | 5/14 | **10/14** | +5 |
+
+### 11.3 New CWE Coverage
+🟢 Gained: CWE-330(weak random) F1=0.875, CWE-611(XXE) F1=0.286, CWE-94(code injection) F1=0.548
+🟢 Improved: CWE-78(+6%), CWE-502(broader)
+🔴 Still zero: CWE-328(hash), CWE-501(trustbound), CWE-643(xpathi), CWE-79(xss), CWE-90(ldapi)
+
+### 11.4 Architecture Change
+Step2 now uses 3-layer scanner stack for Python:
+1. Bandit (Python AST, ms-level)
+2. CodeQL (if installed)
+3. Semgrep (auto + p/python rulesets)
+
+### 11.5 Cost Tracking
+- DeepSeek pricing: chat $0.27/1M prompt + $1.10/1M completion, reasoner $0.55/$2.19
+- Estimated cost: ~$0.50-1.00 per 1230-file scan
+
+---
+
+*End of Knowledge Base — v3.3*
 *Feed this file as context in every Brain B session: `KNOWLEDGE=$(cat f:/ClaudeFiles/_research/ironwall/docs/BRAIN_B_KNOWLEDGE.md)`*
