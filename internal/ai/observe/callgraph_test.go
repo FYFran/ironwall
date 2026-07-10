@@ -125,6 +125,63 @@ func countMethods(methods map[string]map[string]*FuncInfo) int {
 	return n
 }
 
+// TestPythonObserve_Integration runs OBSERVE + call graph on the secure-file-management target.
+func TestPythonObserve_Integration(t *testing.T) {
+	// Resolve target path relative to ironwall root
+	ironwallRoot, _ := filepath.Abs("../../../")
+	target := filepath.Join(ironwallRoot, "battle_test_candidates", "secure-file-management")
+
+	// Check if target exists
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		t.Skipf("target not found: %s", target)
+	}
+
+	// Run Python OBSERVE
+	po := NewPythonObserver()
+	result, err := po.ObserveDir(target)
+	if err != nil {
+		t.Fatalf("Python OBSERVE failed: %v", err)
+	}
+
+	t.Logf("Python OBSERVE: %d files, %d funcs, %d sections",
+		result.TotalFiles, result.TotalFuncs, result.TotalSections)
+	t.Logf("Concern counts: %v", result.ConcernCounts)
+
+	// Verify all sections have required fields
+	for _, s := range result.Sections {
+		if s.FilePath == "" {
+			t.Error("section has empty file path")
+		}
+		if s.FuncName == "" {
+			t.Error("section has empty function name")
+		}
+		if s.CodeSnippet == "" {
+			t.Errorf("section %s has empty code snippet", s.FuncName)
+		}
+	}
+
+	// Verify call graph was built (Python target doesn't have Go code, so CG is nil)
+	if result.CallGraph != nil {
+		t.Logf("Call graph present: %d funcs, %d edges",
+			result.CallGraph.TotalFuncs, result.CallGraph.TotalEdges)
+	}
+
+	// Count handlers — these are the targets for MISSING analysis
+	handlerCount := 0
+	for _, s := range result.Sections {
+		if s.IsHandler {
+			handlerCount++
+			t.Logf("  Handler: [%s:%d] %s() concerns=%v",
+				s.FilePath, s.LineStart, s.FuncName, s.Concerns)
+		}
+	}
+	t.Logf("Handlers found: %d", handlerCount)
+
+	if handlerCount < 3 {
+		t.Errorf("Expected at least 3 handlers, got %d", handlerCount)
+	}
+}
+
 // Test marshaling round-trip
 func TestCallGraphJSON(t *testing.T) {
 	result := &CallGraphResult{
