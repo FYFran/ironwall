@@ -69,6 +69,15 @@ Examples:
 			cfg.DeepStrict = deepStrict
 			cfg.ResolveAIKey()
 
+			// When --deep is active, ensure timeout is long enough for Phase B AI pipeline.
+			// Phase B runs OBSERVE→TRACE→VERIFY→MISSING→CONFIG, each making multiple API calls.
+			// DeepSeek R1 can take 60-180s per call. Default: 900s (15 min) for deep mode.
+			if cfg.DeepAnalysis && cfg.TimeoutSeconds < 900 {
+				log.Printf("Deep analysis requires longer timeout. Overriding %ds → 900s (use --timeout to set higher).",
+					cfg.TimeoutSeconds)
+				cfg.TimeoutSeconds = 900
+			}
+
 			return runScan(cfg)
 		},
 	}

@@ -26,7 +26,7 @@ func NewDeepSeekClient(apiKey, model string) *DeepSeekClient {
 		apiKey:   apiKey,
 		model:    model,
 		httpClient: &http.Client{
-			Timeout: 120 * time.Second,
+			Timeout: 300 * time.Second, // R1 reasoning can take 60-180s per call
 		},
 	}
 }

@@ -44,6 +44,14 @@ func (ct *CostTracker) Summary(model string) string {
 		ct.Calls, ct.PromptTokens, ct.CompletionTokens, ct.CostUSD(model))
 }
 
+const (
+	// DefaultHTTPTimeout is the default HTTP client timeout for AI API calls.
+	// Long enough for DeepSeek R1 reasoning (can take 60-180s on complex prompts).
+	DefaultHTTPTimeout = 300 * time.Second
+	// ShortHTTPTimeout is used for fast API calls (triage/chat models).
+	ShortHTTPTimeout = 120 * time.Second
+)
+
 // Client is a minimal OpenAI-compatible API client for AI analysis.
 type Client struct {
 	endpoint   string
@@ -53,17 +61,23 @@ type Client struct {
 	Cost       CostTracker
 }
 
-// NewClient creates a new AI client.
+// NewClient creates a new AI client with default timeout (300s).
 // endpoint is the API base URL (e.g. "https://api.deepseek.com/v1").
 // apiKey is the authentication key.
 // model is the model name (e.g. "deepseek-chat", "deepseek-reasoner").
 func NewClient(endpoint, apiKey, model string) *Client {
+	return NewClientWithTimeout(endpoint, apiKey, model, DefaultHTTPTimeout)
+}
+
+// NewClientWithTimeout creates a new AI client with a custom HTTP timeout.
+// Use ShortHTTPTimeout (120s) for fast chat models, DefaultHTTPTimeout (300s) for reasoning models.
+func NewClientWithTimeout(endpoint, apiKey, model string, timeout time.Duration) *Client {
 	return &Client{
 		endpoint: strings.TrimRight(endpoint, "/"),
 		apiKey:   apiKey,
 		model:    model,
 		httpClient: &http.Client{
-			Timeout: 120 * time.Second, // Longer timeout for R1 reasoning
+			Timeout: timeout,
 		},
 	}
 }
