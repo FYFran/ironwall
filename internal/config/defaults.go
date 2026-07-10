@@ -2,7 +2,7 @@ package config
 
 const (
 	// Version is the ironwall CLI version.
-	Version = "0.4.0"
+	Version = "0.7.0"
 
 	// DefaultTimeout is the default scan timeout in seconds.
 	DefaultTimeout = 300

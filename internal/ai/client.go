@@ -199,7 +199,12 @@ func (c *Client) chatWithTemp(ctx context.Context, systemPrompt, userMessage str
 // ChatJSON sends a chat request and unmarshals the response into the given target struct.
 // Uses proper JSON unmarshal — not string matching.
 func (c *Client) ChatJSON(ctx context.Context, systemPrompt string, userMessage string, target interface{}) error {
-	response, err := c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, 4096)
+	return c.ChatJSONWithMaxTokens(ctx, systemPrompt, userMessage, target, 4096)
+}
+
+// ChatJSONWithMaxTokens sends a chat request with custom max_tokens and unmarshals the response.
+func (c *Client) ChatJSONWithMaxTokens(ctx context.Context, systemPrompt string, userMessage string, target interface{}, maxTokens int) error {
+	response, err := c.chatWithTemp(ctx, systemPrompt, userMessage, 0.1, maxTokens)
 	if err != nil {
 		return err
 	}

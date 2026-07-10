@@ -1,0 +1,2334 @@
+{
+  "version": "0.7.0",
+  "target": "./battle_test_candidates/ecommerce-flask",
+  "started_at": "2026-07-10T04:19:25+08:00",
+  "completed_at": "2026-07-10T04:21:40+08:00",
+  "duration": "2m14.18s",
+  "summary": {
+    "critical": 0,
+    "high": 3,
+    "medium": 10,
+    "low": 1,
+    "info": 104,
+    "total": 118
+  },
+  "findings": [
+    {
+      "id": "IRON-SEMGREP-001",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\Build, Test, Lint \u0026 Format.yml",
+      "line_number": 12,
+      "code_snippet": "  12 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner (e.g., actions/checkout) and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action (e.g., actions/checkout) and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 12 of Build, Test, Lint \u0026 Format.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow, potentially exfiltrating secrets or modifying the repository.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets (e.g., AWS keys, npm tokens) or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "The finding correctly identifies a mutable tag reference. The attack path is well-documented in real-world supply-chain attacks. The precondition (compromised action owner) is realistic for popular actions."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-002",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\Build, Test, Lint \u0026 Format.yml",
+      "line_number": 14,
+      "code_snippet": "  14 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 14 of Build, Test, Lint \u0026 Format.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-003",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\Build, Test, Lint \u0026 Format.yml",
+      "line_number": 19,
+      "code_snippet": "  19 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 19 of Build, Test, Lint \u0026 Format.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-004",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\build_workflow.yml",
+      "line_number": 11,
+      "code_snippet": "  11 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 11 of build_workflow.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different file and line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-005",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\build_workflow.yml",
+      "line_number": 14,
+      "code_snippet": "  14 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 14 of build_workflow.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-006",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\build_workflow.yml",
+      "line_number": 19,
+      "code_snippet": "  19 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 19 of build_workflow.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-007",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\build_workflow.yml",
+      "line_number": 58,
+      "code_snippet": "  58 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 58 of build_workflow.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-008",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\.github\\workflows\\build_workflow.yml",
+      "line_number": 74,
+      "code_snippet": "  74 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions marketplace or the repository of the action owner and repoint the tag to a malicious commit.",
+        "path": "1. Attacker compromises the repository hosting the action and pushes a malicious commit to the tag referenced (e.g., v4). 2. The next time the workflow runs (line 74 of build_workflow.yml), GitHub Actions fetches the malicious code. 3. The malicious code executes with the permissions of the workflow.",
+        "impact": "The attacker gains arbitrary code execution within the CI/CD pipeline, allowing exfiltration of repository secrets or modification of build artifacts.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-001, but for a different line. The finding is valid."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-009",
+      "title": "dockerfile.security.missing-user.missing-user: By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+      "description": "Semgrep rule dockerfile.security.missing-user.missing-user detected: By not specifying a USER, a program in the container may run as 'root'. This is a security hazard. If an attacker can control a process running as root, they may have control over the container. Ensure that the last USER in a Dockerfile is a USER other than 'root'.",
+      "severity": 1,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\Dockerfile",
+      "line_number": 14,
+      "code_snippet": "  14 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can exploit a vulnerability in the application running inside the container (e.g., RCE via a web endpoint) to gain code execution as root.",
+        "path": "1. Attacker exploits a vulnerability in the Flask app (e.g., command injection, SSTI) to execute arbitrary commands. 2. Because the container runs as root (no USER directive in Dockerfile line 14), the attacker's commands run with root privileges. 3. The attacker can then escape the container (e.g., by mounting host filesystem) or compromise other containers on the same host.",
+        "impact": "The attacker gains root-level access inside the container, enabling container escape and potential host compromise.",
+        "is_real": true,
+        "explanation": "The Dockerfile does not specify a USER, so the process runs as root. This is a real security risk, though the severity depends on the application's attack surface. The finding is valid."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "USER non-root\nCMD [\"flask\", \"run\"]",
+      "cwe": "CWE-250: Execution with Unnecessary Privileges",
+      "cvss": 9.8,
+      "tool_output": "Rule: dockerfile.security.missing-user.missing-user | Severity: ERROR | OWASP: [A04:2021 - Insecure Design A06:2025 - Insecure Design]",
+      "references": [
+        "https://semgrep.dev/r/dockerfile.security.missing-user.missing-user"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-010",
+      "title": "python.django.security.audit.unvalidated-password.unvalidated-password: The password on 'user' is being set without validating the password. Call django.contrib.auth.password_validation.validate_password() with validation functions before setting the password. See https://docs.djangoproject.com/en/3.0/topics/auth/passwords/ for more information.",
+      "description": "Semgrep rule python.django.security.audit.unvalidated-password.unvalidated-password detected: The password on 'user' is being set without validating the password. Call django.contrib.auth.password_validation.validate_password() with validation functions before setting the password. See https://docs.djangoproject.com/en/3.0/topics/auth/passwords/ for more information.\n[AI Deep Verify: Attack scenario not viable — This is a Django-specific rule applied to a Flask application. The code in auth.py uses Flask-SQLAlchemy and Werkzeug's generate_password_hash, not Django's authentication system. The password is hashed before storage, so the 'unvalidated password' concern is not applicable. The finding is a false positive due to framework mismatch.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\app\\routes\\auth.py",
+      "line_number": 68,
+      "code_snippet": "  68 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "This is a Django-specific rule applied to a Flask application. The code in auth.py uses Flask-SQLAlchemy and Werkzeug's generate_password_hash, not Django's authentication system. The password is hashed before storage, so the 'unvalidated password' concern is not applicable. The finding is a false positive due to framework mismatch."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "if django.contrib.auth.password_validation.validate_password(data[\"password\"], user=user):\n        user.set_password(data[\"password\"])",
+      "cwe": "CWE-521: Weak Password Requirements",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.audit.unvalidated-password.unvalidated-password | Severity: WARNING | OWASP: [A07:2021 - Identification and Authentication Failures A07:2025 - Authentication Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.audit.unvalidated-password.unvalidated-password"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-011",
+      "title": "generic.secrets.security.detected-jwt-token.detected-jwt-token: JWT token detected",
+      "description": "Semgrep rule generic.secrets.security.detected-jwt-token.detected-jwt-token detected: JWT token detected\n[AI Deep Verify: Attack scenario not viable — The JWT token is detected in a documentation file (documentation.md), not in source code or configuration. Documentation files are not executed and do not pose a security risk. The finding is a false positive.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\ecommerce-flask\\documentation.md",
+      "line_number": 1191,
+      "code_snippet": "  1191 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The JWT token is detected in a documentation file (documentation.md), not in source code or configuration. Documentation files are not executed and do not pose a security risk. The finding is a false positive."
+      },
+      "ai_confidence": 0.99,
+      "fix_suggestion": "",
+      "cwe": "CWE-321: Use of Hard-coded Cryptographic Key",
+      "cvss": 9.8,
+      "tool_output": "Rule: generic.secrets.security.detected-jwt-token.detected-jwt-token | Severity: ERROR | OWASP: [A02:2021 - Cryptographic Failures A04:2025 - Cryptographic Failures]",
+      "references": [
+        "https://semgrep.dev/r/generic.secrets.security.detected-jwt-token.detected-jwt-token"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-001",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'test-secret-key'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'test-secret-key' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\config.py",
+      "line_number": 17,
+      "code_snippet": "16     SQLALCHEMY_TRACK_MODIFICATIONS = False\n17     SECRET_KEY = \"test-secret-key\"\n18     JWT_SECRET_KEY = \"test-jwt-secret-key\"\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-002",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'test-jwt-secret-key'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'test-jwt-secret-key' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\config.py",
+      "line_number": 18,
+      "code_snippet": "17     SECRET_KEY = \"test-secret-key\"\n18     JWT_SECRET_KEY = \"test-jwt-secret-key\"\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-003",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 113,
+      "code_snippet": "112         \"email\": \"newuser@example.com\",\n113         \"password\": \"password\",\n114     }\n115 \n116 \n117 @pytest.fixture\n118 def sample_user(session):\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-004",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 132,
+      "code_snippet": "131     response = client.post(\"/auth/register\", json=new_user_data)\n132     assert response.status_code == 201\n133     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-005",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 134,
+      "code_snippet": "133     data = json.loads(response.data)\n134     assert data[\"msg\"] == \"User registered successfully\"\n135     user = User.query.filter_by(email=new_user_data[\"email\"]).first()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-006",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 136,
+      "code_snippet": "135     user = User.query.filter_by(email=new_user_data[\"email\"]).first()\n136     assert user is not None\n137     assert user.username == new_user_data[\"username\"]\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-007",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 137,
+      "code_snippet": "136     assert user is not None\n137     assert user.username == new_user_data[\"username\"]\n138 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-008",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 145,
+      "code_snippet": "144         \"email\": \"anotheremail@example.com\",\n145         \"password\": \"password\",\n146     }\n147     response = client.post(\"/auth/register\", json=existing_user_data)\n148     assert response.status_code == 400\n149     data = json.loads(response.data)\n150     assert data[\"msg\"] == \"Username already exists\"\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-009",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 148,
+      "code_snippet": "147     response = client.post(\"/auth/register\", json=existing_user_data)\n148     assert response.status_code == 400\n149     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-010",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 150,
+      "code_snippet": "149     data = json.loads(response.data)\n150     assert data[\"msg\"] == \"Username already exists\"\n151 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-011",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 158,
+      "code_snippet": "157         \"email\": sample_user.email,\n158         \"password\": \"password\",\n159     }\n160     response = client.post(\"/auth/register\", json=existing_email_data)\n161     assert response.status_code == 400\n162     data = json.loads(response.data)\n163     assert data[\"msg\"] == \"Email already exists\"\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-012",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 161,
+      "code_snippet": "160     response = client.post(\"/auth/register\", json=existing_email_data)\n161     assert response.status_code == 400\n162     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-013",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 163,
+      "code_snippet": "162     data = json.loads(response.data)\n163     assert data[\"msg\"] == \"Email already exists\"\n164 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-014",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 168,
+      "code_snippet": "167     \"\"\"Test logging in with valid credentials.\"\"\"\n168     login_data = {\"username\": sample_user.username, \"password\": \"password\"}\n169     response = client.post(\"/auth/login\", json=login_data)\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-015",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 170,
+      "code_snippet": "169     response = client.post(\"/auth/login\", json=login_data)\n170     assert response.status_code == 200\n171     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-016",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 172,
+      "code_snippet": "171     data = json.loads(response.data)\n172     assert \"access_token\" in data\n173 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-017",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'wrongpassword'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'wrongpassword' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 177,
+      "code_snippet": "176     \"\"\"Test logging in with invalid credentials.\"\"\"\n177     invalid_login_data = {\"username\": \"wronguser\", \"password\": \"wrongpassword\"}\n178     response = client.post(\"/auth/login\", json=invalid_login_data)\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-018",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 179,
+      "code_snippet": "178     response = client.post(\"/auth/login\", json=invalid_login_data)\n179     assert response.status_code == 401\n180     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-019",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_auth.py",
+      "line_number": 181,
+      "code_snippet": "180     data = json.loads(response.data)\n181     assert data[\"msg\"] == \"Invalid credentials\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-020",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 119,
+      "code_snippet": "118     response = client.post(\n119         \"/auth/login\", json={\"username\": \"testuser\", \"password\": \"password\"}\n120     )\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-021",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 166,
+      "code_snippet": "165     response = client.get(\"/cart\", headers=auth_headers)\n166     assert response.status_code == 200\n167     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-022",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 168,
+      "code_snippet": "167     data = json.loads(response.data)\n168     assert data[\"cart\"] == []\n169 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-023",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 189,
+      "code_snippet": "188     )\n189     assert response.status_code == 200\n190     assert json.loads(response.data)[\"msg\"] == \"Product added to cart\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-024",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 190,
+      "code_snippet": "189     assert response.status_code == 200\n190     assert json.loads(response.data)[\"msg\"] == \"Product added to cart\"\n191 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-025",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 195,
+      "code_snippet": "194     data = json.loads(response.data)\n195     assert len(data[\"cart\"]) == 1\n196     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-026",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 196,
+      "code_snippet": "195     assert len(data[\"cart\"]) == 1\n196     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n197     assert data[\"cart\"][0][\"quantity\"] == 2\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-027",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 197,
+      "code_snippet": "196     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n197     assert data[\"cart\"][0][\"quantity\"] == 2\n198 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-028",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 223,
+      "code_snippet": "222         headers=auth_headers)\n223     assert response.status_code == 200\n224     assert json.loads(response.data)[\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-029",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 224,
+      "code_snippet": "223     assert response.status_code == 200\n224     assert json.loads(response.data)[\n225         \"msg\"] == \"Item successfully removed from cart\"\n226 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-030",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 230,
+      "code_snippet": "229     data = json.loads(response.data)\n230     assert data[\"cart\"] == []\n231 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-031",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 245,
+      "code_snippet": "244     response = client.delete(\"/cart/999\", headers=auth_headers)\n245     assert response.status_code == 404\n246     assert json.loads(response.data)[\"msg\"] == \"Cart not found\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-032",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 246,
+      "code_snippet": "245     assert response.status_code == 404\n246     assert json.loads(response.data)[\"msg\"] == \"Cart not found\"\n247 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-033",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 274,
+      "code_snippet": "273     )\n274     assert response.status_code == 200\n275     assert json.loads(response.data)[\"msg\"] == \"Product added to cart\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-034",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 275,
+      "code_snippet": "274     assert response.status_code == 200\n275     assert json.loads(response.data)[\"msg\"] == \"Product added to cart\"\n276 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-035",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 280,
+      "code_snippet": "279     data = json.loads(response.data)\n280     assert len(data[\"cart\"]) == 1\n281     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-036",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 281,
+      "code_snippet": "280     assert len(data[\"cart\"]) == 1\n281     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n282     assert data[\"cart\"][0][\"quantity\"] == 3\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-037",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 282,
+      "code_snippet": "281     assert data[\"cart\"][0][\"product_id\"] == sample_product.id\n282     assert data[\"cart\"][0][\"quantity\"] == 3\n283 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-038",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 304,
+      "code_snippet": "303     data = json.loads(response.data)\n304     assert len(data[\"cart\"]) == 1\n305 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-039",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 308,
+      "code_snippet": "307     response = client.delete(\"/cart/clear\", headers=auth_headers)\n308     assert response.status_code == 200\n309     assert json.loads(response.data)[\"msg\"] == \"Cart cleared\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-040",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 309,
+      "code_snippet": "308     assert response.status_code == 200\n309     assert json.loads(response.data)[\"msg\"] == \"Cart cleared\"\n310 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-041",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_carts.py",
+      "line_number": 314,
+      "code_snippet": "313     data = json.loads(response.data)\n314     assert data[\"cart\"] == []\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-042",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'password'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'password' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 146,
+      "code_snippet": "145     response = client.post(\n146         \"/auth/login\", json={\"username\": \"testuser\", \"password\": \"password\"}\n147     )\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-043",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 230,
+      "code_snippet": "229     response = client.post(\"/orders\", headers=auth_headers)\n230     assert response.status_code == 400\n231     assert json.loads(response.data)[\"msg\"] == \"Cart is empty\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-044",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 231,
+      "code_snippet": "230     assert response.status_code == 400\n231     assert json.loads(response.data)[\"msg\"] == \"Cart is empty\"\n232 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-045",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 249,
+      "code_snippet": "248     response = client.post(\"/orders\", headers=auth_headers)\n249     assert response.status_code == 201\n250     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-046",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 251,
+      "code_snippet": "250     data = json.loads(response.data)\n251     assert data[\"msg\"] == \"Order placed successfully\"\n252     assert \"order_id\" in data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-047",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 252,
+      "code_snippet": "251     assert data[\"msg\"] == \"Order placed successfully\"\n252     assert \"order_id\" in data\n253 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-048",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 257,
+      "code_snippet": "256     cart_data = json.loads(cart_response.data)\n257     assert cart_data[\"cart\"] == []\n258 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-049",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 279,
+      "code_snippet": "278     response = client.get(\"/orders/history\", headers=auth_headers)\n279     assert response.status_code == 200\n280     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-050",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 281,
+      "code_snippet": "280     data = json.loads(response.data)\n281     assert len(data[\"orders\"]) == 1\n282     assert \"id\" in data[\"orders\"][0]\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-051",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 282,
+      "code_snippet": "281     assert len(data[\"orders\"]) == 1\n282     assert \"id\" in data[\"orders\"][0]\n283     assert data[\"orders\"][0][\"items_count\"] \u003e 0\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-052",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 283,
+      "code_snippet": "282     assert \"id\" in data[\"orders\"][0]\n283     assert data[\"orders\"][0][\"items_count\"] \u003e 0\n284 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-053",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 306,
+      "code_snippet": "305     response = client.get(f\"/orders/{order_id}\", headers=auth_headers)\n306     assert response.status_code == 200\n307     data = json.loads(response.data)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-054",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 308,
+      "code_snippet": "307     data = json.loads(response.data)\n308     assert \"order\" in data\n309     assert data[\"order\"][\"id\"] == order_id\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-055",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 309,
+      "code_snippet": "308     assert \"order\" in data\n309     assert data[\"order\"][\"id\"] == order_id\n310     assert len(data[\"order\"][\"items\"]) \u003e 0\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-056",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 310,
+      "code_snippet": "309     assert data[\"order\"][\"id\"] == order_id\n310     assert len(data[\"order\"][\"items\"]) \u003e 0\n311 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-057",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 325,
+      "code_snippet": "324     response = client.get(\"/orders/999\", headers=auth_headers)\n325     assert response.status_code == 404\n326     assert json.loads(response.data)[\"msg\"] == \"Pedido não encontrado\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-058",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_orders.py",
+      "line_number": 326,
+      "code_snippet": "325     assert response.status_code == 404\n326     assert json.loads(response.data)[\"msg\"] == \"Pedido não encontrado\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-059",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'test-secret-key'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'test-secret-key' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 35,
+      "code_snippet": "34     app.config[\"SQLALCHEMY_DATABASE_URI\"] = \"sqlite:///:memory:\"\n35     app.config[\"JWT_SECRET_KEY\"] = \"test-secret-key\"\n36 \n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-060",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 151,
+      "code_snippet": "150 \n151         assert Product.query.count() == 1\n152 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-061",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 170,
+      "code_snippet": "169     with fixture_app.app_context():\n170         assert Product.query.count() == 1\n171         db_product = Product.query.get(fixture_sample_product)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-062",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 172,
+      "code_snippet": "171         db_product = Product.query.get(fixture_sample_product)\n172         assert db_product is not None\n173         assert db_product.id == fixture_sample_product\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-063",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 173,
+      "code_snippet": "172         assert db_product is not None\n173         assert db_product.id == fixture_sample_product\n174         assert db_product.name == \"Sample Product\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-064",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 174,
+      "code_snippet": "173         assert db_product.id == fixture_sample_product\n174         assert db_product.name == \"Sample Product\"\n175 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-065",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 177,
+      "code_snippet": "176     response = fixture_client.get(\"/products\")\n177     assert response.status_code == 200\n178     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-066",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 179,
+      "code_snippet": "178     data = response.get_json()\n179     assert isinstance(data, list)\n180     assert len(data) == 1\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-067",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 180,
+      "code_snippet": "179     assert isinstance(data, list)\n180     assert len(data) == 1\n181     assert data[0][\"name\"] == \"Sample Product\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-068",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 181,
+      "code_snippet": "180     assert len(data) == 1\n181     assert data[0][\"name\"] == \"Sample Product\"\n182     assert data[0][\"id\"] == fixture_sample_product\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-069",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 182,
+      "code_snippet": "181     assert data[0][\"name\"] == \"Sample Product\"\n182     assert data[0][\"id\"] == fixture_sample_product\n183 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-070",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 197,
+      "code_snippet": "196     response = fixture_client.get(f\"/products/{fixture_sample_product}\")\n197     assert response.status_code == 200\n198     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-071",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 199,
+      "code_snippet": "198     data = response.get_json()\n199     assert data[\"name\"] == \"Sample Product\"\n200     assert data[\"description\"] == \"This is a sample product.\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-072",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 200,
+      "code_snippet": "199     assert data[\"name\"] == \"Sample Product\"\n200     assert data[\"description\"] == \"This is a sample product.\"\n201     assert data[\"price\"] == 19.99\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-073",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 201,
+      "code_snippet": "200     assert data[\"description\"] == \"This is a sample product.\"\n201     assert data[\"price\"] == 19.99\n202     assert data[\"stock\"] == 100\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-074",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 202,
+      "code_snippet": "201     assert data[\"price\"] == 19.99\n202     assert data[\"stock\"] == 100\n203 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-075",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 216,
+      "code_snippet": "215     response = fixture_client.get(\"/products/999\")\n216     assert response.status_code == 404\n217     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-076",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 218,
+      "code_snippet": "217     data = response.get_json()\n218     assert data[\"msg\"] == \"Product not found\"\n219 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-077",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 244,
+      "code_snippet": "243     )\n244     assert response.status_code == 201\n245     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-078",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 246,
+      "code_snippet": "245     data = response.get_json()\n246     assert data[\"msg\"] == \"Product added\"\n247     assert \"product_id\" in data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-079",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 247,
+      "code_snippet": "246     assert data[\"msg\"] == \"Product added\"\n247     assert \"product_id\" in data\n248 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-080",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 252,
+      "code_snippet": "251         product = Product.query.get(data[\"product_id\"])\n252         assert product is not None\n253         assert product.name == \"New Product\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-081",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 253,
+      "code_snippet": "252         assert product is not None\n253         assert product.name == \"New Product\"\n254 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-082",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 279,
+      "code_snippet": "278     )\n279     assert response.status_code == 403\n280     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-083",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 281,
+      "code_snippet": "280     data = response.get_json()\n281     assert data[\"msg\"] == \"Admin privilege required\"\n282 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-084",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 301,
+      "code_snippet": "300     )\n301     assert response.status_code == 400\n302     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-085",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 303,
+      "code_snippet": "302     data = response.get_json()\n303     assert data[\"msg\"] == \"Name and price are required fields\"\n304 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-086",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 332,
+      "code_snippet": "331     )\n332     assert response.status_code == 200\n333     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-087",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 334,
+      "code_snippet": "333     data = response.get_json()\n334     assert data[\"msg\"] == \"Product updated\"\n335 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-088",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 339,
+      "code_snippet": "338         product = Product.query.get(fixture_sample_product)\n339         assert product is not None\n340         assert product.name == \"Updated Product\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-089",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 340,
+      "code_snippet": "339         assert product is not None\n340         assert product.name == \"Updated Product\"\n341         assert product.description == \"Updated description.\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-090",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 341,
+      "code_snippet": "340         assert product.name == \"Updated Product\"\n341         assert product.description == \"Updated description.\"\n342         assert product.price == 39.99\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-091",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 342,
+      "code_snippet": "341         assert product.description == \"Updated description.\"\n342         assert product.price == 39.99\n343         assert product.stock == 75\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-092",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 343,
+      "code_snippet": "342         assert product.price == 39.99\n343         assert product.stock == 75\n344 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-093",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 372,
+      "code_snippet": "371     )\n372     assert response.status_code == 403\n373     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-094",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 374,
+      "code_snippet": "373     data = response.get_json()\n374     assert data[\"msg\"] == \"Admin privilege required\"\n375 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-095",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 396,
+      "code_snippet": "395     )\n396     assert response.status_code == 200\n397     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-096",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 398,
+      "code_snippet": "397     data = response.get_json()\n398     assert data[\"msg\"] == \"Product deleted\"\n399 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-097",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 403,
+      "code_snippet": "402         product = Product.query.get(fixture_sample_product)\n403         assert product is None\n404 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-098",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 425,
+      "code_snippet": "424     )\n425     assert response.status_code == 403\n426     data = response.get_json()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-099",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask\\tests\\test_products.py",
+      "line_number": 427,
+      "code_snippet": "426     data = response.get_json()\n427     assert data[\"msg\"] == \"Admin privilege required\"\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-111",
+      "title": "Potential Encryption/secret key hardcoded",
+      "description": "Regex pattern detected a potential Encryption/secret key hardcoded at config.py:17. This may be a hardcoded secret that automated scanners missed.",
+      "severity": 1,
+      "file_path": "config.py",
+      "line_number": 17,
+      "code_snippet": "  17 | SECRET_KEY = \"test-secret-key\"",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "Any attacker who can access the source code (e.g., via public repository, insider, or leaked file). No authentication required.",
+        "path": "1. Attacker obtains the source code (e.g., clones public repo or reads leaked file). 2. Attacker reads line 17 of config.py to extract the SECRET_KEY = \"test-secret-key\". 3. Attacker uses this key to forge Flask session cookies, decrypt session data, or sign arbitrary data.",
+        "impact": "Attacker can forge session cookies, impersonate any user, or decrypt session contents. This can lead to full account takeover and privilege escalation.",
+        "is_real": true,
+        "explanation": "The SECRET_KEY is hardcoded with a weak test value. If this code is deployed, an attacker with access to the source can use the key to compromise session integrity. The key is not a placeholder for a real secret; it is a literal test string."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-112",
+      "title": "Potential Encryption/secret key hardcoded",
+      "description": "Regex pattern detected a potential Encryption/secret key hardcoded at config.py:18. This may be a hardcoded secret that automated scanners missed.\n[Also reported by another step: Regex pattern detected a potential JWT Secret Key at config.py:18. This may be a hardcoded secret that automated scanners missed.]",
+      "severity": 1,
+      "file_path": "config.py",
+      "line_number": 18,
+      "code_snippet": "  18 | JWT_SECRET_KEY = \"test-jwt-secret-key\"",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "Any attacker who can access the source code (e.g., via public repository, insider, or leaked file). No authentication required.",
+        "path": "1. Attacker obtains the source code. 2. Attacker reads line 18 of config.py to extract JWT_SECRET_KEY = \"test-jwt-secret-key\". 3. Attacker uses this key to forge or modify JWT tokens, bypassing authentication or authorization.",
+        "impact": "Attacker can forge valid JWT tokens for any user, including admins, leading to full account takeover and unauthorized access to protected resources.",
+        "is_real": true,
+        "explanation": "The JWT_SECRET_KEY is hardcoded with a weak test value. If the application uses JWT for authentication, an attacker with the source can forge tokens. This is a real vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-114",
+      "title": "SBOM generated: 18 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 18 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-115",
+      "title": "Unsafe Docker COPY in Dockerfile",
+      "description": "Dockerfile uses COPY . which copies everything including .git, .env, and sensitive files into the image.\nFound at line 8: COPY . .",
+      "severity": 3,
+      "file_path": "Dockerfile",
+      "line_number": 8,
+      "code_snippet": "  8 | COPY . .",
+      "step": 6,
+      "category": "insecure-configuration",
+      "ai_confidence": 0,
+      "fix_suggestion": "Use .dockerignore file to exclude sensitive files from Docker build context.",
+      "cwe": "CWE-16",
+      "cvss": 2.5
+    },
+    {
+      "id": "IRON-116",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan ./battle_test_candidates/ecommerce-flask -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-117",
+      "title": "Unpinned GitHub Action in Build, Test, Lint \u0026 Format.yml",
+      "description": "GitHub Actions should be pinned to commit SHA, not version tags. Tags can be moved by attackers who compromise the action repository (GhostAction 2025 attack vector).",
+      "severity": 2,
+      "file_path": ".github/workflows/Build, Test, Lint \u0026 Format.yml",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Pin actions to full commit SHA: uses: actions/checkout@a81bb... instead of @v4",
+      "cwe": "CWE-1104",
+      "cvss": 5,
+      "references": [
+        "https://github.com/stepsecurity/secure-workflows"
+      ]
+    },
+    {
+      "id": "IRON-118",
+      "title": "Unpinned GitHub Action in build_workflow.yml",
+      "description": "GitHub Actions should be pinned to commit SHA, not version tags. Tags can be moved by attackers who compromise the action repository (GhostAction 2025 attack vector).",
+      "severity": 2,
+      "file_path": ".github/workflows/build_workflow.yml",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Pin actions to full commit SHA: uses: actions/checkout@a81bb... instead of @v4",
+      "cwe": "CWE-1104",
+      "cvss": 5,
+      "references": [
+        "https://github.com/stepsecurity/secure-workflows"
+      ]
+    },
+    {
+      "id": "IRON-119",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/ecommerce-flask",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "partial"
+}

@@ -10,9 +10,9 @@ import (
 	"github.com/FYFran/ironwall/internal/report"
 )
 
-const aiBatchSize = 15      // findings per AI API call (reduced for reliability)
-const batchInterval = 1500 * time.Millisecond // pause between batches to avoid rate limits
-const maxConcurrency = 3   // max concurrent API calls
+const aiBatchSize = 20      // per API call (balanced: prompt fits, response under max_tokens)
+const batchInterval = 2000 * time.Millisecond // pause between batches (DeepSeek rate limit: 60 RPM)
+const maxConcurrency = 2   // max concurrent API calls (conservative for chat model)
 
 // Engine orchestrates multi-stage AI analysis for security findings.
 type Engine struct {
@@ -76,27 +76,19 @@ func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) ([]repo
 
 	status.Status = "full"
 
-	// Stage 1: Fast triage — filter obvious false positives
-	var triaged []report.Finding
-	if e.triageClient != nil && e.triageClient.Available() {
-		triaged, status = e.runTriage(ctx, findings)
-	} else {
-		triaged = findings
-		status.Status = "partial"
-	}
-
-	// Stage 2: Deep adversarial verification on remaining findings
+	// Single-stage: DeepVerify handles everything (FP detection + adversarial verification)
+	// Triage is skipped — same model, adds complexity without value
 	var verified []report.Finding
 	var deepStatus AnalysisStatus
-	if e.deepClient != nil && e.deepClient.Available() {
-		verified, deepStatus = e.runDeepVerify(ctx, triaged)
-	} else if e.triageClient != nil && e.triageClient.Available() {
-		verified, deepStatus = e.runDeepVerifyWithClient(ctx, triaged, e.triageClient)
+	client := e.deepClient
+	if client == nil || !client.Available() {
+		client = e.triageClient
+	}
+	if client != nil && client.Available() {
+		verified, deepStatus = e.runDeepVerifyWithClient(ctx, findings, client)
 	} else {
-		verified = triaged
-		if status.Status == "full" {
-			status.Status = "partial"
-		}
+		verified = findings
+		status.Status = "skipped"
 	}
 	// Merge deep verify status
 	status.DeepRuns = deepStatus.DeepRuns
@@ -143,7 +135,8 @@ func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) ([]re
 		prompt := fmt.Sprintf(PromptTriage, summary)
 
 		var result TriageResult
-		err := e.triageClient.ChatJSON(ctx, sysPrompt, prompt, &result)
+		triageMaxTokens := 256 + len(batch) * 120
+		err := e.triageClient.ChatJSONWithMaxTokens(ctx, sysPrompt, prompt, &result, triageMaxTokens)
 		if err != nil {
 			log.Printf("[AI Triage] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
 			status.TriageErrors++
@@ -236,7 +229,9 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 		prompt := fmt.Sprintf(PromptDeepVerifyBatch, summary)
 
 		var result DeepVerifyResult
-		err := client.ChatJSON(ctx, SystemPromptDeepVerify, prompt, &result)
+		// Dynamic max_tokens: 256 base + 200 per finding in batch (batch of 20 ≈ 4256 tokens)
+		batchMaxTokens := 256 + len(batch) * 200
+		err := client.ChatJSONWithMaxTokens(ctx, SystemPromptDeepVerify, prompt, &result, batchMaxTokens)
 		if err != nil {
 			log.Printf("[AI DeepVerify] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
 			status.DeepErrors++
@@ -292,8 +287,10 @@ func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding
 	if client == nil {
 		return
 	}
+	var successCount, failCount int
 	for i := range batch {
 		f := &batch[i]
+		key := findingKey(f)
 		findingDesc := fmt.Sprintf(
 			"Title: %s\nFile: %s:%d\nCategory: %s\nCode:\n%s\nDescription: %s",
 			f.Title, f.FilePath, f.LineNumber, f.Category, f.CodeSnippet, f.Description,
@@ -303,6 +300,15 @@ func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding
 		var result AttackTestResult
 		err := client.ChatJSON(ctx, SystemPromptBase, prompt, &result)
 		if err != nil {
+			log.Printf("[AI DeepVerify] one-by-one %s FAILED: %v", key, err)
+			failCount++
+			continue
+		}
+
+		// Detect zero-value responses (API OK but AI produced no meaningful output)
+		if result.Confidence == 0 && !result.IsReal && result.Actor == "" {
+			log.Printf("[AI DeepVerify] one-by-one %s returned zero-value — treating as unprocessed", key)
+			failCount++
 			continue
 		}
 
@@ -318,6 +324,11 @@ func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding
 			f.Severity = report.SevInfo
 			f.Description += fmt.Sprintf("\n[AI Deep Verify: Attack scenario not viable — %s]", result.Explanation)
 		}
+		successCount++
+	}
+	if successCount > 0 || failCount > 0 {
+		log.Printf("[AI DeepVerify] one-by-one complete: %d success, %d failed (out of %d)",
+			successCount, failCount, len(batch))
 	}
 }
 
@@ -375,9 +386,9 @@ func buildFindingSummary(findings []report.Finding) string {
 		sb.WriteString(fmt.Sprintf("  File: %s:%d\n", f.FilePath, f.LineNumber))
 		sb.WriteString(fmt.Sprintf("  Category: %s | Severity: %s\n", f.Category, f.Severity.String()))
 		if f.CodeSnippet != "" {
-			sb.WriteString(fmt.Sprintf("  Code: %s\n", report.TruncateString(f.CodeSnippet, 150)))
+			sb.WriteString(fmt.Sprintf("  Code: %s\n", report.TruncateString(f.CodeSnippet, 400)))
 		}
-		sb.WriteString(fmt.Sprintf("  Description: %s\n\n", report.TruncateString(f.Description, 200)))
+		sb.WriteString(fmt.Sprintf("  Description: %s\n\n", report.TruncateString(f.Description, 400)))
 	}
 	return sb.String()
 }

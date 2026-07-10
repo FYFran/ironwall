@@ -1,0 +1,737 @@
+{
+  "version": "0.7.0",
+  "target": "./battle_test_candidates/BudgetTracker",
+  "started_at": "2026-07-10T04:13:39+08:00",
+  "completed_at": "2026-07-10T04:14:48+08:00",
+  "duration": "1m8.86s",
+  "summary": {
+    "critical": 0,
+    "high": 2,
+    "medium": 9,
+    "low": 0,
+    "info": 23,
+    "total": 34
+  },
+  "findings": [
+    {
+      "id": "IRON-SECRET-001",
+      "title": "Secret detected: Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+      "description": "Betterleaks detected a Detected a Generic API Key, potentially exposing access to various services and sensitive operations. in battle_test_candidates/BudgetTracker/app/__init__.py:5. Rule: generic-api-key. Entropy: 3.58",
+      "severity": 2,
+      "file_path": "battle_test_candidates/BudgetTracker/app/__init__.py",
+      "line_number": 5,
+      "code_snippet": "  5 | 1010************************f6c9",
+      "step": 1,
+      "category": "secret-detected",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-312",
+      "cvss": 5,
+      "tool_output": "Rule: generic-api-key | Tags: [] | Entropy: 3.58 | Verified: false",
+      "references": [
+        "https://github.com/zricethezav/betterleaks"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-001",
+      "title": "python.django.security.audit.unvalidated-password.unvalidated-password: The password on 'user' is being set without validating the password. Call django.contrib.auth.password_validation.validate_password() with validation functions before setting the password. See https://docs.djangoproject.com/en/3.0/topics/auth/passwords/ for more information.",
+      "description": "Semgrep rule python.django.security.audit.unvalidated-password.unvalidated-password detected: The password on 'user' is being set without validating the password. Call django.contrib.auth.password_validation.validate_password() with validation functions before setting the password. See https://docs.djangoproject.com/en/3.0/topics/auth/passwords/ for more information.\n[AI Deep Verify: Attack scenario not viable — The rule name mentions Django, but the code is a Flask app. The password validation rule is Django-specific and does not apply to Flask. Additionally, the code snippet only shows 'requires login' comment, not actual password setting. No concrete attack path.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\routes.py",
+      "line_number": 28,
+      "code_snippet": "  28 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "The rule name mentions Django, but the code is a Flask app. The password validation rule is Django-specific and does not apply to Flask. Additionally, the code snippet only shows 'requires login' comment, not actual password setting. No concrete attack path."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "if django.contrib.auth.password_validation.validate_password(form.password.data, user=user):\n            user.set_password(form.password.data)",
+      "cwe": "CWE-521: Weak Password Requirements",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.audit.unvalidated-password.unvalidated-password | Severity: WARNING | OWASP: [A07:2021 - Identification and Authentication Failures A07:2025 - Authentication Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.audit.unvalidated-password.unvalidated-password"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-002",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\add_transaction.html",
+      "line_number": 6,
+      "code_snippet": "  6 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated or authenticated attacker who can craft a malicious HTML form and trick a logged-in user into submitting it.",
+        "path": "1. Attacker crafts a form that submits to the vulnerable endpoint (e.g., add_transaction). 2. Attacker hosts the form on an external site or embeds it in an email. 3. Victim, who is logged into the app, visits the attacker's page and submits the form. 4. The form submission includes the victim's session cookie, and the server processes the request without a CSRF token, performing the action (e.g., adding a transaction) on behalf of the victim.",
+        "impact": "Attacker can perform state-changing actions (e.g., add, edit, delete transactions) on behalf of an authenticated victim without their consent, potentially leading to data manipulation or financial loss.",
+        "is_real": true,
+        "explanation": "The form in add_transaction.html lacks a CSRF token. Since the app uses Flask (not Django), the CSRF vulnerability is real regardless of the rule name. The attacker can exploit this via cross-site request forgery."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-003",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\base.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack to modify the externally hosted JavaScript file.",
+        "path": "1. Attacker gains control over the CDN serving the script (e.g., via DNS hijacking, CDN compromise, or MITM). 2. Attacker modifies the script to include malicious code (e.g., XSS payload). 3. Victim loads the page, which includes the tampered script. 4. The malicious script executes in the victim's browser, stealing session tokens or performing actions on their behalf.",
+        "impact": "Full compromise of the victim's session and data within the application, including potential account takeover and data exfiltration.",
+        "is_real": true,
+        "explanation": "The script tag on line 7 of base.html is missing the integrity attribute. This is a real supply chain risk. The attacker can modify the CDN resource, leading to XSS."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-004",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\base.html",
+      "line_number": 8,
+      "code_snippet": "  8 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack to modify the externally hosted JavaScript file.",
+        "path": "1. Attacker gains control over the CDN serving the script (e.g., via DNS hijacking, CDN compromise, or MITM). 2. Attacker modifies the script to include malicious code (e.g., XSS payload). 3. Victim loads the page, which includes the tampered script. 4. The malicious script executes in the victim's browser, stealing session tokens or performing actions on their behalf.",
+        "impact": "Full compromise of the victim's session and data within the application, including potential account takeover and data exfiltration.",
+        "is_real": true,
+        "explanation": "The script tag on line 8 of base.html is missing the integrity attribute. This is a real supply chain risk. The attacker can modify the CDN resource, leading to XSS."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-005",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\base.html",
+      "line_number": 9,
+      "code_snippet": "  9 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack to modify the externally hosted JavaScript file.",
+        "path": "1. Attacker gains control over the CDN serving the script (e.g., via DNS hijacking, CDN compromise, or MITM). 2. Attacker modifies the script to include malicious code (e.g., XSS payload). 3. Victim loads the page, which includes the tampered script. 4. The malicious script executes in the victim's browser, stealing session tokens or performing actions on their behalf.",
+        "impact": "Full compromise of the victim's session and data within the application, including potential account takeover and data exfiltration.",
+        "is_real": true,
+        "explanation": "The script tag on line 9 of base.html is missing the integrity attribute. This is a real supply chain risk. The attacker can modify the CDN resource, leading to XSS."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-006",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\edit_transaction.html",
+      "line_number": 5,
+      "code_snippet": "  5 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated or authenticated attacker who can craft a malicious HTML form and trick a logged-in user into submitting it.",
+        "path": "1. Attacker crafts a form that submits to the vulnerable endpoint (e.g., edit_transaction). 2. Attacker hosts the form on an external site or embeds it in an email. 3. Victim, who is logged into the app, visits the attacker's page and submits the form. 4. The form submission includes the victim's session cookie, and the server processes the request without a CSRF token, performing the action (e.g., editing a transaction) on behalf of the victim.",
+        "impact": "Attacker can modify existing transactions on behalf of an authenticated victim without their consent, potentially leading to data manipulation or financial loss.",
+        "is_real": true,
+        "explanation": "The form in edit_transaction.html lacks a CSRF token. Since the app uses Flask (not Django), the CSRF vulnerability is real regardless of the rule name. The attacker can exploit this via cross-site request forgery."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-007",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.\n[AI Deep Verify: Attack scenario not viable — The login form typically does not require CSRF protection because the user is not yet authenticated. CSRF attacks target authenticated users to perform state-changing actions. Login forms are often excluded from CSRF protection as they are used to establish a session. Additionally, the rule name mentions Django, but the app is Flask. However, even in Flask, login forms are commonly exempted. No concrete attack path.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\login.html",
+      "line_number": 5,
+      "code_snippet": "  5 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "The login form typically does not require CSRF protection because the user is not yet authenticated. CSRF attacks target authenticated users to perform state-changing actions. Login forms are often excluded from CSRF protection as they are used to establish a session. Additionally, the rule name mentions Django, but the app is Flask. However, even in Flask, login forms are commonly exempted. No concrete attack path."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-008",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\register.html",
+      "line_number": 5,
+      "code_snippet": "  5 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated attacker who can craft a malicious registration form and trick a victim into submitting it.",
+        "path": "1. Attacker crafts a form that submits to the registration endpoint. 2. Attacker hosts the form on an external site or embeds it in an email. 3. Victim, who may or may not be logged in, visits the attacker's page and submits the form. 4. The form submission includes the victim's session cookie (if any), and the server processes the request without a CSRF token, creating an account on behalf of the victim or with attacker-controlled data.",
+        "impact": "Attacker can create accounts without the victim's consent, potentially leading to account takeover or abuse of the application's resources.",
+        "is_real": true,
+        "explanation": "The form in register.html lacks a CSRF token. Even though registration is a state-changing action, CSRF protection is still important to prevent unwanted account creation. The rule name mentions Django, but the app is Flask; however, the vulnerability pattern is real."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-009",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\transactions.html",
+      "line_number": 9,
+      "code_snippet": "  9 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated or authenticated attacker who can craft a malicious HTML form and trick a logged-in user into submitting it.",
+        "path": "1. Attacker crafts a form that submits to the vulnerable endpoint (e.g., delete transaction). 2. Attacker hosts the form on an external site or embeds it in an email. 3. Victim, who is logged into the app, visits the attacker's page and submits the form. 4. The form submission includes the victim's session cookie, and the server processes the request without a CSRF token, performing the action (e.g., deleting a transaction) on behalf of the victim.",
+        "impact": "Attacker can delete transactions on behalf of an authenticated victim without their consent, potentially leading to data loss or financial manipulation.",
+        "is_real": true,
+        "explanation": "The form on line 9 of transactions.html lacks a CSRF token. Since the app uses Flask (not Django), the CSRF vulnerability is real regardless of the rule name. The attacker can exploit this via cross-site request forgery."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-010",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\BudgetTracker\\app\\templates\\transactions.html",
+      "line_number": 56,
+      "code_snippet": "  56 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated or authenticated attacker who can craft a malicious HTML form and trick a logged-in user into submitting it.",
+        "path": "1. Attacker crafts a form that submits to the vulnerable endpoint (e.g., another action on transactions). 2. Attacker hosts the form on an external site or embeds it in an email. 3. Victim, who is logged into the app, visits the attacker's page and submits the form. 4. The form submission includes the victim's session cookie, and the server processes the request without a CSRF token, performing the action on behalf of the victim.",
+        "impact": "Attacker can perform state-changing actions on transactions (e.g., add, edit, delete) on behalf of an authenticated victim without their consent, potentially leading to data manipulation or financial loss.",
+        "is_real": true,
+        "explanation": "The form on line 56 of transactions.html lacks a CSRF token. Since the app uses Flask (not Django), the CSRF vulnerability is real regardless of the rule name. The attacker can exploit this via cross-site request forgery."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-001",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: '1010dba9d636960e7f19d92abab8f6c9'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: '1010dba9d636960e7f19d92abab8f6c9' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\app\\__init__.py",
+      "line_number": 5,
+      "code_snippet": "4 app = Flask(__name__)\n5 app.secret_key = '1010dba9d636960e7f19d92abab8f6c9'\n6 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///budget_tracker.db'\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-002",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'testpassword'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'testpassword' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 26,
+      "code_snippet": "25         'username': 'testuser',\n26         'password': 'testpassword',\n27         'confirm_password': 'testpassword'\n28     }, follow_redirects=True)\n29     assert b'Registration successful' in response.data\n30     assert User.query.filter_by(username='testuser').first() is not None\n31 \n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-003",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'testpassword'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'testpassword' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 27,
+      "code_snippet": "26         'password': 'testpassword',\n27         'confirm_password': 'testpassword'\n28     }, follow_redirects=True)\n29     assert b'Registration successful' in response.data\n30     assert User.query.filter_by(username='testuser').first() is not None\n31 \n32 def test_login(client):\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-004",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 29,
+      "code_snippet": "28     }, follow_redirects=True)\n29     assert b'Registration successful' in response.data\n30     assert User.query.filter_by(username='testuser').first() is not None\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-005",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 30,
+      "code_snippet": "29     assert b'Registration successful' in response.data\n30     assert User.query.filter_by(username='testuser').first() is not None\n31 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-006",
+      "title": "[B105] hardcoded_password_string: Possible hardcoded password: 'testpassword'",
+      "description": "Bandit rule B105 detected: Possible hardcoded password: 'testpassword' (confidence: MEDIUM)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 43,
+      "code_snippet": "42         'username': 'testuser',\n43         'password': 'testpassword'\n44     }, follow_redirects=True)\n45     assert b'Login successful!' in response.data\n46 \n47 def test_add_transaction(client):\n",
+      "step": 2,
+      "category": "bandit-b105",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B105 | Severity: LOW | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b105.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-007",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 45,
+      "code_snippet": "44     }, follow_redirects=True)\n45     assert b'Login successful!' in response.data\n46 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-008",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 64,
+      "code_snippet": "63     }, follow_redirects=True)\n64     assert b'Transaction added successfully!' in response.data\n65     transaction = Transaction.query.filter_by(description='Test Income').first()\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-009",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 66,
+      "code_snippet": "65     transaction = Transaction.query.filter_by(description='Test Income').first()\n66     assert transaction is not None\n67 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-010",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 85,
+      "code_snippet": "84     response = client.post(f'/delete_transaction/{transaction.id}', follow_redirects=True)\n85     assert b'Transaction deleted successfully!' in response.data\n86     assert Transaction.query.filter_by(id=transaction.id).first() is None\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-011",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 86,
+      "code_snippet": "85     assert b'Transaction deleted successfully!' in response.data\n86     assert Transaction.query.filter_by(id=transaction.id).first() is None\n87 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-012",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 109,
+      "code_snippet": "108     }, follow_redirects=True)\n109     assert b'Transaction updated successfully!' in response.data\n110     updated_transaction = Transaction.query.get(transaction.id)\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-013",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 111,
+      "code_snippet": "110     updated_transaction = Transaction.query.get(transaction.id)\n111     assert updated_transaction.description == 'Updated Expense'\n112     assert updated_transaction.amount == 75.0\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-014",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 112,
+      "code_snippet": "111     assert updated_transaction.description == 'Updated Expense'\n112     assert updated_transaction.amount == 75.0\n113 \n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-015",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 132,
+      "code_snippet": "131     response = client.get('/report')\n132     assert response.status_code == 200\n133     assert b'Financial Report' in response.data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-016",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 133,
+      "code_snippet": "132     assert response.status_code == 200\n133     assert b'Financial Report' in response.data\n134     assert b'Income' in response.data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-017",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 134,
+      "code_snippet": "133     assert b'Financial Report' in response.data\n134     assert b'Income' in response.data\n135     assert b'Expense' in response.data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-018",
+      "title": "[B101] assert_used: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
+      "description": "Bandit rule B101 detected: Use of assert detected. The enclosed code will be removed when compiling to optimised byte code. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker\\tests\\test_app.py",
+      "line_number": 135,
+      "code_snippet": "134     assert b'Income' in response.data\n135     assert b'Expense' in response.data\n",
+      "step": 2,
+      "category": "bandit-b101",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-79",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B101 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b101.html"
+      ]
+    },
+    {
+      "id": "IRON-030",
+      "title": "Unauthenticated ANY endpoint: /delete_transaction/\u003cint:transaction_id\u003e",
+      "description": "The ANY /delete_transaction/\u003cint:transaction_id\u003e route has no visible authentication middleware. Sensitive operations should require authentication.",
+      "severity": 1,
+      "file_path": "app\\routes.py",
+      "line_number": 146,
+      "code_snippet": "  146 | @app.route('/delete_transaction/\u003cint:transaction_id\u003e', methods=['POST'])",
+      "step": 3,
+      "category": "missing-auth",
+      "attack_scenario": {
+        "actor": "Any unauthenticated user with network access to the application",
+        "path": "1. Attacker sends a POST request to /delete_transaction/1 (or any valid transaction ID). 2. The route handler at line 146 executes without any authentication check. 3. The transaction is deleted from the database.",
+        "impact": "An attacker can delete any transaction record, causing data loss and potentially financial or operational harm.",
+        "is_real": true,
+        "explanation": "The route lacks any authentication decorator or manual check, allowing any unauthenticated user to delete transactions. This is a real authorization bypass vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-306",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-031",
+      "title": "Potential Hex-encoded secret (32+ hex chars as string)",
+      "description": "Regex pattern detected a potential Hex-encoded secret (32+ hex chars as string) at app\\__init__.py:5. This may be a hardcoded secret that automated scanners missed.\n[Also reported by another step: Regex pattern detected a potential Encryption/secret key hardcoded at app\\__init__.py:5. This may be a hardcoded secret that automated scanners missed.]",
+      "severity": 1,
+      "file_path": "app\\__init__.py",
+      "line_number": 5,
+      "code_snippet": "  5 | app.secret_key = '1010dba9d636960e7f19d92abab8f6c9'",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "Any attacker with read access to the source code (e.g., via public repository, insider, or decompilation). No special privileges required.",
+        "path": "1. Attacker obtains the source code (e.g., from a public GitHub repo, leaked file, or by decompiling the application). 2. Attacker reads line 5 of app/__init__.py: `app.secret_key = '1010dba9d636960e7f19d92abab8f6c9'`. 3. Attacker uses this secret key to forge Flask session cookies, decrypt existing session data, or sign arbitrary session payloads.",
+        "impact": "Attacker can forge arbitrary Flask session cookies, leading to session hijacking, privilege escalation (e.g., impersonating any user, including admin), and potentially remote code execution if session data is deserialized unsafely. The secret key is a 32-character hex string (128-bit), which is cryptographically strong but hardcoded, making it equivalent to a static password.",
+        "is_real": true,
+        "explanation": "The finding is real because the secret key is hardcoded in plaintext. Even though it appears to be a random hex string, its presence in source code means anyone with access to the code can use it to compromise session integrity. This is a classic hardcoded secret vulnerability."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 5
+    },
+    {
+      "id": "IRON-033",
+      "title": "SBOM generated: 21 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 21 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-034",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan ./battle_test_candidates/BudgetTracker -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-035",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/BudgetTracker",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "partial"
+}

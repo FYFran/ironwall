@@ -53,7 +53,7 @@ func Defaults() *Config {
 		Verbose:        false,
 		AIEnabled:      false,
 		AIModel:        "deepseek-chat",
-		AIDeepModel:    "deepseek-reasoner",
+		AIDeepModel:    "deepseek-chat",
 		AIEndpoint:     "https://api.deepseek.com/v1",
 		TimeoutSeconds: 300,
 		GitCloneDepth:  0,

@@ -1,0 +1,751 @@
+{
+  "version": "0.7.0",
+  "target": "./battle_test_candidates/secure-file-management",
+  "started_at": "2026-07-10T04:07:28+08:00",
+  "completed_at": "2026-07-10T04:08:55+08:00",
+  "duration": "1m27.013s",
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 12,
+    "low": 2,
+    "info": 16,
+    "total": 30
+  },
+  "findings": [
+    {
+      "id": "IRON-SEMGREP-001",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\.github\\workflows\\deploy.yml",
+      "line_number": 14,
+      "code_snippet": "  14 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub account of the action owner or gain write access to the action repository.",
+        "path": "1. Attacker repoints the mutable tag (e.g., `v1`) to a malicious commit in the action repository. 2. The next time the workflow runs (line 14 of deploy.yml), it pulls the malicious action. 3. The malicious action executes arbitrary code in the workflow runner context.",
+        "impact": "The attacker can exfiltrate secrets (e.g., AWS keys, GitHub tokens), modify deployment artifacts, or pivot to internal infrastructure accessible from the runner.",
+        "is_real": true,
+        "explanation": "The workflow uses a mutable tag (`actions/checkout@v3` or similar) instead of a pinned commit SHA. This is a known supply-chain vector (e.g., trivy-action compromise). The finding is real."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-002",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — The finding is a duplicate of IRON-SEMGREP-003 through IRON-SEMGREP-005 (same file, same line). Additionally, the code snippet shows only 'requires login' which is not a real code line; the actual code likely uses Flask's `render_template()` or `flash()` which auto-escapes. Without concrete evidence of unsanitized output, this is a false positive.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same reasoning applies.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same reasoning applies.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same reasoning applies.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 64,
+      "code_snippet": "  64 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "The finding is a duplicate of IRON-SEMGREP-003 through IRON-SEMGREP-005 (same file, same line). Additionally, the code snippet shows only 'requires login' which is not a real code line; the actual code likely uses Flask's `render_template()` or `flash()` which auto-escapes. Without concrete evidence of unsanitized output, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-006",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002 but on line 65. The code snippet shows only 'requires login', not the actual response. Likely false positive.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same reasoning.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 65,
+      "code_snippet": "  65 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-002 but on line 65. The code snippet shows only 'requires login', not the actual response. Likely false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-010",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002 but on line 66. Same reasoning.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same reasoning.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 66,
+      "code_snippet": "  66 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-002 but on line 66. Same reasoning."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-014",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002 but on line 97. Same reasoning.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same reasoning.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 97,
+      "code_snippet": "  97 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-002 but on line 97. Same reasoning."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-018",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002 but on line 98. Same reasoning.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-018. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-018. Same reasoning.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — The finding states user input from request.form.get flows to a string response without visible HTML escaping. However, Flask's Jinja2 auto-escapes all template variables, and if the response is a string returned directly (not via render_template), it is not rendered as HTML. Without evidence that the string is used in an HTML context, this is a false positive.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 98,
+      "code_snippet": "  98 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-002 but on line 98. Same reasoning."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-022",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — The finding indicates an open redirect via redirect(request.url). However, redirect(request.url) is a self-redirect pattern where the attacker cannot control the target URL. This is a known false positive pattern.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 149,
+      "code_snippet": "  149 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding indicates an open redirect via redirect(request.url). However, redirect(request.url) is a self-redirect pattern where the attacker cannot control the target URL. This is a known false positive pattern."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-023",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 154,
+      "code_snippet": "  154 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-024",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 187,
+      "code_snippet": "  187 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-025",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-021: user input from request.form.get flows to a string response without visible HTML escaping. Without evidence of HTML context, this is a false positive.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025; same reasoning applies.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025; same reasoning applies.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025; same reasoning applies.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 309,
+      "code_snippet": "  309 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-021: user input from request.form.get flows to a string response without visible HTML escaping. Without evidence of HTML context, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-029",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 317,
+      "code_snippet": "  317 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-030",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 322,
+      "code_snippet": "  322 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-031",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 329,
+      "code_snippet": "  329 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022: redirect(request.url) is a self-redirect, not an open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-032",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script (e.g., cdn.example.com). 2. Attacker modifies the script to include malicious JavaScript (e.g., XSS payload). 3. User visits the application, which loads the compromised script from the CDN. 4. The malicious script executes in the user's browser, potentially stealing session cookies or performing actions on behalf of the user.",
+        "impact": "The attacker can execute arbitrary JavaScript in the context of the application's origin, leading to session hijacking, data theft, or other client-side attacks.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real supply chain risk. The attacker can modify the externally hosted resource, leading to XSS."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-033",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 53,
+      "code_snippet": "  53 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script (e.g., cdn.example.com). 2. Attacker modifies the script to include malicious JavaScript. 3. User visits the application, which loads the compromised script from the CDN. 4. The malicious script executes in the user's browser.",
+        "impact": "The attacker can execute arbitrary JavaScript in the context of the application's origin, leading to session hijacking, data theft, or other client-side attacks.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real supply chain risk."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-034",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 54,
+      "code_snippet": "  54 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script. 2. Attacker modifies the script to include malicious JavaScript. 3. User visits the application, which loads the compromised script from the CDN. 4. The malicious script executes in the user's browser.",
+        "impact": "The attacker can execute arbitrary JavaScript in the context of the application's origin, leading to session hijacking, data theft, or other client-side attacks.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real supply chain risk."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-035",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 55,
+      "code_snippet": "  55 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script. 2. Attacker modifies the script to include malicious JavaScript. 3. User visits the application, which loads the compromised script from the CDN. 4. The malicious script executes in the user's browser.",
+        "impact": "The attacker can execute arbitrary JavaScript in the context of the application's origin, leading to session hijacking, data theft, or other client-side attacks.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real supply chain risk."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-036",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\index.html",
+      "line_number": 32,
+      "code_snippet": "  32 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An unauthenticated attacker who can craft a malicious HTML page and trick a logged-in user to visit it.",
+        "path": "1. Attacker creates a malicious HTML page containing a form that submits to the vulnerable endpoint (e.g., /some-action) with attacker-controlled data. 2. Attacker tricks a logged-in user (victim) into visiting the malicious page (e.g., via phishing). 3. The victim's browser submits the form, including the victim's session cookie. 4. The server processes the request without CSRF token validation, performing the action on behalf of the victim.",
+        "impact": "The attacker can perform state-changing actions (e.g., changing password, deleting files) on behalf of the victim without their consent.",
+        "is_real": true,
+        "explanation": "Missing CSRF token in a Flask form is a real CSRF vulnerability. The rule name mentions Django, but the vulnerability pattern is valid for any framework."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-037",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\index.html",
+      "line_number": 81,
+      "code_snippet": "  81 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An unauthenticated attacker who can craft a malicious HTML page and trick a logged-in user to visit it.",
+        "path": "1. Attacker creates a malicious HTML page containing a form that submits to the vulnerable endpoint with attacker-controlled data. 2. Attacker tricks a logged-in user into visiting the malicious page. 3. The victim's browser submits the form, including the victim's session cookie. 4. The server processes the request without CSRF token validation, performing the action on behalf of the victim.",
+        "impact": "The attacker can perform state-changing actions on behalf of the victim without their consent.",
+        "is_real": true,
+        "explanation": "Missing CSRF token in a Flask form is a real CSRF vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-038",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\login.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An unauthenticated attacker who can craft a malicious HTML page and trick a logged-in user to visit it.",
+        "path": "1. Attacker creates a malicious HTML page containing a form that submits to the login endpoint with attacker-controlled credentials. 2. Attacker tricks a logged-in user into visiting the malicious page. 3. The victim's browser submits the form, including the victim's session cookie. 4. The server processes the request without CSRF token validation, potentially logging the victim out or performing other actions.",
+        "impact": "The attacker can perform state-changing actions (e.g., logout, password change) on behalf of the victim without their consent.",
+        "is_real": true,
+        "explanation": "Missing CSRF token in a Flask form is a real CSRF vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-039",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\register.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An unauthenticated attacker who can craft a malicious HTML page and trick a logged-in user to visit it.",
+        "path": "1. Attacker creates a malicious HTML page containing a form that submits to the register endpoint with attacker-controlled data. 2. Attacker tricks a logged-in user into visiting the malicious page. 3. The victim's browser submits the form, including the victim's session cookie. 4. The server processes the request without CSRF token validation, potentially registering a new account or modifying existing data.",
+        "impact": "The attacker can perform state-changing actions on behalf of the victim without their consent.",
+        "is_real": true,
+        "explanation": "Missing CSRF token in a Flask form is a real CSRF vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-040",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\share.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An unauthenticated attacker who can craft a malicious HTML page and trick a logged-in user to visit it.",
+        "path": "1. Attacker creates a malicious HTML page containing a form that submits to the share endpoint with attacker-controlled data. 2. Attacker tricks a logged-in user into visiting the malicious page. 3. The victim's browser submits the form, including the victim's session cookie. 4. The server processes the request without CSRF token validation, potentially sharing files or performing other actions.",
+        "impact": "The attacker can perform state-changing actions on behalf of the victim without their consent.",
+        "is_real": true,
+        "explanation": "Missing CSRF token in a Flask form is a real CSRF vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-041",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\upload.html",
+      "line_number": 8,
+      "code_snippet": "  8 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Any unauthenticated user who can access the upload page and trick an authenticated admin into visiting a crafted page.",
+        "path": "1. Attacker crafts a malicious HTML page that auto-submits a form to the upload endpoint (e.g., POST /upload) without a CSRF token. 2. Attacker lures an authenticated admin to visit that page (e.g., via phishing email). 3. The admin's browser sends the forged request with the admin's session cookie. 4. The server processes the upload (e.g., file upload) because no CSRF token is validated. 5. Attacker gains unauthorized file upload.",
+        "impact": "Attacker can upload arbitrary files (e.g., malicious scripts, malware) to the server, potentially leading to remote code execution, data theft, or defacement.",
+        "is_real": true,
+        "explanation": "The form in upload.html lacks a CSRF token, making it vulnerable to cross-site request forgery. An attacker can force an authenticated user to perform unintended actions, such as uploading files, without their consent."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-042",
+      "title": "python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host: Running flask app with host 0.0.0.0 could expose the server publicly.",
+      "description": "Semgrep rule python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host detected: Running flask app with host 0.0.0.0 could expose the server publicly.\n[AI Deep Verify: Attack scenario not viable — Running Flask on host 0.0.0.0 exposes the server to all network interfaces, but this is not inherently a security vulnerability. The rule is a false positive because it does not consider the production context (debug=False) and the actual risk is minimal.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\run.py",
+      "line_number": 36,
+      "code_snippet": "  36 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "No specific attacker role; this is a configuration issue.",
+        "path": "No concrete attack path exists because binding to 0.0.0.0 alone does not create a vulnerability. The server must also be running in debug mode or have other misconfigurations to be exploitable.",
+        "impact": "No direct impact; the server is accessible on all network interfaces, but without debug mode or other flaws, this is a low-severity configuration concern.",
+        "is_real": false,
+        "explanation": "Running Flask on host 0.0.0.0 exposes the server to all network interfaces, but this is not inherently a security vulnerability. The rule is a false positive because it does not consider the production context (debug=False) and the actual risk is minimal."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-668: Exposure of Resource to Wrong Sphere",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host | Severity: WARNING | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-001",
+      "title": "[B104] hardcoded_bind_all_interfaces: Possible binding to all interfaces.",
+      "description": "Bandit rule B104 detected: Possible binding to all interfaces. (confidence: MEDIUM)",
+      "severity": 3,
+      "file_path": "./battle_test_candidates/secure-file-management\\run.py",
+      "line_number": 39,
+      "code_snippet": "38         ssl_context=ssl_context,\n39         host='0.0.0.0',\n40         port=443\n",
+      "step": 2,
+      "category": "bandit-b104",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 5,
+      "tool_output": "Bandit rule: B104 | Severity: MEDIUM | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b104.html"
+      ]
+    },
+    {
+      "id": "IRON-044",
+      "title": "SBOM generated: 17 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 17 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-045",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/secure-file-management",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan ./battle_test_candidates/secure-file-management -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-046",
+      "title": "1/10 recent commits are not GPG signed",
+      "description": "Unsigned commits can be forged by attackers who gain access to git configuration. GPG-sign all commits to establish cryptographic proof of authorship.",
+      "severity": 3,
+      "file_path": ".git",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Configure git GPG signing: git config --global commit.gpgsign true",
+      "cwe": "CWE-1104",
+      "cvss": 2,
+      "references": [
+        "https://docs.github.com/en/authentication/managing-commit-signature-verification"
+      ]
+    },
+    {
+      "id": "IRON-047",
+      "title": "Unpinned GitHub Action in deploy.yml",
+      "description": "GitHub Actions should be pinned to commit SHA, not version tags. Tags can be moved by attackers who compromise the action repository (GhostAction 2025 attack vector).",
+      "severity": 2,
+      "file_path": ".github/workflows/deploy.yml",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Pin actions to full commit SHA: uses: actions/checkout@a81bb... instead of @v4",
+      "cwe": "CWE-1104",
+      "cvss": 5,
+      "references": [
+        "https://github.com/stepsecurity/secure-workflows"
+      ]
+    },
+    {
+      "id": "IRON-048",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/secure-file-management",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "partial"
+}

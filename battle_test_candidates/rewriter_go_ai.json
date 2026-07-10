@@ -1,0 +1,260 @@
+{
+  "version": "0.7.0",
+  "target": "f:/ClaudeFiles/_research/rewriter-go",
+  "started_at": "2026-07-10T04:16:56+08:00",
+  "completed_at": "2026-07-10T04:17:12+08:00",
+  "duration": "15.421s",
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 3,
+    "info": 10,
+    "total": 13
+  },
+  "findings": [
+    {
+      "id": "IRON-001",
+      "title": "Unauthenticated GET endpoint: X-Admin-Key",
+      "description": "The GET X-Admin-Key route has no visible authentication middleware. Sensitive operations should require authentication.\n[AI Deep Verify: Attack scenario not viable — The code reads the X-Admin-Key header but there is no visible authentication middleware or validation logic. This means any request with any value in that header will be processed as if authenticated. This is a real missing authentication vulnerability.]",
+      "severity": 4,
+      "file_path": "internal\\handler\\admin.go",
+      "line_number": 30,
+      "code_snippet": "  30 | key := r.Header.Get(\"X-Admin-Key\")",
+      "step": 3,
+      "category": "missing-auth",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker",
+        "path": "1. Attacker sends GET request to the admin endpoint with any X-Admin-Key header value. 2. The handler reads the header but does not validate it against a stored secret. 3. The handler proceeds to execute sensitive operations without authentication.",
+        "impact": "The attacker can perform any admin action without valid credentials, leading to full system compromise.",
+        "is_real": false,
+        "explanation": "The code reads the X-Admin-Key header but there is no visible authentication middleware or validation logic. This means any request with any value in that header will be processed as if authenticated. This is a real missing authentication vulnerability."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-306",
+      "cvss": 9.8
+    },
+    {
+      "id": "IRON-002",
+      "title": "Unauthenticated ANY endpoint: POST /api/admin/gen-codes",
+      "description": "The ANY POST /api/admin/gen-codes route has no visible authentication middleware. Sensitive operations should require authentication.\n[AI Deep Verify: Attack scenario not viable — The route is registered on adminMux but there is no authentication middleware applied. The handler will execute for any request, allowing an unauthenticated attacker to generate codes. This is a real missing authentication vulnerability.]",
+      "severity": 4,
+      "file_path": "main.go",
+      "line_number": 239,
+      "code_snippet": "  239 | adminMux.HandleFunc(\"POST /api/admin/gen-codes\", redeemH.AdminGenCodes)",
+      "step": 3,
+      "category": "missing-auth",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker",
+        "path": "1. Attacker sends POST request to /api/admin/gen-codes. 2. The route is registered on adminMux without any authentication middleware. 3. The handler AdminGenCodes executes, generating redemption codes without verifying the caller's identity.",
+        "impact": "Attacker can generate unlimited valid redemption codes, leading to unauthorized access or resource abuse.",
+        "is_real": false,
+        "explanation": "The route is registered on adminMux but there is no authentication middleware applied. The handler will execute for any request, allowing an unauthenticated attacker to generate codes. This is a real missing authentication vulnerability."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-306",
+      "cvss": 9.8
+    },
+    {
+      "id": "IRON-003",
+      "title": "Potential JWT Secret Key",
+      "description": "Regex pattern detected a potential JWT Secret Key at internal\\handler\\auth_test.go:22. This may be a hardcoded secret that automated scanners missed.\n[AI Deep Verify: Attack scenario not viable — The secret is in a test file (auth_test.go) and is explicitly a test key. Test files are excluded from production builds. No real attack path exists.]",
+      "severity": 4,
+      "file_path": "internal\\handler\\auth_test.go",
+      "line_number": 22,
+      "code_snippet": "  22 | h := \u0026AuthHandler{DB: database, JWTSecret: \"test-secret-key-for-unit-tests-123456789012\"}",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "none",
+        "path": "none",
+        "impact": "none",
+        "is_real": false,
+        "explanation": "The secret is in a test file (auth_test.go) and is explicitly a test key. Test files are excluded from production builds. No real attack path exists."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-004",
+      "title": "Potential JWT Secret Key",
+      "description": "Regex pattern detected a potential JWT Secret Key at internal\\handler\\auth_test.go:62. This may be a hardcoded secret that automated scanners missed.\n[AI Deep Verify: Attack scenario not viable — Same as above – test file, test key. No real vulnerability.]",
+      "severity": 4,
+      "file_path": "internal\\handler\\auth_test.go",
+      "line_number": 62,
+      "code_snippet": "  62 | h := \u0026AuthHandler{DB: database, JWTSecret: \"test-secret-key-for-unit-tests-123456789012\"}",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "none",
+        "path": "none",
+        "impact": "none",
+        "is_real": false,
+        "explanation": "Same as above – test file, test key. No real vulnerability."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-005",
+      "title": "Potential Hex-encoded secret (32+ hex chars as string)",
+      "description": "Regex pattern detected a potential Hex-encoded secret (32+ hex chars as string) at scripts\\publish_telegraph.py:6. This may be a hardcoded secret that automated scanners missed.\n[AI Deep Verify: Attack scenario not viable — The hex string is 47 characters long, which is not a standard key length (e.g., 32, 64). It is likely a placeholder or example token. The file is in a scripts directory, not production code. No evidence it is used in a security context.]",
+      "severity": 4,
+      "file_path": "scripts\\publish_telegraph.py",
+      "line_number": 6,
+      "code_snippet": "  6 | TOKEN = \"6d5f42bd5640e51b3c59cf69b87b50d2483c5ee14d5076ac54147d9fa51c\"",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "none",
+        "path": "none",
+        "impact": "none",
+        "is_real": false,
+        "explanation": "The hex string is 47 characters long, which is not a standard key length (e.g., 32, 64). It is likely a placeholder or example token. The file is in a scripts directory, not production code. No evidence it is used in a security context."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 5
+    },
+    {
+      "id": "IRON-006",
+      "title": "Potential AWS account ID (12 digits)",
+      "description": "Regex pattern detected a potential AWS account ID (12 digits) at internal\\handler\\auth_test.go:22. This may be a hardcoded secret that automated scanners missed.",
+      "severity": 4,
+      "file_path": "internal\\handler\\auth_test.go",
+      "line_number": 22,
+      "code_snippet": "  22 | h := \u0026AuthHandler{DB: database, JWTSecret: \"test-secret-key-for-unit-tests-123456789012\"}",
+      "step": 4,
+      "category": "information-disclosure",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 5
+    },
+    {
+      "id": "IRON-007",
+      "title": "Potential AWS account ID (12 digits)",
+      "description": "Regex pattern detected a potential AWS account ID (12 digits) at internal\\handler\\auth_test.go:62. This may be a hardcoded secret that automated scanners missed.",
+      "severity": 4,
+      "file_path": "internal\\handler\\auth_test.go",
+      "line_number": 62,
+      "code_snippet": "  62 | h := \u0026AuthHandler{DB: database, JWTSecret: \"test-secret-key-for-unit-tests-123456789012\"}",
+      "step": 4,
+      "category": "information-disclosure",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 5
+    },
+    {
+      "id": "IRON-008",
+      "title": "SBOM generated: 89 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 89 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-009",
+      "title": "AUTOINCREMENT without protection in redeem_codes.sql (x1 occurrences)",
+      "description": "Autoincrement IDs can leak information (order of creation, total count). Found at lines: 2",
+      "severity": 3,
+      "file_path": "sql\\redeem_codes.sql",
+      "line_number": 2,
+      "code_snippet": "  1 locations with AUTOINCREMENT in redeem_codes.sql",
+      "step": 7,
+      "category": "information-disclosure",
+      "ai_confidence": 0,
+      "fix_suggestion": "Consider using UUID or ULID for primary keys in user-facing tables.",
+      "cwe": "CWE-200",
+      "cvss": 2.5
+    },
+    {
+      "id": "IRON-010",
+      "title": "AUTOINCREMENT without protection in schema.sql (x11 occurrences)",
+      "description": "Autoincrement IDs can leak information (order of creation, total count). Found at lines: 6, 21, 38, 50, 57, 67, 78, 88, 97, 104, 126",
+      "severity": 3,
+      "file_path": "sql\\schema.sql",
+      "line_number": 6,
+      "code_snippet": "  11 locations with AUTOINCREMENT in schema.sql",
+      "step": 7,
+      "category": "information-disclosure",
+      "ai_confidence": 0,
+      "fix_suggestion": "Consider using UUID or ULID for primary keys in user-facing tables.",
+      "cwe": "CWE-200",
+      "cvss": 2.5
+    },
+    {
+      "id": "IRON-011",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "f:/ClaudeFiles/_research/rewriter-go",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan f:/ClaudeFiles/_research/rewriter-go -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-012",
+      "title": "10/10 recent commits are not GPG signed",
+      "description": "Unsigned commits can be forged by attackers who gain access to git configuration. GPG-sign all commits to establish cryptographic proof of authorship.",
+      "severity": 3,
+      "file_path": ".git",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Configure git GPG signing: git config --global commit.gpgsign true",
+      "cwe": "CWE-1104",
+      "cvss": 2,
+      "references": [
+        "https://docs.github.com/en/authentication/managing-commit-signature-verification"
+      ]
+    },
+    {
+      "id": "IRON-013",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "f:/ClaudeFiles/_research/rewriter-go",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "partial"
+}

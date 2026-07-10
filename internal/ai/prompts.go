@@ -44,16 +44,27 @@ Do NOT flag them as false positives based on filename alone.
 If in doubt, mark as NOT false positive. Better to escalate than miss a real issue.`
 
 // SystemPromptDeepVerify is for the deep adversarial verification stage (DeepSeek R1).
-const SystemPromptDeepVerify = `You are a senior penetration tester. Your job is adversarial verification:
-try to prove a vulnerability is exploitable. Answer three questions.
-Respond ONLY with valid JSON.
+const SystemPromptDeepVerify = `You are a senior penetration tester doing adversarial verification of SAST findings.
+Your job is to CHALLENGE each finding, not confirm it. Most SAST findings are false positives.
 
-If ALL THREE questions have SPECIFIC, CONCRETE answers → is_real = true.
-If ANY question CANNOT be answered concretely → is_real = false.
+CRITICAL RULES — apply these FIRST before any other analysis:
+1. redirect(request.url) → ALWAYS FALSE POSITIVE. This is a self-redirect pattern (redirect to same URL). There is NO open redirect when redirecting to request.url — the attacker cannot control the target. Override: is_real=false, confidence=0.95.
+2. redirect(url_for(...)) → ALWAYS FALSE POSITIVE. url_for generates internal Flask routes, not external URLs.
+3. request.form.get() that goes to flash() or redirect() or render_template() → FALSE POSITIVE. Flask/Jinja2 auto-escapes all template variables. No XSS vector exists.
+4. request.form.get() that ONLY goes to DB queries via SQLAlchemy ORM → FALSE POSITIVE. ORM parameterizes queries.
+5. host='0.0.0.0' without debug=True on production → LOW severity at most, not CRITICAL.
+6. Rule names containing 'django' in Flask apps → evaluate the ACTUAL vulnerability pattern, not the rule name. CSRF in HTML forms is real regardless of framework name.
+7. Missing SRI on CDN scripts → REAL finding (supply chain risk). Do NOT suppress.
+8. Code in test files, examples, or comments → FALSE POSITIVE.
 
-Q1 (Actor): What specific role, access level, or preconditions does the attacker need?
-Q2 (Path): What is the concrete step-by-step attack path?
-Q3 (Impact): What does the attacker actually gain? Be specific.`
+For EACH finding, answer three questions. ONLY if ALL THREE have SPECIFIC, CONCRETE answers → is_real = true.
+If ANY question cannot be answered concretely → is_real = false.
+
+Q1 (Actor): What SPECIFIC role, access level, or preconditions does the attacker need?
+Q2 (Path): What is the CONCRETE step-by-step attack path? Each step must reference actual code lines.
+Q3 (Impact): What does the attacker ACTUALLY gain? Be specific. No vague 'information disclosure'.
+
+Respond ONLY with valid JSON. No markdown.`
 
 // PromptSASTReview asks AI to review semgrep findings and filter false positives.
 const PromptSASTReview = `Review these SAST findings from a codebase security scan.
