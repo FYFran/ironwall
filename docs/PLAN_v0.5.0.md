@@ -1,5 +1,7 @@
 # Ironwall v0.5.0 — 完整执行计划
 
+> ⚠️ **状态: 未执行 (PLAN ONLY).** 本计划未实施。检出率仍为 7-37% (取决于 benchmark)，未达到 70% 目标。报告价值、离线 AI、本地 LLM 均未实现。详见 [NEXT_SESSION.md](NEXT_SESSION.md) 了解当前真实状态。
+>
 > 双脑共识通过 | Brain A(皮特) + Brain B(顶级安全ML专家) | 2026-07-09
 
 ---

@@ -1,533 +1,435 @@
-# Brain B Knowledge Base — 2025-2026 SAST & Security Landscape
+# Brain B Knowledge Base — 铁壁 Ironwall
 
-> Last updated: 2026-07-09
-> Sources: Brain A (Claude) deep research across 4 domains
+> v4.0 | 2026-07-10 | 重构+最新数据 | Brain A(皮特) + Brain B(Codex) 联合维护
 
----
-
-## 1. SAST Tools Landscape (2025-2026)
-
-### 1.1 Semgrep vs CodeQL: The Real Numbers
-
-| Metric | CodeQL | Semgrep (CE) | Semgrep (Pro) |
-|--------|--------|-------------|---------------|
-| Approach | Relational DB + QL queries | AST pattern matching | Cross-file interprocedural |
-| OWASP Benchmark Accuracy | 65.5% | 58.9% | No independent study |
-| OWASP Benchmark F1 | 74.4% | 69.4% | Unknown |
-| Ukrainian Study F1 (2025) | 87.8% | 70.3% | Unknown |
-| Precision | 60.3% | 56.3% | Unknown |
-| Recall | 97.0% | 90.4% | Unknown |
-| FPR | 68.2% | 74.8% | Unknown |
-| Interprocedural | Full (whole-program) | Intra only (CE) | Cross-file (8 languages) |
-
-**Critical gap:** No independent study has tested Semgrep Pro Engine vs CodeQL. All published comparisons use CE.
-
-**2025-2026 Key Developments:**
-- **Opengrep fork** (Jan 2025): 10+ vendors forked Semgrep CE after license changes
-- **CodeQL incremental analysis** (Sept 2025): All languages now support PR scanning (5-40% faster)
-- **CodeQL Rust support** (July 2025): Public preview
-- **CodeQL None mode** (2024): Analysis without compilation, may lose accuracy
-
-### 1.2 Real-World Detection Reality (EASE 2024, Bennett et al.)
-
-- 502 real Java vulnerabilities, 4 tools tested:
-  - Individual tool detection: **11.2% to 26.5%**
-  - All 4 combined: **38.8%**
-  - After custom Semgrep rules: **44.7%** (181% improvement)
-- **76.9% of false negatives caused by missing rules, NOT engine limitations**
-
-### 1.3 Pricing (2026)
-
-- Semgrep Teams: $30/contributor/month (Free tier: 10 devs, includes Pro)
-- GitHub Code Security: $30/active committer/month (CodeQL + Copilot Autofix)
-- Both converged at ~$30/committer/month
-
-### 1.4 Tool Positioning Summary
-
-| Scenario | Winner |
-|----------|--------|
-| Fast PR feedback | Semgrep |
-| Deep semantic audit | CodeQL |
-| Maximum security | Both (Semgrep on PRs + CodeQL nightly) |
-| PHP codebase | Semgrep (CodeQL no PHP) |
-| Custom rule velocity | Semgrep (minutes vs days) |
+本文档是铁壁项目的核心知识库。Brain B 每次会话必读。
 
 ---
 
-## 2. AI + Security Intersection (2025-2026)
+## 1. SAST 工具格局
 
-### 2.1 Key Research Papers
+### 1.1 核心工具对比
 
-**ZeroFalse (2026)**
-- CodeQL + LLM integration, CWE-specific prompting + flow-sensitive traces
-- F1: 0.912 (OWASP Java), 0.955 (OpenVuln)
-- Top models: Grok-4 (0.912), Gemini 2.5 Pro (0.910), GPT-5 (0.955)
-- Key insight: "Reasoning-oriented LLMs provide the most reliable precision-recall balance"
+| 工具 | 方法 | 精度 | 召回率 | F1 | 价格 |
+|------|------|:---:|:---:|:---:|------|
+| **CodeQL** | 关系DB + QL查询, 全程序污点追踪 | 60.3% | 97.0% | 74.4% | 公开仓库免费, 私有$30/committer/mo |
+| **Semgrep CE** | AST模式匹配, 文件内 | 56.3% | 90.4% | 69.4% | 免费 |
+| **Semgrep Pro** | 跨文件过程间分析 | — | — | — | <10 devs免费, 之后$30/committer/mo |
+| **gosec** | Go AST规则引擎 | — | — | — | 免费 |
+| **bandit** | Python AST规则引擎 | — | — | — | 免费 |
+| **bearer** | 多语言SAST, 隐私/安全规则 | — | — | — | 免费 |
 
-**RealVuln Benchmark (April 2026, arXiv:2604.13764)**
-- 15 scanners (3 SAST, 10 LLM, 2 security-specialized) on 26 Python repos, 796 labeled entries
-- **F3 (recall-weighted):** Kolega.Dev=73.0 > Claude Sonnet 4.6=51.7 > Semgrep=17.7
-- **F1:** Claude Sonnet 4.6=60.9 > Kolega.Dev=52.4 > Semgrep=?
+### 1.2 真实世界检测现实 (EASE 2024, Bennett et al.)
 
-**SastBench (Jan 2026, arXiv:2601.02941)**
-- Agentic SAST triage benchmark
-- Gemini 2.5 Pro Best: Acc=0.641, Prec=0.169, Recall=0.582, F1=0.262, F2=0.197
-- Claude Sonnet 4.5: Acc=0.481, Prec=0.140, Recall=0.722
-- Key: Even best models struggle with triage — low precision but decent recall
+- 502个真实Java漏洞, 4个工具:
+  - 单个工具检测率: **11.2%–26.5%**
+  - 4个工具合并: **38.8%**
+  - 加自定义Semgrep规则后: **44.7%** (+181%)
+- **76.9%的FN源于缺失规则, 非引擎限制**
 
-**FuzzingBrain V2 (May 2026, arXiv:2605.21779)**
-- Multi-agent LLM system, OSS-Fuzz integration
-- 90% detection (36/40) on AIxCC 2025 dataset
-- 41 zero-days in 19 OSS projects (26 confirmed, 23 fixed, 2 CVEs)
-- "Suspicious Point" abstraction — between line and function granularity
+### 1.3 2025-2026 关键发展
 
-**SEC-bench Pro (May 2026, arXiv:2605.26548)**
-- 183 validated V8/SpiderMonkey vulns ($1.5M+ Google VRP)
-- ClaudeCode+Codex union: 37.9% V8, 48.8% SpiderMonkey
-- Frontier models still below 40% success on long-horizon tasks
+- **Opengrep fork** (2025.1): 10+厂商在Semgrep CE改许可证后fork
+- **CodeQL增量分析** (2025.9): 所有语言支持PR扫描 (快5-40%)
+- **CodeQL Rust支持** (2025.7): 公开预览
+- **Semgrep Code重写引擎** (2024底): 性能大幅提升
+- **GitHub Copilot Autofix** (2024 GA): CodeQL + AI修复建议
+- **Semgrep Assistant**: GPT-4驱动triage + 误报过滤
+- **Snyk DeepCode AI**: 混合符号执行 + 多模型LLM
+- **Snyk AppRisk**: ASPM平台, 2024收购Helios (运行时观测)
 
-**Revelio (June 2026, arXiv:2606.22263)**
-- Agentic memory safety detection with executable PoVs
-- 19 new memory-safety vulns in 7 heavily-fuzzed projects
-- ~$300 total cost, ~1 hour per project
+### 1.4 开源新星
 
-### 2.2 LLM vs Traditional SAST (ScienceDirect 2026)
+| 工具 | 语言 | 亮点 |
+|------|------|------|
+| **ruff** | Python | 2024爆发, 取代flake8, 含基础安全检查 |
+| **trivy** | 跨语言 | 容器+依赖+IaC+密钥, 已成标配 |
+| **osv-scanner** | 跨语言 | Google OSV数据库前端, Go实现 |
+| **zizmor** | GitHub Actions | 2024新星, CI/CD安全审计 |
+| **govulncheck** | Go | Go 1.19+官方漏洞扫描 |
 
-| Approach | F1 Score | FPR |
-|----------|---------|-----|
-| Traditional SAST | 0.10–0.66 | 40-60%+ |
-| Standalone LLM | 0.61–0.88 | Varies |
-| Hybrid (SAST+LLM) | 0.91–0.99 | ~10-17% |
+---
 
-- 30 LLMs evaluated against OWASP Benchmark v1.2
+## 2. 竞争格局 (统一视图)
+
+### 2.1 商业竞品
+
+| 选手 | 核心能力 | 精度 | 召回率 | 差异化 | 弱点 |
+|------|---------|:---:|:---:|------|------|
+| **Neo** (ProjectDiscovery) | Runtime验证, 多Agent | 93% | 100% crit+high | 构建exploit, 22个CVE (RSAC 2026) | SaaS-only, 企业$$$ |
+| **CodeQL** | 数据流深度, 全程序QL | 60% | 97% | AST级污点追踪 | 需构建环境, 非AI原生 |
+| **Semgrep** | 速度, 自定义规则 | 56% | 90% | 分钟级规则编写 | 无语义理解 |
+| **Snyk Code** | IDE集成, 开发者体验 | — | — | DeepCode AI混合引擎 | 贵, 锁定平台 |
+| **Checkmarx** | 企业合规, 全语言 | — | — | 25+语言, Gartner Leader 7年 | 贵, 学习曲线陡 |
+| **Corgea** | AI-first triage+自动修复 | — | — | AI推理+代码上下文+可达性 | 商业闭源 |
+| **Veracode** | 二进制分析, 合规 | — | — | FedRAMP/SOC2, 30+语言 | 慢, 开发者体验差 |
+| **Fortify** | 政府/军工, 审计 | — | — | 30+语言, 完全本地部署, 等保 | 老旧, 贵 |
+| **Endor Labs** | 可达性分析降噪 | — | — | 全栈可达性 (代码+依赖+容器) | SaaS |
+
+### 2.2 免费替代方案 (Ironwall必须证明增量价值)
+
+- GitHub免费安全功能: CodeQL + Dependabot + Secret scanning → 覆盖SAST+SCA+密钥
+- Trivy + Semgrep CE + DefectDojo → 免费完整管线
+- GitLab SAST (内置, 免费层可用)
+
+### 2.3 中国厂商
+
+| 厂商 | 产品 | 定位 |
+|------|------|------|
+| **奇安信** | 代码卫士 | 企业SAST, Forrester代表厂商 |
+| **默安科技** | 雳鉴 | SAST + IAST |
+| **悬镜安全** | 灵脉 | IAST + RASP |
+| **华为云** | CodeCheck | DevSecOps集成 |
+| **阿里云** | 云效代码安全 | 内置CI/CD |
+| **腾讯云** | CODING代码扫描 | 内置平台 |
+
+---
+
+## 3. 中国SAST市场
+
+### 3.1 市场规模
+
+- ~$200M, 25% CAGR (2026-2032预测)
+- 政策驱动: 等保2.0、信创、数据安全法
+- 三级以上系统要求代码审计能力
+
+### 3.2 关键趋势
+
+1. **AI+SAST军备竞赛** — 各家接大模型做误报过滤/规则生成
+2. **信创适配硬门槛** — 必须支持国产CPU/OS/数据库
+3. **DevSecOps一体化** — 不再单独卖SAST, CI/CD全链路
+4. **SCA增长最快** — 供应链安全受重视
+5. **价格战白热化** — 中小企业市场被免费/开源蚕食
+
+### 3.3 闲鱼 = 阿里巴巴
+
+- Java/Go技术栈, 海量微服务
+- 阿里内部有Aone工程平台, 可能有内置安全门控
+- **Ironwall要打入阿里, 必须比内部工具好10倍**
+
+---
+
+## 4. 漏洞基准与指标
+
+### 4.1 标准指标
+
+| 指标 | 公式 | 用途 |
+|------|------|------|
+| Precision | TP/(TP+FP) | 多少告警是真的 |
+| Recall/TPR | TP/(TP+FN) | 多少真漏洞被找到 |
+| F1 | 2PR/(P+R) | 平衡度量 |
+| **F3** | (10·P·R)/(9·P+R) | **安全优先 (漏报比误报严重9倍)** |
+| MCC | Matthews | 类别不平衡下稳健 |
+| AI Suppression Rate | TP_killed_by_AI / TP | 灾难性失败指标 |
+
+### 4.2 关键基准数据集
+
+| 基准 | 语言 | 规模 | 状态 |
+|------|------|------|------|
+| **OWASP Benchmark v1.2** | Java | 2,740用例 | 事实标准 |
+| **OWASP Python Benchmark** | Python | 1,000+用例 | 2025.11发布, AppSecAI |
+| **RealVuln** | Python | 26仓库, 796标注 | 2026.4, F3排名 |
+| **SastBench** | — | Agentic triage专用 | 2026.1 |
+| **Snyk VulnBench JS 1.0** | JavaScript | 44参考发现, 300次运行 | 2026.6 |
+| **CrossCommitVuln-Bench** | Python | 15个CVE, 跨commit链 | 2026.4, AIware '26 |
+| **RealSec-bench** | Java | 105实例, 19 CWE | 2026.7, ACL 2026 |
+| **JavaVulBench** | Java | 30,600方法, 1,740 CVE | 2026.7, 污染审计 |
+| **RustMizan** | Rust | 可编译, 污染感知 | 2026.7 |
+
+### 4.3 真实 vs 合成
+
+- 合成基准高估工具性能
+- 真实CVE上检测率降至11-27%/工具 (Bennett 2024)
+- **规则覆盖 > 引擎复杂度** — 76.9% FN = 缺失规则
+- CrossCommitVuln-Bench: 逐commit检测率仅13%, 87%的链对SAST不可见
+
+---
+
+## 5. CVE与威胁趋势
+
+### 5.1 体量
+
+- **48,174个新CVE in 2025** — 131/天 (2024: 113/天)
+- 320,000+累计CVE by 2025.12
+- 38% High/Critical (H1 2025: 1,773 Critical)
+
+### 5.2 利用速度
+
+- **Time-to-exploit: -7天** (漏洞在补丁存在前就被利用)
+- 28.3%在披露24小时内武器化
+- 中位利用时间: <5天
+
+### 5.3 供应链 — #1担忧
+
+- 4×增长 in 重大供应链攻击 over 5年 (IBM X-Force 2026)
+- 2025翻倍: 26事件/月
+- OWASP Top 10 2025: "Software Supply Chain Failures" at #3
+
+### 5.4 AI作为攻击向量
+
+- **2,130个AI相关CVE in 2025** (+34.6%)
+- AI编码助手生成代码: 45%含漏洞, 62%至少1个可利用
+- 首个AI生成的野外零日利用确认 (2026.5)
+- Veracode 2026春: **AI代码安全通过率卡在~55%两年**
+
+---
+
+## 6. AI + 安全研究 (2025-2026)
+
+### 6.1 核心论文
+
+| 论文 | 时间 | 关键发现 |
+|------|------|---------|
+| **ZeroFalse** | 2026 | CodeQL+LLM, CWE特定prompt, F1=0.912 (OWASP), 0.955 (OpenVuln). Grok-4(0.912) > Gemini 2.5(0.910) > GPT-5(0.955) |
+| **RealVuln** | 2026.4 | 15扫描器, 26 Python仓库. F3: Kolega.Dev=73.0 > Sonnet 4.6=51.7 > Semgrep=17.7 |
+| **SastBench** | 2026.1 | Agentic SAST triage. Gemini 2.5 Acc=0.641, Rec=0.582. Sonnet 4.5 Acc=0.481, Rec=0.722 |
+| **FuzzingBrain V2** | 2026.5 | 多Agent, OSS-Fuzz集成. 90%检测 on AIxCC, 41个零日, 26确认, 2 CVE |
+| **Revelio** | 2026.6 | Agentic内存安全检测, 可执行PoV. 19个新漏洞 in 7个重度fuzzed项目. ~$300总成本 |
+| **Snyk VulnBench JS** | 2026.6 | 300次重复扫描. 最佳LLM F1=75.4% (Opus 4.6 Medium). LLM独有报告50%仅出现1/5次. 贵≠好 (Opus 4.7 Max 5.7×cost, 分更低) |
+| **Frame** | 2026 | 神经符号SAST: Z3污点+LLM. F1=0.58 vs Semgrep 0.45 on Endor Labs真实语料. LLM层恢复65个两者都漏的漏洞 |
+| **Antaeus** | 2026.7 | 仓库级逻辑漏洞检测 (CWE-200, CWE-284). 上下文扎根LLM推理. 28仓库, 15个漏洞 |
+| **LeanGuard** | 2026.7 | 神经符号: LLM语义过滤 + Lean 4形式验证. 5 CWE类 |
+| **VIC-RAGENT** | 2026.7 | 多Agent漏洞引入commit检测. F1比基线高1.2-1.7× |
+| **Veritas** | 2026.7 (更新) | 剥离二进制漏洞推理. 90%召回, 已验证候选中零FP. 发现Apple CVE |
+| **JavaVulBench** | 2026.7 | Java漏洞基准, 30,600方法, 1,740 CVE, 12个检测器, 污染审计 |
+| **CrossCommitVuln-Bench** | 2026.4 | 跨commit Python漏洞. 逐commit SAST检测率仅13% |
+| **Abliterated LLMs** | 2026.7 | 消融模型补丁验证率67.8% vs 对齐模型29.9%. 拒绝训练损害安全准确性 |
+| **RealSec-bench** | 2026.7 | RAG改善功能正确性但安全收益可忽略 (负面结果) |
+
+### 6.2 LLM vs 传统SAST (ScienceDirect 2026)
+
+| 方法 | F1 | FPR |
+|------|:---:|:---:|
+| 传统SAST | 0.10–0.66 | 40-60%+ |
+| 独立LLM | 0.61–0.88 | 可变 |
+| **混合 (SAST+LLM)** | **0.91–0.99** | **~10-17%** |
+
+- 30个LLM vs OWASP Benchmark v1.2
 - Semgrep F1=0.66, Gemini 3 Pro F1=0.88
-- Lviv Polytechnic (2026): Hybrid pipeline improved detection 2.5x, reduced FP up to 91%
+- Lviv Polytechnic (2026): 混合管线检测率提升2.5×, FP降低达91%
 
-### 2.3 Competitor AI-SAST Tools
+### 6.3 关键工程教训 (Rafter 2026)
 
-| Tool | Key Metric | Approach |
-|------|-----------|----------|
-| **ProjectDiscovery Neo** | 93% precision, 60% more vulns, 80% fewer FP | Multi-agent + runtime validation |
-| **VulSolver** | F1=0.9915 on OWASP, 40+ zero-days | Incremental verified conclusions |
-| **Checkmarx** | F1=0.499 (category avg=0.20) | Security-tuned LLM core |
-| **OX Security** | 83% valid findings (vs 61% Snyk) | LLM contextual analysis |
-| **DryRun Security** | 23/26 vulns detected (2x traditional) | LLM-driven SAST |
-
-### 2.4 Key Insight for Ironwall's Positioning
-
-**Ironwall IS a hybrid (SAST+AI) — this is the winning architecture per all 2025-2026 research.**
-But competitors are moving fast: Neo adds runtime validation, VulSolver has incremental reasoning, Checkmarx has security-tuned LLMs. Ironwall's offline rule engine is a differentiator — no one else has a pure-Go local fallback.
+- **Agent脚手架 > 模型质量.** GPT-4 raw 15-40% precision → +agent infra 70-85%
+- SAST+AI混合 = "最佳实用权衡": 75-90% precision, 50-70% recall
+- 架构洞察: 非确定性发现是大问题 — 同一扫描器两次运行得到不同结果
 
 ---
 
-## 3. Vulnerability Benchmarks & Testing Methodology
+## 7. 铁壁架构与定位 (诚实版)
 
-### 3.1 Standard Metrics
+### 7.1 铁壁是什么
 
-| Metric | Formula | Use |
-|--------|---------|-----|
-| Precision | TP/(TP+FP) | How many alerts are real |
-| Recall/TPR | TP/(TP+FN) | How many real vulns found |
-| F1 | 2PR/(P+R) | Balanced measure |
-| F2/F3 | Weights recall higher | Security-critical (missing vulns worse than FP) |
-| MCC | Matthews Correlation | Robust under class imbalance |
-| Youden's Index | Sens+Spec-1 | Overall detection quality |
+> **Ironwall = Multi-SAST Runner + AI降噪 + AI缺失控制检测**
 
-### 3.2 Key Benchmark Datasets
+- 一键运行 semgrep + gosec + bandit + gitleaks + syft/grype + KICS
+- 跨工具去重 (7.5% precision提升)
+- AI过滤误报 (actionable findings上Precision 100%, n=30)
+- **AI缺失控制检测 — 发现SAST找不到的漏洞 (GT-008 CWE-306 已验证)**
 
-- **OWASP Benchmark v1.2** — 2,740 Java test cases, de facto standard
-- **OWASP Python Benchmark** — Released Nov 2025 by AppSecAI, 1,000+ test cases. THIS IS RELEVANT.
-- **OWApp Benchmark** — Android, OWASP MASVS aligned
-- **Java CVE Benchmark** — 680 real Java programs with known CVEs
-- **OpenVuln** — Used by ZeroFalse
-- **SastBench** — Agentic triage specific (Jan 2026)
+### 7.2 铁壁不是什么
 
-### 3.3 Real-World vs Synthetic
+- ❌ 不是漏洞发现引擎 (Recall受限于底层SAST规则)
+- ❌ 不是离线AI方案 (AI要联网, 离线引擎只有9条规则)
+- ❌ 不是Neo竞品 (没有runtime验证)
+- ❌ 不是CodeQL竞品 (没有全程序数据流分析)
 
-- Synthetic benchmarks (OWASP) overestimate tool performance
-- On real CVEs, detection rates drop to 11-27% per tool (Bennett et al., EASE 2024)
-- All 4 tools combined: only 38.8% of real vulns caught
-- **Rule coverage matters more than engine sophistication** — 76.9% of FNs = missing rules
+### 7.3 真实差异化
 
-### 3.4 Testing Methodology Best Practices
+| 独特性 | 证据 |
+|--------|------|
+| 一键多SAST | semgrep+gosec+bandit+gitleaks+syft+KICS |
+| 跨工具去重 | OWASP基准: Precision +7.5%, Recall零损失 |
+| AI降噪 | 实战: actionable findings Precision 100% |
+| **AI缺失控制检测** | Phase B: GT-008(CWE-306) SAST找不到 |
+| 极低成本 | ~$0.016/scan (含Phase B) |
+| Go本地OBSERVE | 12安全模式, stdlib only, 零依赖 |
 
-From Trail of Bits / academic consensus:
-1. Pre-patch vs post-patch comparison (CVE regression test)
-2. Independent human annotation (not tool authors)
-3. Report all 4 quadrants (TP/FP/TN/FN) — never just precision
-4. Disclose disagreements transparently
-5. Cross-validation across multiple benchmark datasets
-6. AI Suppression Rate as a top-line metric
+### 7.4 不可替代的场景
+
+> "我想一键跑semgrep+gosec+bandit+gitleaks, 得到去重结果, AI过滤噪音, AI检测缺失控制——免费或几乎免费。"
+
+没有其他工具做这个具体组合。Semgrep/Snyk/CodeQL对AI功能收费。Trivy没有多SAST。Neo是企业$$$。
 
 ---
 
-## 4. Real-World Vulnerability Trends (2025-2026)
+## 8. 阿里巴巴生态系统策略
 
-### 4.1 CVE Volume
+### 8.1 关键问题
 
-- **48,174 new CVEs in 2025** — 131/day (up from 113/day in 2024)
-- 320,000+ total CVEs by Dec 2025
-- 38% rated High/Critical (1,773 Critical in H1 2025 alone)
-- API vulnerability exploitation: +181% YoY
+闲鱼 = 阿里巴巴。阿里内部有:
+- Aone工程平台 (可能内置安全门控)
+- 云效代码安全 (CodeAdmin)
+- 自研SAST/SCA方案
 
-### 4.2 Exploitation Speed
+**Ironwall必须比阿里内部工具好10倍才有意义。**
 
-- **Time-to-exploit: -7 days** in 2025 (exploited BEFORE patch exists)
-- 28.3% weaponized within 24 hours of disclosure
-- Median time-to-exploit: under 5 days
-- 32% of vulns unpatched for >180 days
+### 8.2 可能的切入点
 
-### 4.3 Supply Chain — The #1 Concern
+1. **供应链安全** — 阿里开源项目众多, 对外部依赖的可见性可能不足
+2. **个人开发者/小团队** — 阿里云效面向企业, 个人开发者可能用免费工具
+3. **等保2.0合规** — 离线扫描能力是独特卖点
+4. **多语言混合项目** — 阿里内部工具可能偏重Java, Ironwall的Go+Python支持是补充
 
-- 4× increase in major supply chain compromises over 5 years (IBM X-Force 2026)
-- Doubled in 2025: 26 incidents/month
-- 50% of experts rank supply chain as #1 concern
-- **OWASP Top 10 2025:** "Software Supply Chain Failures" at #3
-- Major campaigns: TeamPCP (500K+ creds), GlassWorm (433+ packages), PhantomRaven (88 npm packages)
+### 8.3 GitHub免费层是致命竞争
 
-### 4.4 AI as Attack Vector
-
-- **2,130 AI-related CVEs in 2025** (+34.6% from 2024)
-- 641 High/Critical
-- Claude Code CVE-2025-52882 (CVSS 8.8), Cursor CVE-2025-54135, GitHub Copilot CVE-2025-53773
-- First AI-generated zero-day exploit in the wild confirmed (May 2026)
-- Prompt injection = "the new RCE for agentic systems"
-
-### 4.5 AI-Generated Code Vulnerability
-
-- 92% of organizations using AI coding assistants
-- 45% of AI-generated code has vulnerabilities without security prompting
-- 62% from latest LLMs contain at least 1 exploitable vuln
-- XSS: 86% of the time, Log injection: 88%
-
-### 4.6 Go/Python Specific CVEs (2025-2026)
-
-**Python:**
-- CVE-2026-4810 (Google ADK, CVSS 9.8): RCE via code injection
-- CVE-2026-27459 (pyOpenSSL, CVSS 9.8): Buffer overflow
-- CVE-2025-4330 (tarfile): Symlink bypass, extraction filter escape
-
-**Go:**
-- CVE-2026-44973 (go-billy): Path traversal
-- CVE-2026-26014 (Pion DTLS): AES GCM nonce reuse
-- CVE-2025-30204 (golang-jwt): JWT implementation flaws
+GitHub免费安全功能覆盖: CodeQL + Secret scanning + Dependabot。如果你的目标用户已经在GitHub上, 必须证明增量价值。离线场景对GitHub用户是小众。
 
 ---
 
-## 5. What This Means for Ironwall v0.5.0 Testing
+## 9. 监管与合规
 
-### 5.1 Ironwall's Architecture Position
+### 9.1 中国
 
-Ironwall = Hybrid SAST+AI (the winning architecture per all 2025-2026 research)
-- Traditional scanners: gitleaks, semgrep, gosec, kics
-- AI Agent Engine: OBSERVE→TRACE→VERIFY→ASSESS
-- Offline fallback: 9-rule pure Go engine (unique differentiator)
+- **等保2.0**: 三级以上系统要求代码审计能力。离线扫描是真实优势
+- **信创**: 国产CPU/OS/数据库适配是硬门槛
+- **数据安全法/PIPL**: 代码不出境的扫描方案有需求
 
-### 5.2 Competitive Positioning
+### 9.2 国际
 
-| Ironwall Advantage | Evidence |
-|-------------------|----------|
-| Hybrid SAST+AI | F1 0.91-0.99 in research vs 0.66 traditional |
-| Offline engine | No competitor has local-only fallback |
-| Attack path generation | Beyond what SAST or standalone LLM provides |
-| 96% FP reduction (Fiber) | Better than Semgrep Assistant (20-40% reduction) |
-
-### 5.3 Ironwall Gaps vs State of Art
-
-| Gap | Best-in-Class |
-|-----|--------------|
-| No runtime validation | ProjectDiscovery Neo verifies at runtime |
-| No incremental reasoning | VulSolver reuses conclusions |
-| No interprocedural discovery | CodeQL has full taint tracking |
-| No PoV generation | Revelio generates executable proofs |
-| 10-sample golden set | RealVuln uses 796, SastBench uses thousands |
-
-### 5.4 Most Important Metric for 闲鱼 Customers
-
-Per research consensus: **F3/F2 > F1** for security tools. Missing a real vuln (FN) is worse than a false alarm (FP). But for practical customer experience, **AI Suppression Rate** (how often AI kills a real vuln) is the catastrophic failure metric.
+- PCI DSS: 要求代码审查 (要求6.5)
+- SOC 2: 要求变更管理中的安全审查
+- HIPAA: 要求技术保障措施
+- GDPR: 数据保护影响评估
 
 ---
 
-## 6. Supplemental Research (Round 2, 2026-07-09)
+## 10. Phase B 开发历史 (压缩)
 
-### 6.1 F3 Score Justification
+### 10.1 Phase B v1: OBSERVE→TRACE→VERIFY
 
-F3 (β=3): Recall weighted 9× over precision. Formula: Fβ = (β²+1)·P·R / (β²·P+R)
+- **OBSERVE**: Go AST解析器, 12安全模式, 纯本地
+- **TRACE**: LLM数据流追踪 (input→sink)
+- **VERIFY**: 对抗性验证
+- **结果**: 找到4个SAST已发现的漏洞, 0独特发现
+- **教训**: TRACE prompt问的是"输入到达sink了吗?" — 和gosec taint analysis同一个问题
 
-Why F3 for security:
-- Missing a real vuln (FN) is far more dangerous than false alarm (FP)
-- In RealVuln benchmark: F3 ranking differs from F1 — Kolega.Dev leads F3=73.0 (high recall), Sonnet 4.6 leads F1=60.9 (balanced)
-- "Better 100 false positives than one missed vulnerability"
-- **Ironwall should report BOTH F1 AND F3 in all benchmarks**
+### 10.2 Phase B v2: 加TraceMissing + TraceConfig
 
-### 6.2 ProjectDiscovery Neo — Closest Competitor
+- **TraceMissing**: 检测HTTP handler缺失的安全控制 (认证/验证/限流/CSRF)
+- **TraceConfig**: 检测危险配置模式
+- **结果**: **找到GT-008 (CWE-306, admin endpoint缺失认证) — SAST永远检测不到**
+- SAST recall 78% (7/9) → 89% (8/9) combined
+- 成本: $0.0164/scan
 
-Architecture: Plan→Execute→Verify 3-phase multi-agent
-- Planning Phase: pre-plans task, gathers intel, identifies parallel steps
-- Execution Phase: orchestrator delegates to specialized subagents (browser-agent, sandbox-agent, recon-agent)
-- Verification Phase: dedicated vulnerability-verifier-agent validates each finding, generates PoCs
+### 10.3 Phase B v3: 降噪
 
-**Benchmark (2026):**
+- Severity tuning: rate_limiting→LOW, CSRF→LOW
+- Smart dedup: 文件+行号 proximity matching
+- `--deep-strict` flag: CRITICAL+HIGH only
+- **结果: 34→5 actionable findings, zero noise**
 
-| Metric | Neo | Claude Code | Invicti DAST | Snyk SAST |
-|--------|-----|-------------|-------------|-----------|
-| Valid findings | 66 | 41 | 10 | 0 |
-| False positives | 5 | 24 | 10 | 5 |
-| Precision | 93% | 63% | 50% | 0% |
-| Crit+High found | 100% (21/21) | 62% | 0% | 0% |
+### 10.4 Python OBSERVE
 
-- 22 CVEs across 13 major OSS projects (NocoDB, Gitea, Budibase, Crawl4AI, etc.)
-- 84% prompt cache hit rate, 59-70% LLM cost reduction via relocation trick + 3-breakpoint architecture
-- Launched commercially at RSAC 2026 after winning RSAC Innovation Sandbox 2025
+- `ast.parse()` via subprocess, 零C依赖
+- 5文件→10 sections on secure-file-management
+- VERIFY正确拒绝了所有finding (代码有proper sanitization)
 
-**Neo differentiator:** Runtime validation — deploys apps in isolated sandbox, builds working exploits. Bridge between SAST and DAST. Finds business logic flaws SAST can't touch.
-**Ironwall differentiator vs Neo:** Offline engine (Neo has no offline mode). Local deployment (Neo is SaaS/cloud). Pricing (Neo is enterprise $$$).
+### 10.5 Gosec Bug
 
-### 6.3 Chinese SAST Market
+- 嵌入式 `gosec/v2 v2.27.1` API on Go 1.25: 静默返回0 issues
+- 修复: CLI gosec via subprocess `gosec -fmt=json ./...`
+- 影响: Step 2对Go项目从0→正常
 
-- **奇安信**: Forrester SAST Solutions Landscape Q2 2025 representative vendor. Dominant enterprise player in China
-- **默安科技**: Secondary player
-- **长亭科技**: Network security focus, less SAST
-- Market: ~$200M growing at 25% CAGR (2026-2032 projections)
-- **闲鱼 is Alibaba** — Java/Go tech stack, massive microservices scale
-- **等保2.0**: Level 3+ systems require code audit capabilities
-- Key customer pain points: supply chain security, legacy code, compliance audits
+### 10.6 Brain B审查关键修复
 
-### 6.4 OWASP Python Benchmark
-
-- Released **November 2025** by AppSecAI + David Wichers (original Java benchmark creator)
-- **1,000+ Python test cases** covering: SQL Injection, XSS, Command Injection, Path Traversal, Weak Cryptography
-- Open source, GitHub: `OWASP/www-project-benchmark`
-- **Most directly usable standardized benchmark for Ironwall** (Python is one of Ironwall's supported languages)
-- Each test case has a known ground truth (vulnerable or safe) — enables proper F3/F1 calculation
-
-### 6.5 Ironwall Architecture Self-Study (from actual code)
-
-- **Scanner pipeline (8 steps):** gitleaks → semgrep → gosec → hardcoded secrets → kics → syft/grype → database checks → supply chain
-- **AI Agent Engine:** OfflineEngine (9 rule categories, pure Go) + Analyst (OBSERVE→TRACE→VERIFY→ASSESS, DeepSeek-powered)
-- **9 offline rule categories:** CWE coverage includes hardcoded credentials, weak crypto, SQL injection patterns, command injection, path traversal, unsafe deserialization, XXE, SSRF, JWT issues
-- **Fiber test result:** 23 scanner findings → Agent reduced to 1 (96% FP reduction) on 128K lines Go
-- **vulnbench precision:** 94.4% (17TP/1FP/1TN/1FN) on self-written 7-file test suite
-- **Key weakness:** 9 rules is tiny compared to CodeQL's hundreds. 76.9% of real-world FNs come from missing rules (EASE 2024). Offline engine covers a fraction of CWE space. The AI engine is what fills the gap.
+- `safeConcernCategory()` panic guard
+- CRLF normalization in code snippets
+- Dead import checks (path\"→imp=="path")
+- Timeout context wired
+- collectPyFiles base-only matching
+- gosec filepath.Rel path handling
+- Dedup full-path matching (raw string backticks)
+- DeepAnalysisResult.Errors field
 
 ---
 
-## 7. Brain A + Brain B Consensus Test Plan (2026-07-09)
+## 11. 基准测试历史 (压缩)
 
-### 7.1 1-Day Test Schedule
+### 11.1 OWASP Python Benchmark (1,230文件)
 
-| Time | Phase | What | Key Metric | Pass Criteria |
-|------|-------|------|-----------|---------------|
-| 09:00-09:30 | Setup | Deploy Ironwall, prepare OWASP Python Benchmark + 1 real project | Boot time | <30 min to first scan |
-| 09:30-10:30 | Core | OWASP Python Benchmark full run (1000+ cases) | F3, F1, Recall, Precision | F3≥0.60, Recall≥0.70 |
-| 10:30-11:30 | Compare | Real project + Semgrep same-target baseline | Differential findings | Ironwall finds ≥2 semantic vulns Semgrep missed |
-| 11:30-12:00 | Offline | Disconnect network, re-scan | Full offline functionality | No external API dependency |
-| 13:00-14:30 | Analysis | FP root cause, FN sampling, false positive classification | FP type distribution | Precision≥0.40 |
-| 14:30-15:30 | Perf | Stress test: 1k/10k/100k LOC projects | Speed, memory peak | ≥500 LOC/s, no OOM |
-| 15:30-16:30 | Edge | Obfuscated code, multi-lang, framework-specific | Recall degradation | No crash, Recall drop ≤15% |
-| 16:30-17:00 | Report | All metrics compiled | Overall | PASS / CONDITIONAL / FAIL |
+| 工具 | Strict Recall | Strict F3 | CWE Covered |
+|------|:---:|:---:|:---:|
+| semgrep alone | 0.126 | 0.127 | 5/14 |
+| Ironwall no-AI | 0.372 | 0.339 | 10/14 |
+| Ironwall +AI filter | Precision 100% | — | — |
 
-### 7.2 Ironwall's Irreplaceable Position
+Ironwall多扫描器方法 (semgrep+bandit) Python召回率比单独semgrep高3×。
 
-| Competitor | Strength | Weakness |
-|-----------|----------|----------|
-| **Neo** | Verification (93% precision, 100% crit+high) | SaaS-only, no offline |
-| **CodeQL** | Data flow depth (AST-level taint) | Build env required, not AI-native |
-| **Semgrep** | Speed (pattern match, ms-level) | No semantic understanding |
-| **Ironwall** | **Offline AI semantic analysis** | Smaller rule set |
+### 11.2 Go Battle Test (go_target, 12 ground truth)
 
-**Three scenarios where Ironwall wins:**
-1. 等保2.0 internal network code audit (compliance, often air-gapped)
-2. Military/government offline environments
-3. Developers who don't want to upload code to cloud (data privacy)
+| 配置 | Recall | 独特发现 | 成本 |
+|------|:---:|:---:|:---:|
+| SAST only | 78% (7/9) | — | $0 |
+| SAST + AI filter | 78% | — | $0.02 |
+| SAST + AI + Phase B strict | **89% (8/9)** | **1 (GT-008)** | **$0.016** |
 
-### 7.3 The One-Line Summary
+### 11.3 Python Battle Test (secure-file-management, 544行)
 
-> "This day doesn't test whether Ironwall works — it tests whether 'offline + AI + code understanding' is a viable path. If it works, Ironwall has no competitor in air-gapped and compliance-mandated offline scenarios."
+- OBSERVE: 5文件→10 sections
+- TRACE: 4 traces, VERIFY全部正确拒绝 (代码有proper sanitization)
+- MISSING: 20 controls, strict mode→0 actionable (correct — 代码安全)
 
 ---
 
-## 8. Brain B Infrastructure (2026-07-09)
+## 12. 已知缺口与路线图
 
-### 8.1 Codex + DeepSeek Proxy Setup
-- **Proxy path:** `~/.codex-deepseek/src/main.py` (yangfei4913438/codex-deepseek fork)
-- **Start command:** `cd ~/.codex-deepseek && uv run python -m src.main`
-- **Port:** 4000
-- **Model:** deepseek-v4-pro via DeepSeek API
-- **Codex config:** `~/.codex/config.toml` → `model_provider = "deepseek_local"`
-- **Search:** `codex --search exec --model deepseek` enables web_search tool
+### 12.1 技术缺口
 
-### 8.2 Critical Proxy Fixes Applied (2026-07-09)
-1. **`translate.py: translate_tools()`** — Added `web_search` type handling (codex --search sends `{"type":"web_search"}` which was silently dropped)
-2. **`translate.py: translate_tools()`** — Added `namespace` type handling for MCP tools (unwraps `mcp__xxx__` namespaces, stores mapping in TOOL_NAMESPACE_MAP)
-3. **`main.py: build_non_stream_response()`** — Added namespace to function_call outputs for MCP routing
-4. **`main.py: _handle_non_stream()`** — Added 3-round tool call loop with Tavily search execution
-5. **`main.py`** — Removed duplicate proxy-injected web_search tool (codex --search provides it natively)
-6. **Zombie processes:** Multiple proxy instances can accumulate on port 4000. Kill all before restart: `netstat -ano | grep ":4000.*LISTEN" | awk '{print $5}' | xargs -I{} taskkill //F //PID {}`
+| 缺口 | 最佳 | 优先级 |
+|------|------|:--:|
+| Python TRACE/MISSING不支持 | — | 🟡 |
+| 无运行时验证 | Neo | 🔴 |
+| 无过程间数据流 | CodeQL | 🟢 |
+| 离线LLM (Ollama)未实现 | — | 🟡 |
+| 无IDE插件 | Snyk, Semgrep | 🟢 |
+| 无SCA深度 (仅有syft/grype基础) | Snyk, Endor | 🟢 |
+| 无IaC深度 (仅有KICS基础) | Trivy, Checkmarx | 🟢 |
+| 大项目未测试 (最大5文件) | — | 🟡 |
+| PromptVerify vs DeepVerify逻辑矛盾 | — | 🟡 |
 
-### 8.3 Tavily MCP Server (custom)
-- **Path:** `C:/Users/31704/.codex/tavily_search_mcp.py` — minimal stdio MCP server
-- **Registered in codex:** `codex mcp add tavily -- python C:/Users/31704/.codex/tavily_search_mcp.py`
-- **Note:** stdio MCP may not work with custom providers due to namespace routing. Use proxy-side tool loop instead.
+### 12.2 战略缺口
 
-### 8.4 Network Notes
-- Git Bash `curl` may timeout while Python `urllib` works fine — use Python for network tests
-- Tavily API key in `~/.codex-deepseek/.env` as `TAVILY_API_KEY`
-- DeepSeek API key in `~/.codex-deepseek/.env` as `api_key`
+- 无仪表板/UI (无企业可用性)
+- 无合规报告生成
+- 无PR评论集成
+- 无定价模型
 
----
+### 12.3 已解决
 
----
-
-## 9. Code Audit + Smoke Test Findings (2026-07-09)
-
-### 9.1 Nil Engine Safety Confirmed
-
-All 3 AI-dependent steps handle nil engine correctly:
-- Step2 (SAST): `if s.engine != nil && s.engine.Available()` → else uses `classify.HeuristicAttackTest()`
-- Step3 (Endpoints): `if s.engine != nil && s.engine.Available()` → safe
-- Step4 (Hardcoded): `if s.engine != nil && s.engine.Available()` → else uses `classify.HeuristicAttackTest()`
-- Go short-circuit evaluation prevents panic. `--no-ai` mode is production-safe.
-
-### 9.2 Ironwall Python Support — Better Than Expected
-
-- Step2 non-Go path: semgrep auto rules (290 Python rules available)
-- Step3: routePatterns include Flask (`@app.route`) and FastAPI (`@app.get/post`)
-- Step4: scanExtensions includes `.py`, all 15 regex patterns are language-agnostic
-- Step1 (gitleaks), Step5-8: language-agnostic
-- **Only gosec is Go-specific** — compensated by semgrep for non-Go
-
-### 9.3 Smoke Test Findings (single Python file, no AI)
-
-- Ironwall found: 1 secret (gitleaks+step4), 3 info
-- Semgrep found SQLi at line 9 — but NOT in Ironwall JSON output
-- Root cause: single-file scan has path inconsistency (step produces `testdata/smoke_test.py` vs `smoke_test.py`)
-- **Not a blocker:** benchmark uses directory target, path handling is consistent for directories
-- **Action needed:** verify semgrep findings appear in directory-target scan
-
-### 9.4 Deep Dive: OWASP Benchmark Test Strategy Revised
-
-**New understanding after code audit:**
-- Ironwall IS capable of scanning Python (semgrep + regex + gitleaks)
-- Benchmark tests Ironwall's FLOOR (basic pattern matching on isolated micro-files), not CEILING (semantic understanding, cross-file analysis)
-- Ironwall's AI advantage may not show on synthetic benchmarks — the real differentiation appears on complex real-world code
-
-**Revised success criteria:**
-| Metric | Min Acceptable | Notes |
-|--------|---------------|-------|
-| F3 (AI) | ≥0.30 | Proves Python capability exists |
-| ΔF3 (AI - noAI) | >0 | AI provides incremental value (MUST) |
-| AI Suppression Rate | <5% | AI must not kill real vulns |
-| No crash | required | Stability baseline |
-
-**Key risks:**
-1. Semgrep findings might not propagate through Ironwall pipeline (smoke test issue)
-2. OWASP Benchmark is synthetic — disclaimer required in report
-3. Cost: estimated $3-11 per scan round (DeepSeek API)
-4. API rate limiting during VERIFY phase needs monitoring
-
-### 9.5 Evaluator Design
-
-**Matching algorithm (strict, primary):**
-```
-Per-finding: CWE match + file match
-  - finding CWE must match expected CWE for that file
-  - TP if match, FP if no match
-  - FN: expected CWE for file that ironwall didn't report
-  - TN: safe file with no ironwall findings
-```
-
-**Matching algorithm (relaxed, auxiliary):**
-```
-Per-file: any finding in vulnerable file = TP
-  - Higher recall, lower precision
-  - Reported as secondary metric
-```
-
-**Required metrics:**
-- Precision, Recall, F1, F3, MCC, Accuracy
-- Per-CWE breakdown (CWE-89, CWE-78, CWE-79, CWE-22, CWE-327)
-- AI Suppression Rate (TP killed by AI)
-- Δ metrics (AI vs noAI, AI vs Semgrep)
-- Cost and time
+- ✅ Go OBSERVE (12安全模式)
+- ✅ Python OBSERVE (ast.parse)
+- ✅ AI降噪 (100% precision on actionable)
+- ✅ AI缺失控制检测 (GT-008已验证)
+- ✅ Gosec Go 1.25兼容性
+- ✅ 多语言OBSERVE (Go+Python)
+- ✅ Noise reduction (34→5 actionable)
+- ✅ 诚实定位
 
 ---
 
----
+## 13. 参考资料
 
-## 10. Benchmark Execution Results (2026-07-09)
+### 13.1 铁壁内部文档
+- `docs/DESIGN_PhaseB_Real_AI_Engine.md` — Phase B架构设计
+- `docs/BRAIN_B_REVIEW_PhaseB.md` — 架构审查
+- `docs/BRAIN_B_PROTOCOL.md` — 双脑协议
+- `battle_test_candidates/go_target/BATTLE_REPORT.md` — 实战报告
+- `CODE_REVIEW_CHECKLIST.md` — 代码审查清单
 
-### 10.1 Bugs Fixed (7 total)
-1. semgrep.go CWE field `string→[]string` — all findings silently dropped
-2. semgrep.go OWASP field same issue
-3. markdown.go JSON writer missing cwe/description/fix fields
-4. engine.go: 400 findings in one API call → timeout → silent fallback → batching fix (25/batch)
-5. Added `--no-test-filter` flag to skip AI test-file heuristic for benchmarks
-6. Added `analysis_status` field to ScanResult (full/partial/skipped/error)
-7. API rate limiting: 19 DeepVerify batches, only 4 completed
-
-### 10.2 Final Results: Ironwall vs semgrep (OWASP Python Benchmark, 1230 files)
-
-| Tool | Precision | Recall | F3 | MCC | Findings |
-|------|:---:|:---:|:---:|:---:|:---:|
-| semgrep bare | 0.134 | 0.126 | 0.127 | -0.262 | 458 |
-| **Ironwall no-AI** | **0.144** | 0.126 | **0.128** | **-0.247** | **403** |
-
-Ironwall dedup improves Precision +7.5% over bare semgrep with zero Recall loss.
-
-### 10.3 CWE Coverage
-5/14 CWE detected: CWE-89 (F1=1.00), CWE-502 (F1=0.75), CWE-614 (F1=0.76), CWE-78 (F1=0.52), CWE-22 (F1=0.06)
-9 CWE zero: XSS, Weak Crypto, Weak Rand, Trust Bound, XXE, XPath Inj, LDAP Inj, Code Inj, Open Redirect
-
-### 10.4 Key Lessons
-- Ironwall pipeline verified complete (no finding loss vs raw semgrep)
-- Dedup provides measurable precision improvement
-- AI engine works but needs retry logic for large scans
-- `analysis_status` field prevents silent failure (critical architecture fix)
-- OWASP Benchmark tests floor, not ceiling — real-project validation still needed
+### 13.2 外部资源
+- OWASP Benchmark: https://owasp.org/www-project-benchmark/
+- OWASP Python Benchmark: GitHub `OWASP/www-project-benchmark`
+- gosec: https://github.com/securego/gosec
+- Semgrep: https://semgrep.dev
+- CodeQL: https://codeql.github.com
+- Neo: https://projectdiscovery.io
+- RealVuln: arXiv:2604.13764
+- Snyk VulnBench: arXiv:2606.15762
+- ZeroFalse: arXiv:2510.02534
 
 ---
 
----
-
-## 11. P1: Bandit Integration Results (2026-07-09)
-
-### 11.1 What was done
-- Integrated bandit 1.9.4 as Python-specific scanner (complements semgrep)
-- Added `p/python` semgrep ruleset alongside auto
-- Fixed bandit JSON parsing (metrics field type)
-- Fixed semgrep multi-config support (comma → separate --config flags)
-- Added CostTracker to AI client (token counting + USD estimation)
-
-### 11.2 Results: OWASP Python Benchmark
-
-| Metric | Before (semgrep only) | After (+bandit+p/python) | Δ |
-|--------|:---:|:---:|:---:|
-| Strict TP | 57 | **168** | +195% |
-| Strict Recall | 0.126 | **0.372** | +195% |
-| Strict F3 | 0.128 | **0.339** | +165% |
-| Relaxed TP | 150 | **265** | +77% |
-| Relaxed Recall | 0.332 | **0.586** | +77% |
-| Relaxed F3 | 0.341 | **0.583** | +71% |
-| Relaxed MCC | 0.102 | **0.313** | +207% |
-| CWE covered | 5/14 | **10/14** | +5 |
-
-### 11.3 New CWE Coverage
-🟢 Gained: CWE-330(weak random) F1=0.875, CWE-611(XXE) F1=0.286, CWE-94(code injection) F1=0.548
-🟢 Improved: CWE-78(+6%), CWE-502(broader)
-🔴 Still zero: CWE-328(hash), CWE-501(trustbound), CWE-643(xpathi), CWE-79(xss), CWE-90(ldapi)
-
-### 11.4 Architecture Change
-Step2 now uses 3-layer scanner stack for Python:
-1. Bandit (Python AST, ms-level)
-2. CodeQL (if installed)
-3. Semgrep (auto + p/python rulesets)
-
-### 11.5 Cost Tracking
-- DeepSeek pricing: chat $0.27/1M prompt + $1.10/1M completion, reasoner $0.55/$2.19
-- Estimated cost: ~$0.50-1.00 per 1230-file scan
-
----
-
-*End of Knowledge Base — v3.3*
-*Feed this file as context in every Brain B session: `KNOWLEDGE=$(cat f:/ClaudeFiles/_research/ironwall/docs/BRAIN_B_KNOWLEDGE.md)`*
+*End of Knowledge Base — v4.0*
+*2026-07-10 | Brain A(皮特) + Brain B(Codex DeepSeek-v4-pro) 联合更新*
+*每次 Brain B 会话必读: `cat f:/ClaudeFiles/_research/ironwall/docs/BRAIN_B_KNOWLEDGE.md`*

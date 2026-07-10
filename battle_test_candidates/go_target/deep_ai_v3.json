@@ -1,0 +1,742 @@
+{
+  "version": "0.7.0",
+  "target": "battle_test_candidates/go_target",
+  "started_at": "2026-07-10T09:31:45+08:00",
+  "completed_at": "2026-07-10T09:32:20+08:00",
+  "duration": "35.433s",
+  "summary": {
+    "critical": 0,
+    "high": 5,
+    "medium": 9,
+    "low": 11,
+    "info": 5,
+    "total": 30
+  },
+  "findings": [
+    {
+      "id": "IRON-SECRET-001",
+      "title": "Secret detected: Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+      "description": "Betterleaks detected a Detected a Generic API Key, potentially exposing access to various services and sensitive operations. in battle_test_candidates/go_target/main.go:31. Rule: generic-api-key. Entropy: 4.92",
+      "severity": 2,
+      "file_path": "battle_test_candidates/go_target/main.go",
+      "line_number": 31,
+      "code_snippet": "  31 | sk-a**********************************8stu",
+      "step": 1,
+      "category": "secret-detected",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-312",
+      "cvss": 5,
+      "tool_output": "Rule: generic-api-key | Tags: [] | Entropy: 4.92 | Verified: false",
+      "references": [
+        "https://github.com/zricethezav/betterleaks"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-001",
+      "title": "Potential G704: SSRF via taint analysis",
+      "description": "SSRF via taint analysis\nGosec confidence: 90%",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 157,
+      "code_snippet": "  157 | 156: \t// VULNERABLE: user-controlled URL, no allowlist\n157: \tresp, err := http.Get(targetURL)\n158: \tif err != nil {",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'url' parameter in the HTTP request",
+        "path": "1. Attacker sends GET request to /fetch?url=http://internal-service:8080/admin 2. Handler extracts 'url' parameter (line 155) 3. No allowlist validation (line 156 comment) 4. http.Get(targetURL) executed (line 157) 5. Response returned to attacker",
+        "impact": "attacker can probe internal network services (e.g., cloud metadata endpoints, internal APIs) and exfiltrate data via response",
+        "is_real": true,
+        "explanation": "The code directly uses user-supplied URL in http.Get without any allowlist or validation, enabling SSRF attacks against internal resources."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "918",
+      "cvss": 7.5,
+      "tool_output": "Rule: G704 | Line: 157 | Column: 23",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-002",
+      "title": "Potential G701: SQL injection via taint analysis",
+      "description": "SQL injection via taint analysis\nGosec confidence: 90%",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 71,
+      "code_snippet": "  71 | 70: \tquery := \"SELECT id, username, role FROM users WHERE username='\" + username + \"' AND password='\" + password + \"'\"\n71: \trow := db.QueryRow(query)\n72:",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can supply username and password via HTTP POST form",
+        "path": "1. Attacker sends POST to /login with username=' OR '1'='1' -- and password=anything 2. Handler concatenates into SQL query (line 70) 3. db.QueryRow executes (line 71) 4. Query returns first user (likely admin) 5. Attacker logs in as admin",
+        "impact": "attacker can bypass authentication and gain admin access, potentially leading to full database compromise",
+        "is_real": true,
+        "explanation": "String concatenation of user input into SQL query without parameterization allows classic SQL injection."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "89",
+      "cvss": 7.5,
+      "tool_output": "Rule: G701 | Line: 71 | Column: 20",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-003",
+      "title": "Potential G703: Path traversal via taint analysis",
+      "description": "Path traversal via taint analysis\nGosec confidence: 90%",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 136,
+      "code_snippet": "  136 | 135: \tfilepath := \"./files/\" + filename\n136: \tdata, err := os.ReadFile(filepath)\n137: \tif err != nil {",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'filename' parameter in the HTTP request",
+        "path": "1. Attacker sends GET to /read?filename=../../etc/passwd 2. Handler constructs filepath as './files/../../etc/passwd' (line 135) 3. os.ReadFile reads the file (line 136) 4. File content returned to attacker",
+        "impact": "attacker can read arbitrary files on the server, including configuration files, source code, and system files",
+        "is_real": true,
+        "explanation": "User-supplied filename is concatenated with a base path without sanitization, enabling path traversal."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "22",
+      "cvss": 7.5,
+      "tool_output": "Rule: G703 | Line: 136 | Column: 26",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-004",
+      "title": "Potential G702: Command injection via taint analysis",
+      "description": "Command injection via taint analysis\nGosec confidence: 90%\n[Also reported by another step: Subprocess launched with variable\nGosec confidence: 90%]",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 114,
+      "code_snippet": "  114 | 113: \t// VULNERABLE: user input to shell command via bash -c\n114: \tout, err := exec.Command(\"bash\", \"-c\", cmd).Output()\n115: \tif err != nil {",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'cmd' parameter in the HTTP request",
+        "path": "1. Attacker sends GET to /exec?cmd=ls;cat /etc/shadow 2. Handler constructs cmd string (line 113) 3. exec.Command('bash', '-c', cmd) executes (line 114) 4. Command output returned to attacker",
+        "impact": "attacker can execute arbitrary system commands with the privileges of the web server, leading to full server compromise",
+        "is_real": true,
+        "explanation": "User input is passed directly to bash -c without sanitization, allowing arbitrary command execution."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "78",
+      "cvss": 7.5,
+      "tool_output": "Rule: G702 | Line: 114 | Column: 26",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-005",
+      "title": "Potential G705: XSS via taint analysis",
+      "description": "XSS via taint analysis\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 210,
+      "code_snippet": "  210 | 209: \tw.Header().Set(\"Content-Type\", \"application/json\")\n210: \tfmt.Fprintf(w, `{\"algorithm\":\"md5\",\"input\":\"%s\",\"hash\":\"%s\"}`, input, hexHash)\n211: }",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'input' parameter in the HTTP request",
+        "path": "1. Attacker sends GET to /hash?input=\u003cscript\u003ealert(1)\u003c/script\u003e 2. Handler sets Content-Type to application/json (line 209) 3. fmt.Fprintf writes JSON with unsanitized input (line 210) 4. If browser interprets as HTML (e.g., via content sniffing), script executes",
+        "impact": "attacker can execute arbitrary JavaScript in victim's browser, potentially stealing cookies or performing actions on behalf of the user",
+        "is_real": true,
+        "explanation": "User input is reflected in JSON response without encoding; if Content-Type is not strictly enforced, XSS may occur."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "79",
+      "cvss": 5,
+      "tool_output": "Rule: G705 | Line: 210 | Column: 13",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-006",
+      "title": "Potential G705: XSS via taint analysis",
+      "description": "XSS via taint analysis\nGosec confidence: 90%\n[AI Deep Verify: Attack scenario not viable — Content-Type is application/octet-stream, which forces binary download. No XSS vector exists because browsers will not render the response as HTML.]",
+      "severity": 4,
+      "file_path": "main.go",
+      "line_number": 143,
+      "code_snippet": "  143 | 142: \tw.Header().Set(\"Content-Type\", \"application/octet-stream\")\n143: \tw.Write(data)\n144: }",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Content-Type is application/octet-stream, which forces binary download. No XSS vector exists because browsers will not render the response as HTML."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "79",
+      "cvss": 5,
+      "tool_output": "Rule: G705 | Line: 143 | Column: 9",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-007",
+      "title": "Potential G705: XSS via taint analysis",
+      "description": "XSS via taint analysis\nGosec confidence: 90%\n[AI Deep Verify: Attack scenario not viable — Content-Type is text/plain, which prevents HTML rendering. No XSS vector exists.]",
+      "severity": 4,
+      "file_path": "main.go",
+      "line_number": 121,
+      "code_snippet": "  121 | 120: \tw.Header().Set(\"Content-Type\", \"text/plain\")\n121: \tw.Write(out)\n122: }",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Content-Type is text/plain, which prevents HTML rendering. No XSS vector exists."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "79",
+      "cvss": 5,
+      "tool_output": "Rule: G705 | Line: 121 | Column: 9",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-008",
+      "title": "Potential G705: XSS via taint analysis",
+      "description": "XSS via taint analysis\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 100,
+      "code_snippet": "  100 | 99: \t// Using template here would be safe — raw Write is not\n100: \tw.Write([]byte(html))\n101: }",
+      "step": 2,
+      "category": "injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'html' parameter in the HTTP request",
+        "path": "1. Attacker sends GET to /render?html=\u003cscript\u003ealert(1)\u003c/script\u003e 2. Handler writes raw HTML to response (line 100) 3. Browser renders the HTML and executes the script",
+        "impact": "attacker can execute arbitrary JavaScript in victim's browser, leading to session hijacking, phishing, or defacement",
+        "is_real": true,
+        "explanation": "User-supplied HTML is written directly to response without sanitization or templating, enabling stored/reflected XSS."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "79",
+      "cvss": 5,
+      "tool_output": "Rule: G705 | Line: 100 | Column: 9",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-009",
+      "title": "Potential G401: Use of weak cryptographic primitive",
+      "description": "Use of weak cryptographic primitive\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 206,
+      "code_snippet": "  206 | 205: \t// VULNERABLE: MD5 is cryptographically broken\n206: \thash := md5.Sum([]byte(input))\n207: \thexHash := fmt.Sprintf(\"%x\", hash)",
+      "step": 2,
+      "category": "weak-crypto",
+      "attack_scenario": {
+        "actor": "attacker who can obtain MD5 hashes (e.g., via database leak or network sniffing)",
+        "path": "1. Attacker obtains MD5 hash from response (line 210) 2. Attacker uses rainbow tables or brute force to reverse the hash 3. Attacker recovers the original input (e.g., password)",
+        "impact": "attacker can recover plaintext values from MD5 hashes, compromising user credentials or sensitive data",
+        "is_real": true,
+        "explanation": "MD5 is cryptographically broken and vulnerable to collision and preimage attacks; its use weakens security."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "328",
+      "cvss": 5,
+      "tool_output": "Rule: G401 | Line: 206 | Column: 10",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-010",
+      "title": "Potential G114: Use of net/http serve function that has no support for setting timeouts",
+      "description": "Use of net/http serve function that has no support for setting timeouts\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 52,
+      "code_snippet": "  52 | 51: \tlog.Println(\"Vulnerable app listening on :8080\")\n52: \tlog.Fatal(http.ListenAndServe(\":8080\", nil))\n53: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "attack_scenario": {
+        "actor": "remote attacker who can establish many slow connections to the server",
+        "path": "1. Attacker opens many TCP connections to :8080 2. Server does not enforce timeouts (line 52) 3. Connections remain open indefinitely, exhausting server resources",
+        "impact": "denial of service: server becomes unresponsive to legitimate requests due to resource exhaustion",
+        "is_real": true,
+        "explanation": "http.ListenAndServe without timeouts allows slowloris-style attacks; however, severity is medium as it requires many connections."
+      },
+      "ai_confidence": 0.7,
+      "fix_suggestion": "",
+      "cwe": "676",
+      "cvss": 5,
+      "tool_output": "Rule: G114 | Line: 52 | Column: 12",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-012",
+      "title": "Potential G202: SQL string concatenation",
+      "description": "SQL string concatenation\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 70,
+      "code_snippet": "  70 | 69: \t// VULNERABLE: string concatenation into SQL query\n70: \tquery := \"SELECT id, username, role FROM users WHERE username='\" + username + \"' AND password='\" + password + \"'\"\n71: \trow := db.QueryRow(query)",
+      "step": 2,
+      "category": "sql-injection",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can supply username and password",
+        "path": "1. Attacker sends POST to /login with malicious input 2. String concatenation builds SQL query (line 70) 3. db.QueryRow executes (line 71) 4. SQL injection succeeds",
+        "impact": "attacker can bypass authentication and extract/modify database contents",
+        "is_real": true,
+        "explanation": "Same as IRON-GOSEC-002; SQL string concatenation is vulnerable."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "89",
+      "cvss": 5,
+      "tool_output": "Rule: G202 | Line: 70 | Column: 11",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-013",
+      "title": "Potential G304: Potential file inclusion via variable",
+      "description": "Potential file inclusion via variable\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 136,
+      "code_snippet": "  136 | 135: \tfilepath := \"./files/\" + filename\n136: \tdata, err := os.ReadFile(filepath)\n137: \tif err != nil {",
+      "step": 2,
+      "category": "path-traversal",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'filename' parameter",
+        "path": "1. Attacker sends GET to /read?filename=../../etc/shadow 2. filepath becomes './files/../../etc/shadow' (line 135) 3. os.ReadFile reads (line 136) 4. Content returned",
+        "impact": "attacker can read arbitrary files, including sensitive system files",
+        "is_real": true,
+        "explanation": "Same as IRON-GOSEC-003; path traversal via variable."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "22",
+      "cvss": 5,
+      "tool_output": "Rule: G304 | Line: 136 | Column: 15",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-014",
+      "title": "Potential G107: Potential HTTP request made with variable url",
+      "description": "Potential HTTP request made with variable url\nGosec confidence: 60%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 157,
+      "code_snippet": "  157 | 156: \t// VULNERABLE: user-controlled URL, no allowlist\n157: \tresp, err := http.Get(targetURL)\n158: \tif err != nil {",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "attack_scenario": {
+        "actor": "unauthenticated remote attacker who can control the 'url' parameter",
+        "path": "1. Attacker sends GET to /fetch?url=http://169.254.169.254/latest/meta-data/ 2. http.Get(targetURL) (line 157) 3. Response returned",
+        "impact": "attacker can access internal services and cloud metadata, leading to credential theft",
+        "is_real": true,
+        "explanation": "Same as IRON-GOSEC-001; HTTP request with variable URL enables SSRF."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "88",
+      "cvss": 5,
+      "tool_output": "Rule: G107 | Line: 157 | Column: 15",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-015",
+      "title": "Potential G501: Blocklisted import crypto/md5: weak cryptographic primitive",
+      "description": "Blocklisted import crypto/md5: weak cryptographic primitive\nGosec confidence: 90%",
+      "severity": 2,
+      "file_path": "main.go",
+      "line_number": 11,
+      "code_snippet": "  11 | 10: import (\n11: \t\"crypto/md5\"\n12: \t\"database/sql\"",
+      "step": 2,
+      "category": "insecure-configuration",
+      "attack_scenario": {
+        "actor": "attacker who can exploit weak crypto (e.g., via hash retrieval)",
+        "path": "1. Attacker obtains MD5 hash from application 2. Attacker uses collision or preimage attack 3. Attacker forges data or recovers plaintext",
+        "impact": "attacker can break integrity or confidentiality of data protected by MD5",
+        "is_real": true,
+        "explanation": "Importing crypto/md5 indicates use of a weak cryptographic primitive; same as IRON-GOSEC-009."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "327",
+      "cvss": 5,
+      "tool_output": "Rule: G501 | Line: 11 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-016",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 216,
+      "code_snippet": "  216 | 215: \tw.Header().Set(\"Content-Type\", \"application/json\")\n216: \tw.Write([]byte(`{\"status\":\"ok\"}`))\n217: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 216 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-017",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 194,
+      "code_snippet": "  194 | 193: \t}\n194: \tw.Write([]byte(`]}`))\n195: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 194 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-018",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 189,
+      "code_snippet": "  189 | 188: \t\tif !first {\n189: \t\t\tw.Write([]byte(\",\"))\n190: \t\t}",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 189 | Column: 4",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-019",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 187,
+      "code_snippet": "  187 | 186: \t\tvar username, role string\n187: \t\trows.Scan(\u0026id, \u0026username, \u0026role)\n188: \t\tif !first {",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 187 | Column: 3",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-020",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 182,
+      "code_snippet": "  182 | 181: \tw.Header().Set(\"Content-Type\", \"application/json\")\n182: \tw.Write([]byte(`{\"users\":[`))\n183: \tfirst := true",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 182 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-021",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 166,
+      "code_snippet": "  166 | 165: \tw.Header().Set(\"Content-Type\", resp.Header.Get(\"Content-Type\"))\n166: \tw.Write(body)\n167: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 166 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-022",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 143,
+      "code_snippet": "  143 | 142: \tw.Header().Set(\"Content-Type\", \"application/octet-stream\")\n143: \tw.Write(data)\n144: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 143 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-023",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 121,
+      "code_snippet": "  121 | 120: \tw.Header().Set(\"Content-Type\", \"text/plain\")\n121: \tw.Write(out)\n122: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 121 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-024",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 100,
+      "code_snippet": "  100 | 99: \t// Using template here would be safe — raw Write is not\n100: \tw.Write([]byte(html))\n101: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 100 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-GOSEC-025",
+      "title": "Potential G104: Errors unhandled",
+      "description": "Errors unhandled\nGosec confidence: 90%",
+      "severity": 3,
+      "file_path": "main.go",
+      "line_number": 59,
+      "code_snippet": "  59 | 58: \tw.Header().Set(\"Content-Type\", \"text/html\")\n59: \tw.Write([]byte(tmpl))\n60: }",
+      "step": 2,
+      "category": "hardcoded-credentials",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "703",
+      "cvss": 2.5,
+      "tool_output": "Rule: G104 | Line: 59 | Column: 2",
+      "references": [
+        "https://github.com/securego/gosec#available-rules"
+      ]
+    },
+    {
+      "id": "IRON-027",
+      "title": "Potential Generic API key in config",
+      "description": "Regex pattern detected a potential Generic API key in config at main.go:31. This may be a hardcoded secret that automated scanners missed.",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 31,
+      "code_snippet": "  31 | const apiKey = \"sk-abc123def456ghi789jkl012mno345pqr678stu\"",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "Any attacker who can access the source code (e.g., via a public repository, insider threat, or compromised CI/CD pipeline). No special privileges required beyond read access to the codebase.",
+        "path": "1. Attacker obtains the source file main.go (e.g., by cloning a public repo or exfiltrating from a compromised system).\n2. Attacker reads line 31: `const apiKey = \"sk-abc123def456ghi789jkl012mno345pqr678stu\"`.\n3. Attacker uses this API key to authenticate against the corresponding service (e.g., OpenAI, Stripe, or similar) and performs unauthorized actions.",
+        "impact": "Attacker gains full access to the API service associated with the key, potentially leading to data exfiltration, service abuse, financial charges, or privilege escalation depending on the key's permissions. The key appears to be a valid format (e.g., 'sk-' prefix suggests a secret key for a service like OpenAI).",
+        "is_real": true,
+        "explanation": "The finding is a hardcoded API key in source code. The key is a literal string constant, not an environment variable or placeholder. The pattern 'sk-' is a common prefix for secret keys (e.g., OpenAI, Stripe). This is a real security vulnerability because anyone with access to the source can extract and misuse the key. The severity is HIGH as it can lead to significant impact."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-028",
+      "title": "SBOM generated: 1 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 1 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-029",
+      "title": "Not a git repository — supply chain checks limited",
+      "description": "Supply chain security checks (SBOM provenance, SLSA) require a git repository. Without git history, we cannot verify commit signatures or build provenance.",
+      "severity": 3,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-1104",
+      "cvss": 2
+    },
+    {
+      "id": "IRON-030",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan battle_test_candidates/go_target -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-031",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    },
+    {
+      "id": "IRON-AI-001",
+      "title": "Server-Side Request Forgery (SSRF) in proxy handler",
+      "description": "The handleProxy function takes a user-controlled 'url' query parameter and passes it directly to http.Get() without any validation or allowlist. An attacker can make the server send requests to arbitrary internal or external hosts, potentially accessing internal services (e.g., cloud metadata endpoints, internal APIs) or performing port scanning.",
+      "severity": 1,
+      "file_path": "battle_test_candidates\\go_target\\main.go",
+      "line_number": 149,
+      "code_snippet": "func handleProxy(w http.ResponseWriter, r *http.Request) {\n\ttargetURL := r.URL.Query().Get(\"url\")\n\tif targetURL == \"\" {\n\t\thttp.Error(w, \"Missing 'url' parameter\", http.StatusBadRequest)\n\t\treturn\n\t}\n\n\t// VULNERABLE: user-controlled URL, no allowlist\n\tresp, err := http.Get(targetURL)\n\tif err != nil {\n\t\thttp.Error(w, fmt.Sprintf(\"Request failed: %v\", err), http.StatusBadGateway)\n\t\treturn\n\t}\n\tdefer resp.Body.Close()\n\n\tbody, _ := io.ReadAll(resp.Body)\n\tw.Header().Set(\"Content-Type\", resp.Header.Get(\"Content-Type\"))\n\tw.Write(body)\n}",
+      "step": 9,
+      "category": "sql",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Implement an allowlist of permitted target URLs or domains. Validate that the URL scheme is HTTPS and the host is in a predefined list. Alternatively, use a URL parser to reject private IP ranges and block access to internal networks.",
+      "cwe": "CWE-918",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-AI-002",
+      "title": "OS Command Injection in handleExec",
+      "description": "The handleExec function takes a 'cmd' query parameter from the URL and passes it directly to exec.Command with 'bash -c', allowing an attacker to execute arbitrary system commands. There is no authentication, input validation, or sanitization. This is a classic OS command injection vulnerability.",
+      "severity": 0,
+      "file_path": "battle_test_candidates\\go_target\\main.go",
+      "line_number": 106,
+      "code_snippet": "func handleExec(w http.ResponseWriter, r *http.Request) {\n\tcmd := r.URL.Query().Get(\"cmd\")\n\tif cmd == \"\" {\n\t\thttp.Error(w, \"Missing 'cmd' parameter\", http.StatusBadRequest)\n\t\treturn\n\t}\n\n\t// VULNERABLE: user input to shell command via bash -c\n\tout, err := exec.Command(\"bash\", \"-c\", cmd).Output()\n\tif err != nil {\n\t\thttp.Error(w, fmt.Sprintf(\"Command failed: %v\", err), http.StatusInternalServerError)\n\t\treturn\n\t}\n\n\tw.Header().Set(\"Content-Type\", \"text/plain\")\n\tw.Write(out)\n}",
+      "step": 9,
+      "category": "sql",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Avoid using 'bash -c' with user input. If command execution is required, use a whitelist of allowed commands and validate input strictly. Consider using a safer alternative like exec.Command with fixed arguments, or implement proper input validation and authentication.",
+      "cwe": "CWE-78",
+      "cvss": 9.8
+    },
+    {
+      "id": "IRON-AI-003",
+      "title": "Path Traversal in handleFiles",
+      "description": "The 'filename' parameter from the URL query string is concatenated into a file path without validation, allowing an attacker to read arbitrary files outside the intended './files/' directory by using path traversal sequences like '../'.",
+      "severity": 1,
+      "file_path": "battle_test_candidates\\go_target\\main.go",
+      "line_number": 127,
+      "code_snippet": "func handleFiles(w http.ResponseWriter, r *http.Request) {\n\tfilename := r.URL.Query().Get(\"filename\")\n\tif filename == \"\" {\n\t\thttp.Error(w, \"Missing 'filename' parameter\", http.StatusBadRequest)\n\t\treturn\n\t}\n\n\t// VULNERABLE: user-controlled path without validation\n\tfilepath := \"./files/\" + filename\n\tdata, err := os.ReadFile(filepath)\n\tif err != nil {\n\t\thttp.Error(w, \"File not found\", http.StatusNotFound)\n\t\treturn\n\t}\n\n\tw.Header().Set(\"Content-Type\", \"application/octet-stream\")\n\tw.Write(data)\n}",
+      "step": 9,
+      "category": "sql",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Validate and sanitize the filename: ensure it does not contain path traversal characters (e.g., '../'), or use a whitelist of allowed filenames. Alternatively, use filepath.Clean and check that the resolved path starts with the intended base directory.",
+      "cwe": "CWE-22",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-AI-004",
+      "title": "Reflected XSS in handleSearch",
+      "description": "User input from the 'query' query parameter is directly concatenated into an HTML string and written to the response without any escaping or sanitization. An attacker can inject arbitrary HTML/JavaScript by crafting a malicious query parameter, leading to reflected cross-site scripting (XSS).",
+      "severity": 1,
+      "file_path": "battle_test_candidates\\go_target\\main.go",
+      "line_number": 88,
+      "code_snippet": "func handleSearch(w http.ResponseWriter, r *http.Request) {\n\tquery := r.URL.Query().Get(\"query\")\n\n\t// VULNERABLE: user input reflected without escaping\n\thtml := `\u003chtml\u003e\u003cbody\u003e\n\t\t\u003ch1\u003eSearch Results\u003c/h1\u003e\n\t\t\u003cp\u003eYou searched for: ` + query + `\u003c/p\u003e\n\t\t\u003cp\u003eNo results found.\u003c/p\u003e\n\t\u003c/body\u003e\u003c/html\u003e`\n\n\tw.Header().Set(\"Content-Type\", \"text/html\")\n\t// Using template here would be safe — raw Write is not\n\tw.Write([]byte(html))\n}",
+      "step": 9,
+      "category": "sql",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Use Go's html/template package to auto-escape output, or manually escape the query value with html.EscapeString() before embedding it in HTML.",
+      "cwe": "CWE-79",
+      "cvss": 7.5
+    }
+  ],
+  "analysis_status": "partial"
+}

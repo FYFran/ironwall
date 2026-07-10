@@ -1,5 +1,7 @@
 # Ironwall v0.5.0 — AI Agent Engine 设计文档
 
+> ⚠️ **状态: 未实现 (PLAN ONLY).** 本文档描述 v0.5.0 的计划架构。当前代码 (v0.7.0) 中 OBSERVE→TRACE→VERIFY→ASSESS 四阶段、攻击路径生成、上下文采集、本地LLM支持均为零行代码。现有 AI 引擎是单阶段 DeepVerify prompt 调用，仅做 finding 真伪判断。
+>
 > 双脑对抗验证通过 | 2026-07-09 | Brain A(皮特架构师) + Brain B(顶级安全ML专家)
 
 ---

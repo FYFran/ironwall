@@ -12,19 +12,22 @@ import (
 func main() {
 	rootCmd := &cobra.Command{
 		Use:   "ironwall",
-		Short: "🔍 Ironwall — 7-Step Security Audit CLI",
-		Long: `Ironwall is an open-source security audit CLI tool.
-It runs a 7-step pipeline against your codebase:
-  1. Secret scanning (gitleaks)
-  2. SAST analysis (semgrep + AI review)
-  3. Endpoint audit
-  4. Hardcoded secrets
-  5. Dependency CVE check
-  6. Server configuration
-  7. Database audit
+		Short: "Ironwall — Multi-SAST Runner with AI Noise Filter",
+		Long: `Ironwall runs multiple SAST scanners with one command and optionally uses AI to filter false positives.
 
-All scanning happens locally. Your code never leaves your machine.
-AI analysis sends only code snippets to the API (you bring your own key).`,
+Pipeline (8 steps):
+  1. Secret scanning (gitleaks)
+  2. SAST analysis (semgrep + gosec + bandit)
+  3. Endpoint detection (pattern-based)
+  4. Hardcoded secrets (regex)
+  5. Dependency CVE check (syft + grype)
+  6. IaC misconfigurations (KICS)
+  7. Database configuration check
+  8. AI noise filter (DeepSeek — requires --ai flag + API key)
+
+Steps 1-7 run 100% locally. Step 8 sends code snippets to DeepSeek API.
+The AI does not find new vulnerabilities — it filters false positives from existing findings.
+The underlying SAST recall determines what Ironwall can detect.`,
 		Version: config.Version,
 		Run: func(cmd *cobra.Command, args []string) {
 			_ = cmd.Help()

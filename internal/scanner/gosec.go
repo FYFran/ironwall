@@ -1,55 +1,69 @@
 package scanner
 
 import (
+	"encoding/json"
 	"fmt"
+	"os/exec"
+	"path/filepath"
 	"strconv"
 	"strings"
-
-	"github.com/securego/gosec/v2"
-	"github.com/securego/gosec/v2/issue"
-	"github.com/securego/gosec/v2/rules"
 
 	"github.com/FYFran/ironwall/internal/report"
 )
 
-// GosecResult holds the results of an embedded gosec scan.
+// GosecResult holds the results of a gosec scan.
 type GosecResult struct {
-	Issues  []*issue.Issue
-	Metrics *gosec.Metrics
-	Errors  map[string][]gosec.Error
+	Issues []GosecIssue `json:"Issues"`
 }
 
-// RunGosec runs an embedded gosec scan on the target directory.
-// This replaces the semgrep subprocess with native Go AST analysis.
+// GosecIssue is a single gosec finding (parsed from JSON output).
+type GosecIssue struct {
+	Severity   string `json:"severity"`
+	Confidence string `json:"confidence"`
+	Cwe        struct {
+		ID  string `json:"ID"`
+		URL string `json:"URL"`
+	} `json:"cwe"`
+	RuleID string `json:"rule_id"`
+	What   string `json:"details"`
+	File   string `json:"file"`
+	Line   string `json:"line"`
+	Col    string `json:"column"`
+	Code   string `json:"code"`
+}
+
+// RunGosec runs gosec CLI on the target directory and parses JSON output.
 func RunGosec(target string) (*GosecResult, error) {
-	conf := gosec.NewConfig()
-	// Configure for thorough analysis
-	conf.Set("G101", map[string]interface{}{
-		"mode": "strict",
-	})
-	conf.Set("G401", map[string]interface{}{"mode": "strict"})
-	conf.Set("G501", map[string]interface{}{"mode": "strict"})
-
-	analyzer := gosec.NewAnalyzer(conf, false, true, false, 0, nil)
-
-	// Load all default gosec rules
-	ruleList := rules.Generate(false)
-	ruleDefs, ruleSuppressed := ruleList.RulesInfo()
-	analyzer.LoadRules(ruleDefs, ruleSuppressed)
-
-	// Run the scan
-	err := analyzer.Process(nil, target+"/...")
+	absTarget, err := filepath.Abs(target)
 	if err != nil {
-		return nil, fmt.Errorf("gosec process failed: %w", err)
+		return nil, fmt.Errorf("gosec: resolve path: %w", err)
 	}
 
-	issues, metrics, errs := analyzer.Report()
+	// Run gosec from target directory with JSON output
+	cmd := exec.Command("gosec", "-fmt=json", "-no-fail", "-quiet", "./...")
+	cmd.Dir = absTarget
 
-	return &GosecResult{
-		Issues:  issues,
-		Metrics: metrics,
-		Errors:  errs,
-	}, nil
+	output, err := cmd.Output()
+	if err != nil {
+		// gosec exits non-zero when issues found — that's expected, try to parse anyway
+		if len(output) == 0 {
+			return nil, fmt.Errorf("gosec: %w (no output)", err)
+		}
+	}
+
+	var result GosecResult
+	if err := json.Unmarshal(output, &result); err != nil {
+		return nil, fmt.Errorf("gosec: parse JSON: %w (output: %.200s)", err, string(output))
+	}
+
+	// Make file paths absolute
+	for i := range result.Issues {
+		if !filepath.IsAbs(result.Issues[i].File) {
+			result.Issues[i].File = filepath.Join(absTarget, result.Issues[i].File)
+		}
+	}
+
+	return &result, nil
 }
 
 // ToFindings converts gosec issues to ironwall Finding structs.
@@ -58,12 +72,21 @@ func (r *GosecResult) ToFindings(target string) []report.Finding {
 		return nil
 	}
 
+	absTarget, _ := filepath.Abs(target)
+
 	var findings []report.Finding
 	for i, iss := range r.Issues {
-		sev := mapGosecSeverity(iss.Severity)
+		sev := mapGosecSeverityStr(iss.Severity)
 		cwe := iss.Cwe.ID
 		category := mapGosecRuleToCategory(iss.RuleID)
 		lineNum, _ := strconv.Atoi(iss.Line)
+
+		filePath := iss.File
+		// Make relative to target if absolute
+		if strings.HasPrefix(filePath, absTarget) {
+			filePath = strings.TrimPrefix(filePath, absTarget+"/")
+			filePath = strings.TrimPrefix(filePath, absTarget+"\\")
+		}
 
 		var codeSnippet string
 		if iss.Code != "" {
@@ -71,16 +94,22 @@ func (r *GosecResult) ToFindings(target string) []report.Finding {
 		}
 
 		description := iss.What
-		if iss.Confidence > 0 {
-			description += fmt.Sprintf("\nGosec confidence: %.0f%%", float64(iss.Confidence)*100)
+		confidence := mapGosecConfidence(iss.Confidence)
+		if confidence > 0 {
+			description += fmt.Sprintf("\nGosec confidence: %.0f%%", confidence*100)
+		}
+
+		suffix := ""
+		if iss.RuleID != "" {
+			suffix = " " + iss.RuleID
 		}
 
 		findings = append(findings, report.Finding{
 			ID:          fmt.Sprintf("IRON-GOSEC-%03d", i+1),
-			Title:       fmt.Sprintf("[%s] %s", iss.RuleID, iss.What),
+			Title:       fmt.Sprintf("Potential%s: %s", suffix, iss.What),
 			Description: description,
 			Severity:    sev,
-			FilePath:    iss.File,
+			FilePath:    filePath,
 			LineNumber:  lineNum,
 			CodeSnippet: codeSnippet,
 			Step:        2,
@@ -88,49 +117,59 @@ func (r *GosecResult) ToFindings(target string) []report.Finding {
 			CWE:         cwe,
 			CVSS:        report.SeverityToCVSS(sev),
 			ToolOutput:  fmt.Sprintf("Rule: %s | Line: %s | Column: %s", iss.RuleID, iss.Line, iss.Col),
-			References:  []string{fmt.Sprintf("https://github.com/securego/gosec#available-rules")},
+			References:  []string{"https://github.com/securego/gosec#available-rules"},
 		})
 	}
 	return findings
 }
 
-// mapGosecSeverity maps gosec Score to ironwall Severity.
-func mapGosecSeverity(s issue.Score) report.Severity {
-	switch s {
-	case issue.High:
+func mapGosecSeverityStr(s string) report.Severity {
+	switch strings.ToUpper(s) {
+	case "HIGH":
 		return report.SevHigh
-	case issue.Medium:
+	case "MEDIUM":
 		return report.SevMedium
-	case issue.Low:
+	case "LOW":
 		return report.SevLow
 	default:
 		return report.SevLow
 	}
 }
 
-// mapGosecRuleToCategory maps gosec rule IDs to ironwall categories.
+func mapGosecConfidence(s string) float64 {
+	switch strings.ToUpper(s) {
+	case "HIGH":
+		return 0.9
+	case "MEDIUM":
+		return 0.6
+	case "LOW":
+		return 0.3
+	default:
+		return 0.0
+	}
+}
+
 func mapGosecRuleToCategory(ruleID string) string {
 	switch {
-	case strings.HasPrefix(ruleID, "G1"): // G101-G112: Hardcoded credentials
+	case strings.HasPrefix(ruleID, "G1"):
 		return "hardcoded-credentials"
-	case strings.HasPrefix(ruleID, "G2"): // G201-G204: SQL injection
+	case strings.HasPrefix(ruleID, "G2"):
 		return "sql-injection"
-	case strings.HasPrefix(ruleID, "G3"): // G301-G307: File operations
+	case strings.HasPrefix(ruleID, "G3"):
 		return "path-traversal"
-	case strings.HasPrefix(ruleID, "G4"): // G401-G407: Crypto
+	case strings.HasPrefix(ruleID, "G4"):
 		return "weak-crypto"
-	case strings.HasPrefix(ruleID, "G5"): // G501-G505: Blocklisted imports
+	case strings.HasPrefix(ruleID, "G5"):
 		return "insecure-configuration"
-	case strings.HasPrefix(ruleID, "G6"): // G601-G602: Memory issues
+	case strings.HasPrefix(ruleID, "G6"):
 		return "injection"
-	case isTaintRule(ruleID): // G7xx: Taint analysis rules
+	case isTaintRule(ruleID):
 		return "injection"
 	default:
 		return "static-analysis"
 	}
 }
 
-// isTaintRule checks if a gosec rule ID is a taint analysis rule.
 func isTaintRule(ruleID string) bool {
 	taintPrefixes := []string{"G701", "G702", "G703", "G704", "G705", "G706", "G707", "G708", "G709", "G710"}
 	for _, p := range taintPrefixes {
@@ -140,4 +179,3 @@ func isTaintRule(ruleID string) bool {
 	}
 	return false
 }
-

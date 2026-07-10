@@ -39,6 +39,12 @@ type Config struct {
 	// TimeoutSeconds is the max time for the full scan (0 = no limit).
 	TimeoutSeconds int
 
+	// DeepAnalysis enables Phase B AI deep analysis (OBSERVE→TRACE→VERIFY).
+	DeepAnalysis bool
+
+	// DeepStrict filters Phase B to CRITICAL+HIGH only.
+	DeepStrict bool
+
 	// GitCloneDepth for --github mode (0 = full clone).
 	GitCloneDepth int
 }

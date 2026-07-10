@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -26,17 +28,23 @@ func newScanCmd() *cobra.Command {
 		aiModel       string
 		timeout       int
 		noTestFilter  bool
+		deepAnalysis  bool
+	deepStrict   bool
 	)
 
 	cmd := &cobra.Command{
 		Use:   "scan [target]",
-		Short: "Run security audit on a target directory",
-		Long: `Run the full 7-step security audit pipeline on a target directory.
-By default all 7 steps run. Use --quick for a fast scan (steps 1+4 only).
+		Short: "Run multi-scanner security audit on a target directory",
+		Long: `Run the 8-step security audit pipeline (semgrep + gosec + bandit + gitleaks + more).
+
+By default all steps run locally. Use --ai to enable AI noise filtering (requires DEEPSEEK_API_KEY).
+Use --deep to enable AI-powered deep analysis (OBSERVE→TRACE→VERIFY) that finds vulnerabilities SAST misses.
+Use --quick for a fast scan (secrets + hardcoded patterns only).
 
 Examples:
   ironwall scan .
-  ironwall scan ./my-project --format markdown
+  ironwall scan ./my-project --ai --format markdown
+  ironwall scan ./my-project --ai --deep
   ironwall scan /path/to/code --quick --format json`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,6 +65,8 @@ Examples:
 			cfg.AIModel = aiModel
 			cfg.TimeoutSeconds = timeout
 			cfg.NoTestFilter = noTestFilter
+			cfg.DeepAnalysis = deepAnalysis
+			cfg.DeepStrict = deepStrict
 			cfg.ResolveAIKey()
 
 			return runScan(cfg)
@@ -72,6 +82,8 @@ Examples:
 	cmd.Flags().BoolVar(&aiEnabled, "ai", false, "Enable AI-assisted analysis (requires IRONWALL_AI_KEY or DEEPSEEK_API_KEY)")
 	cmd.Flags().StringVar(&aiModel, "ai-model", "deepseek-chat", "AI model to use")
 	cmd.Flags().IntVar(&timeout, "timeout", 300, "Scan timeout in seconds")
+	cmd.Flags().BoolVar(&deepAnalysis, "deep", false, "Enable AI deep analysis: AST inspection + LLM data flow tracing (requires --ai)")
+	cmd.Flags().BoolVar(&deepStrict, "deep-strict", false, "Only report CRITICAL+HIGH Phase B findings (reduces noise)")
 	cmd.Flags().BoolVar(&noTestFilter, "no-test-filter", false, "Disable AI test-file heuristic (for benchmarks)")
 
 	return cmd
@@ -148,7 +160,7 @@ func runScan(cfg *config.Config) error {
 	}
 
 	// Handle interrupt signal
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(cfg.TimeoutSeconds)*time.Second)
 	defer cancel()
 
 	sigCh := make(chan os.Signal, 1)
@@ -163,6 +175,71 @@ func runScan(cfg *config.Config) error {
 	result, err := pipe.Run(ctx, cfg.Target)
 	if err != nil {
 		return fmt.Errorf("scan failed: %w", err)
+	}
+
+	// Phase B: AI deep analysis (OBSERVE→TRACE→VERIFY→MISSING→CONFIG)
+	if cfg.DeepAnalysis && engine != nil && engine.Available() {
+		log.Println("\n--- Phase B: AI Deep Analysis ---")
+		deepResult, deepErr := engine.AnalyzeDeep(ctx, cfg.Target)
+		if deepErr != nil {
+			log.Printf("Deep analysis error: %v", deepErr)
+		} else if deepResult != nil {
+			newCount := 0
+			if len(deepResult.Verified) > 0 {
+				aiFindings := engine.ConvertToFindings(deepResult.Verified)
+				for i := range aiFindings {
+					aiFindings[i].Step = 9
+					result.Findings = append(result.Findings, aiFindings[i])
+				}
+				newCount += len(aiFindings)
+			}
+			if len(deepResult.MissingCtrls) > 0 {
+				missFindings := engine.ConvertMissingToFindings(deepResult.MissingCtrls)
+				for i := range missFindings {
+					missFindings[i].Step = 9
+					result.Findings = append(result.Findings, missFindings[i])
+				}
+				newCount += len(missFindings)
+			}
+			if len(deepResult.ConfigIssues) > 0 {
+				cfgFindings := engine.ConvertConfigToFindings(deepResult.ConfigIssues)
+				for i := range cfgFindings {
+					cfgFindings[i].Step = 9
+					result.Findings = append(result.Findings, cfgFindings[i])
+				}
+				newCount += len(cfgFindings)
+			}
+			// Dedup Phase B findings against SAST findings
+			beforeDedup := newCount
+			phaseBStart := len(result.Findings) - newCount
+			if phaseBStart >= 0 && phaseBStart < len(result.Findings) {
+				phaseBOnly := result.Findings[phaseBStart:]
+				uniqueOnly := ai.DeduplicatePhaseB(phaseBOnly, result.Findings[:phaseBStart])
+				result.Findings = result.Findings[:phaseBStart]
+				result.Findings = append(result.Findings, uniqueOnly...)
+				newCount = len(uniqueOnly)
+				log.Printf("AI dedup: %d PhaseB -> %d unique (%d SAST overlaps)", beforeDedup, newCount, beforeDedup-newCount)
+			}
+			// --deep-strict: only report CRITICAL+HIGH Phase B findings
+			if cfg.DeepStrict {
+				phaseBStart := len(result.Findings) - newCount
+				var filtered []report.Finding
+				for _, f := range result.Findings[phaseBStart:] {
+					if f.Severity <= 1 { // CRITICAL(0) or HIGH(1)
+						filtered = append(filtered, f)
+					}
+				}
+				if len(filtered) < newCount {
+					result.Findings = result.Findings[:phaseBStart]
+					result.Findings = append(result.Findings, filtered...)
+					log.Printf("AI strict: %d -> %d (CRITICAL+HIGH only)", newCount, len(filtered))
+					newCount = len(filtered)
+				}
+			}
+			log.Printf("AI deep analysis: %d unique findings (%d trace, %d missing, %d config)",
+				newCount, len(deepResult.Verified), len(deepResult.MissingCtrls), len(deepResult.ConfigIssues))
+			log.Printf("AI cost: %s", deepResult.Cost)
+		}
 	}
 
 	// Generate report

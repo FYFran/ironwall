@@ -1,0 +1,128 @@
+{
+  "version": "0.7.0",
+  "target": "battle_test_candidates/go_target",
+  "started_at": "2026-07-10T09:25:42+08:00",
+  "completed_at": "2026-07-10T09:25:43+08:00",
+  "duration": "871ms",
+  "summary": {
+    "critical": 0,
+    "high": 1,
+    "medium": 1,
+    "low": 1,
+    "info": 3,
+    "total": 6
+  },
+  "findings": [
+    {
+      "id": "IRON-SECRET-001",
+      "title": "Secret detected: Detected a Generic API Key, potentially exposing access to various services and sensitive operations.",
+      "description": "Betterleaks detected a Detected a Generic API Key, potentially exposing access to various services and sensitive operations. in battle_test_candidates/go_target/main.go:31. Rule: generic-api-key. Entropy: 4.92",
+      "severity": 2,
+      "file_path": "battle_test_candidates/go_target/main.go",
+      "line_number": 31,
+      "code_snippet": "  31 | sk-a**********************************8stu",
+      "step": 1,
+      "category": "secret-detected",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-312",
+      "cvss": 5,
+      "tool_output": "Rule: generic-api-key | Tags: [] | Entropy: 4.92 | Verified: false",
+      "references": [
+        "https://github.com/zricethezav/betterleaks"
+      ]
+    },
+    {
+      "id": "IRON-002",
+      "title": "Potential Generic API key in config",
+      "description": "Regex pattern detected a potential Generic API key in config at main.go:31. This may be a hardcoded secret that automated scanners missed.",
+      "severity": 1,
+      "file_path": "main.go",
+      "line_number": 31,
+      "code_snippet": "  31 | const apiKey = \"sk-abc123def456ghi789jkl012mno345pqr678stu\"",
+      "step": 4,
+      "category": "hardcoded-secret",
+      "attack_scenario": {
+        "actor": "Anyone with access to the source code",
+        "path": "Read the file, extract the credential, use it to access the target service",
+        "impact": "Unauthorized access to the protected service",
+        "is_real": true,
+        "explanation": "Hardcoded secrets are accessible to anyone who can read the source code."
+      },
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-003",
+      "title": "SBOM generated: 1 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 1 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-004",
+      "title": "Not a git repository — supply chain checks limited",
+      "description": "Supply chain security checks (SBOM provenance, SLSA) require a git repository. Without git history, we cannot verify commit signatures or build provenance.",
+      "severity": 3,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-1104",
+      "cvss": 2
+    },
+    {
+      "id": "IRON-005",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan battle_test_candidates/go_target -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-006",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "battle_test_candidates/go_target",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "skipped"
+}
