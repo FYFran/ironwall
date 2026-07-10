@@ -8,7 +8,7 @@
 
 |  | Predicted + | Predicted - |
 |---|---|---|
-| **Actual +** | TP=6 | FN=1 |
+| **Actual +** | TP=7 | FN=0 |
 | **Actual -** | FP=0 | TN=3 |
 
 ## Metrics
@@ -16,8 +16,8 @@
 | Metric | AI (DeepSeek V3) | Offline (Rules) | Delta |
 |---|---|---|---|
 | Precision | 1.000 | 1.000 | +0.000 |
-| Recall | 0.857 | 1.000 | -0.143 |
-| F1 | 0.923 | 1.000 | -0.077 |
+| Recall | 1.000 | 1.000 | +0.000 |
+| F1 | 1.000 | 1.000 | +0.000 |
 
 ## Per-Finding Comparison
 
@@ -25,14 +25,14 @@
 |---|---|---|---|---|---|
 | GOLDEN-001 | confirm | exploit | 0.95 | ✅ | ✅ |
 | GOLDEN-002 | confirm | exploit | 0.95 | ✅ | ✅ |
-| GOLDEN-003 | confirm | NOT | 0.95 | ✅ | ❌ |
+| GOLDEN-003 | confirm | exploit | 0.95 | ✅ | ✅ |
 | GOLDEN-004 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-005 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-006 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-007 | confirm | exploit | 0.95 | ✅ | ✅ |
-| GOLDEN-008 | reject | NOT | 0.90 | ✅ | ✅ |
+| GOLDEN-008 | reject | NOT | 0.30 | ✅ | ✅ |
 | GOLDEN-009 | reject | NOT | 0.95 | ✅ | ✅ |
-| GOLDEN-010 | reject | NOT | 0.95 | ✅ | ✅ |
+| GOLDEN-010 | reject | NOT | 1.00 | ✅ | ✅ |
 
 ## Analysis
 

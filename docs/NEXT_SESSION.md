@@ -1,50 +1,70 @@
-# NEXT_SESSION — 铁壁 (2026-07-10 最终存档)
+# NEXT_SESSION — 铁壁 (2026-07-10 晚间存档)
 
-> Codex proxy修复完成 | Brain B可独立联网搜索 | 全部commit
-
----
-
-## 本次完成 (7.10全天)
-
-### Phase A ✅ — 诚实重新定位
-- README重写, CLI诚实化, 未实现文档标记
-
-### Phase B ✅ — AI审计引擎 (OBSERVE→TRACE→VERIFY→MISSING→CONFIG)
-- Go OBSERVE (12安全模式) + Python OBSERVE (ast.parse)
-- TRACE数据流 + MISSING缺失控制 + CONFIG配置
-- VERIFY验证 → 严格模式35→5 actionable
-- 实战GT-008 (CWE-306) — SAST找不到的独特发现
-
-### Gosec修复 ✅ — 嵌入式→CLI, Go 1.25兼容
-
-### Brain B ✅ — Codex代理修复 (6个改动)
-- tavily_search工具注入 → DeepSeek可调用
-- 工具模式强制非流式 → tool call loop工作
-- SSE协议完整实现 → Codex消费无错误
-- Brain B自主搜索, 零黑盒影响
-- 详见: `docs/CODEX_PROXY_FIXES.md`
-
-### Brain B代码审查 ✅ — 5 CRITICAL修复, 13 IMPORTANT记录
-
-### KB v4.0 ✅ — 完整重构, 最新2026研究
-
-### 代码统计
-- 提交: `988ae9d` — 39文件, +11,300/-621行
-- 新文件15个, 修改文件10个
+> Brain B v4.1注入 | 死代码清理 | 调用图 | Flask条件化 | 验证统一 | 全测试通过
 
 ---
 
-## 下一步 (按优先级)
+## 本轮完成 (7.10晚间)
 
-### 🔴 今天继续可做
-1. **Python TRACE实战** — 跑secure-file-management看MISSING能找到啥 (有代码没测)
-2. **死代码清理** — engine.go里runTriage/runDeepVerify (~90行)
-3. **Proxy文档已存** — `docs/CODEX_PROXY_FIXES.md`
+### 🔴 Brain B升级 ✅
+- KB v4.1: +Arnica AI SAST +CSA 2026 +竞争缺口
+- Proxy注入: `main.py`启动读KB → system prompt (13KB)
+- tavily_search可用 → Brain B独立联网搜索
+- KB路径: `docs/BRAIN_B_KNOWLEDGE.md`
+- Proxy文档: `docs/CODEX_PROXY_FIXES.md`
 
-### 🟡 下次会话
-4. 大项目测试 (100+文件Go项目)
-5. PromptVerify vs DeepVerify矛盾修复
-6. Flask规则条件化 (非Python扫描别浪费token)
+### 🔴 死代码清理 ✅ — 170行移除
+- `runTriage` (78行) + `runDeepVerify` wrapper (3行)
+- 3个triage prompts + 2个triage types
+- `noTestFilter` from Engine/NewEngine/scan.go/config.go
+- `--no-test-filter` CLI flag
+
+### 🔴 调用图 ✅ — AST-based, 零依赖
+- 新文件: `internal/ai/observe/callgraph.go` (330行)
+- Ironwall自身: 799函数, 1439调用边, 38包
+- `WalkTaint()` BFS跨文件追踪
+- 集成进 `ObserveResult` + OBSERVE pipeline
+- 测试: `callgraph_test.go`
+
+### 🟡 Verify Prompt统一 ✅
+- `verifyBatchOneByOne` 现在用 `SystemPromptDeepVerify` (同batch)
+- 阈值一致: `!IsReal && Confidence >= 0.7`
+- 文档化一致性契约
+
+### 🟡 Flask规则条件化 ✅
+- `DeepVerifyPrompt(hasPython)` 动态选择prompt
+- `Engine.SetLanguages(hasGo, hasPython)` API
+- `detectLanguages()` 自动检测目标语言
+- 非Python项目每次batch省~120 tokens
+
+### 🟡 Python OBSERVE ✅
+- CLI验证: 5文件, 10 sections, 8 handlers
+- SAST发现30个(6 CRITICAL + 19 HIGH)
+- MISSING应能找到: `delete_file`/`unshare_file` 缺CSRF保护(CWE-352)
+- Phase B AI全pipeline: 需更长timeout (当前120s不够)
+
+---
+
+## 代码统计
+
+- 提交: `b5afabd` — 5文件, +86/-20行 (Flask conditioning + verify fix)
+- 提交: `00213f5` — Python OBSERVE集成测试
+- 提交: `1eafe6e` — Brain B v4.1 + 死代码 + 调用图 (10文件, +676/-166)
+- **总计: +819/-186行, 3 commits**
+
+---
+
+## 下一步
+
+### 🔴 继续优先
+1. **Python TRACE AI实战** — 加长timeout或分步运行Phase B
+2. **Brain B模型升级** — DeepSeek → Claude Opus 4.8 (SAST F1差~0.1)
+3. **双脑对抗** — 第二个独立Brain B互相挑战
+
+### 🟡 下次
+4. **调用图接入TRACE** — TRACE prompt加call graph context
+5. **大项目调用图实战** — 100+文件Go项目跨文件污点追踪
+6. **Python调用图** — AST import追踪, 同Go模式
 
 ### 🟢 低优先级
 7. 离线LLM (Ollama)
@@ -58,26 +78,27 @@
 
 ```
 1. python -m mempalace wake-up --wing claudefiles
-2. python -m mempalace search "ironwall Phase B next" --wing claudefiles
+2. python -m mempalace search "ironwall v4.1" --wing claudefiles
 3. 读 docs/NEXT_SESSION.md (本文件)
-4. 读 docs/CODEX_PROXY_FIXES.md (如果需要修代理)
-5. Codex proxy: port 4000 (应已运行)
-6. battle_test_candidates/go_target/BATTLE_REPORT.md — 上次实战结果
+4. Codex proxy port 4000 (应已运行, KB自动注入)
+5. Brain B测试: curl -s http://localhost:4000/v1/responses -H "Content-Type: application/json" -d '{"input":[{"role":"user","content":"What is Arnica AI SAST?"}],"stream":false}' | grep delta
 ```
 
-## 关键文件索引
+## 关键文件
 
 | 文件 | 说明 |
 |------|------|
-| `docs/BRAIN_B_KNOWLEDGE.md` | v4.0知识库 |
-| `docs/CODEX_PROXY_FIXES.md` | Codex代理修复文档 |
-| `docs/DESIGN_PhaseB_Real_AI_Engine.md` | Phase B架构 |
-| `docs/BRAIN_B_REVIEW_PhaseB.md` | Brain B架构审查 |
-| `internal/ai/phaseb.go` | Phase B全部方法 |
-| `internal/ai/observe/` | OBSERVE模块 (Go+Python) |
-| `battle_test_candidates/go_target/` | Go测试目标+实战报告 |
-| `~/.codex-deepseek/src/main.py` | Codex代理 (6个修复) |
+| `docs/BRAIN_B_KNOWLEDGE.md` | v4.1知识库 |
+| `docs/CODEX_PROXY_FIXES.md` | Codex代理修复 |
+| `internal/ai/observe/callgraph.go` | 调用图引擎 (NEW) |
+| `internal/ai/observe/callgraph_test.go` | 调用图测试 (NEW) |
+| `internal/ai/engine.go` | 死代码清理 + verify统一 |
+| `internal/ai/prompts.go` | Flask条件化 + DeepVerifyPrompt() |
+| `internal/ai/types.go` | 砍TriageResult/TriageVerdict |
+| `cmd/ironwall/scan.go` | detectLanguages() + SetLanguages |
+| `internal/config/config.go` | 砍NoTestFilter |
 
 ---
 
-*皮特 + Codex DeepSeek-v4-pro | 2026-07-10 最终存档*
+*皮特 + Brain B (DeepSeek-v4-pro via Codex) | 2026-07-10 晚间存档*
+*三连commit: 1eafe6e → 00213f5 → b5afabd*
