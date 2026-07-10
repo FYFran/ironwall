@@ -65,10 +65,11 @@
 6. **Brain B攻击点**: 名称匹配over-match、token预算爆炸、Python nil静默退化、LLM信任错误图数据→更危险的幻觉 — 全部通过Option C guardrails防御
 
 ### 🔴 继续优先
-1. **Python TRACE AI实战** — 加长timeout或分步运行Phase B（当前120s不够）
+1. ~~**Python TRACE AI实战 — 超时修复**~~ ✅ HTTP timeout 120s→300s, --deep auto-900s
 2. **Brain B模型升级** — DeepSeek → Claude Opus 4.8 (SAST F1差~0.1)
 3. **Recall审计** — 对比TRACE call graph ON vs OFF在实战项目上的Recall差异
 4. **大项目调用图实战** — 100+文件Go项目验证entry point detection + chain质量
+5. **Python TRACE 端到端测试** — 用secure-file-management跑完整Phase B (需API key)
 
 ### 🟡 下次
 5. **Python调用图** — AST import追踪, 同Go模式
