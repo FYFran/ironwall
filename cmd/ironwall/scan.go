@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
@@ -129,6 +131,27 @@ func newVersionCmd() *cobra.Command {
 	}
 }
 
+// detectLanguages checks whether the target directory contains Go and/or Python source files.
+func detectLanguages(target string) (hasGo, hasPython bool) {
+	filepath.Walk(target, func(path string, info os.FileInfo, err error) error {
+		if err != nil || info.IsDir() {
+			return nil
+		}
+		ext := strings.ToLower(filepath.Ext(path))
+		switch ext {
+		case ".go":
+			hasGo = true
+		case ".py":
+			hasPython = true
+		}
+		if hasGo && hasPython {
+			return filepath.SkipAll // both found, stop walking
+		}
+		return nil
+	})
+	return
+}
+
 func runScan(cfg *config.Config) error {
 	// Build AI engine if enabled (dual-model: triage + deep verify)
 	var engine *ai.Engine
@@ -136,6 +159,10 @@ func runScan(cfg *config.Config) error {
 		triageClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
 		deepClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIDeepModel)
 		engine = ai.NewEngine(triageClient, deepClient)
+
+		// Auto-detect target languages for conditional prompt rules
+		hasGo, hasPython := detectLanguages(cfg.Target)
+		engine.SetLanguages(hasGo, hasPython)
 	}
 
 	// Build pipeline

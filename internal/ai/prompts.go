@@ -14,19 +14,17 @@ Your analysis must be:
 
 NEVER fabricate findings. If you're unsure, say so and set confidence low.`
 
-// SystemPromptDeepVerify is for the deep adversarial verification stage (DeepSeek R1).
-const SystemPromptDeepVerify = `You are a senior penetration tester doing adversarial verification of SAST findings.
+// SystemPromptDeepVerify is for the deep adversarial verification stage.
+// Contains core rules (language-agnostic) + optional framework-specific rules.
+// Use DeepVerifyPrompt(hasPython) to get the appropriate prompt for the target.
+const SystemPromptDeepVerifyCore = `You are a senior penetration tester doing adversarial verification of SAST findings.
 Your job is to CHALLENGE each finding, not confirm it. Most SAST findings are false positives.
 
 CRITICAL RULES — apply these FIRST before any other analysis:
 1. redirect(request.url) → ALWAYS FALSE POSITIVE. This is a self-redirect pattern (redirect to same URL). There is NO open redirect when redirecting to request.url — the attacker cannot control the target. Override: is_real=false, confidence=0.95.
-2. redirect(url_for(...)) → ALWAYS FALSE POSITIVE. url_for generates internal Flask routes, not external URLs.
-3. request.form.get() that goes to flash() or redirect() or render_template() → FALSE POSITIVE. Flask/Jinja2 auto-escapes all template variables. No XSS vector exists.
-4. request.form.get() that ONLY goes to DB queries via SQLAlchemy ORM → FALSE POSITIVE. ORM parameterizes queries.
-5. host='0.0.0.0' without debug=True on production → LOW severity at most, not CRITICAL.
-6. Rule names containing 'django' in Flask apps → evaluate the ACTUAL vulnerability pattern, not the rule name. CSRF in HTML forms is real regardless of framework name.
-7. Missing SRI on CDN scripts → REAL finding (supply chain risk). Do NOT suppress.
-8. Code in test files, examples, or comments → FALSE POSITIVE.
+2. host='0.0.0.0' without debug=True on production → LOW severity at most, not CRITICAL.
+3. Missing SRI on CDN scripts → REAL finding (supply chain risk). Do NOT suppress.
+4. Code in test files, examples, or comments → FALSE POSITIVE.
 
 For EACH finding, answer three questions. ONLY if ALL THREE have SPECIFIC, CONCRETE answers → is_real = true.
 If ANY question cannot be answered concretely → is_real = false.
@@ -36,6 +34,28 @@ Q2 (Path): What is the CONCRETE step-by-step attack path? Each step must referen
 Q3 (Impact): What does the attacker ACTUALLY gain? Be specific. No vague 'information disclosure'.
 
 Respond ONLY with valid JSON. No markdown.`
+
+// Flask-specific FP rules — only appended when target contains Python files.
+// Prevents wasted tokens and confusion on Go/JS/Rust projects.
+const SystemPromptDeepVerifyFlask = `
+
+FLASK/PYTHON-SPECIFIC RULES (target is a Python project):
+5. redirect(url_for(...)) → ALWAYS FALSE POSITIVE. url_for generates internal Flask routes, not external URLs.
+6. request.form.get() that goes to flash() or redirect() or render_template() → FALSE POSITIVE. Flask/Jinja2 auto-escapes all template variables. No XSS vector exists.
+7. request.form.get() that ONLY goes to DB queries via SQLAlchemy ORM → FALSE POSITIVE. ORM parameterizes queries.
+8. Rule names containing 'django' in Flask apps → evaluate the ACTUAL vulnerability pattern, not the rule name. CSRF in HTML forms is real regardless of framework name.`
+
+// SystemPromptDeepVerify is the backward-compatible constant (includes Flask rules).
+// New code should use DeepVerifyPrompt() instead.
+const SystemPromptDeepVerify = SystemPromptDeepVerifyCore + SystemPromptDeepVerifyFlask
+
+// DeepVerifyPrompt returns the appropriate deep verify system prompt based on target language.
+func DeepVerifyPrompt(hasPython bool) string {
+	if hasPython {
+		return SystemPromptDeepVerifyCore + SystemPromptDeepVerifyFlask
+	}
+	return SystemPromptDeepVerifyCore
+}
 
 // PromptSASTReview asks AI to review semgrep findings and filter false positives.
 const PromptSASTReview = `Review these SAST findings from a codebase security scan.

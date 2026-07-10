@@ -18,6 +18,15 @@ const maxConcurrency = 2   // max concurrent API calls (conservative for chat mo
 type Engine struct {
 	triageClient *Client // Fast model (DeepSeek V3 / deepseek-chat) — used as fallback for deep verify
 	deepClient   *Client // Reasoning model (DeepSeek R1 / deepseek-reasoner)
+	hasPython    bool    // Target contains Python files (enables Flask-specific FP rules)
+	hasGo        bool    // Target contains Go files
+}
+
+// SetLanguages configures target language hints for conditional prompt rules.
+// Call before Analyze() to avoid wasted tokens on irrelevant framework rules.
+func (e *Engine) SetLanguages(hasGo, hasPython bool) {
+	e.hasGo = hasGo
+	e.hasPython = hasPython
 }
 
 // NewEngine creates a new multi-stage AI engine.
@@ -144,7 +153,7 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 		var result DeepVerifyResult
 		// Dynamic max_tokens: 256 base + 200 per finding in batch (batch of 20 ≈ 4256 tokens)
 		batchMaxTokens := 256 + len(batch) * 200
-		err := client.ChatJSONWithMaxTokens(ctx, SystemPromptDeepVerify, prompt, &result, batchMaxTokens)
+		err := client.ChatJSONWithMaxTokens(ctx, DeepVerifyPrompt(e.hasPython), prompt, &result, batchMaxTokens)
 		if err != nil {
 			log.Printf("[AI DeepVerify] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
 			status.DeepErrors++
@@ -191,7 +200,10 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	return append(reviewList, passThrough...), status
 }
 
-// verifyBatchOneByOne verifies findings individually when batch fails.
+// verifyBatchOneByOne verifies findings individually when batch DeepVerify fails.
+// Uses same SystemPromptDeepVerify as batch path for consistency.
+// Same suppression threshold: !IsReal && Confidence >= 0.7.
+// AttackTestResult fields map 1:1 to DeepVerifyVerdict fields.
 func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding) {
 	client := e.deepClient
 	if client == nil || !client.Available() {
@@ -211,7 +223,7 @@ func (e *Engine) verifyBatchOneByOne(ctx context.Context, batch []report.Finding
 		prompt := fmt.Sprintf(PromptAttackScenario, findingDesc)
 
 		var result AttackTestResult
-		err := client.ChatJSON(ctx, SystemPromptBase, prompt, &result)
+		err := client.ChatJSON(ctx, DeepVerifyPrompt(e.hasPython), prompt, &result)
 		if err != nil {
 			log.Printf("[AI DeepVerify] one-by-one %s FAILED: %v", key, err)
 			failCount++
