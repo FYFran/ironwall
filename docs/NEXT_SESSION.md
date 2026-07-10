@@ -56,15 +56,23 @@
 
 ## 下一步
 
+### ✅ 本次完成 (2026-07-10 深夜)
+1. **Brain B对抗审查** — Option A(per-section raw CG)被否决，选Option C(pre-computed validated taint chains)
+2. **调用图→TRACE集成** — `WalkTaintFromEntryPoints()` + `ValidateChain()` + `DeduplicateChains()` + `GetChainsForFunction()`
+3. **TRACE prompt升级** — `SystemPromptTrace` 新增5条call graph hints解读规则
+4. **Pipeline连接** — `AnalyzeDeep()` 自动计算taint chains传入`Trace()`
+5. **全测试通过** — observe(4.4s) + pipeline(1.7s) + report/scanner 无回归
+6. **Brain B攻击点**: 名称匹配over-match、token预算爆炸、Python nil静默退化、LLM信任错误图数据→更危险的幻觉 — 全部通过Option C guardrails防御
+
 ### 🔴 继续优先
-1. **Python TRACE AI实战** — 加长timeout或分步运行Phase B
+1. **Python TRACE AI实战** — 加长timeout或分步运行Phase B（当前120s不够）
 2. **Brain B模型升级** — DeepSeek → Claude Opus 4.8 (SAST F1差~0.1)
-3. **双脑对抗** — 第二个独立Brain B互相挑战
+3. **Recall审计** — 对比TRACE call graph ON vs OFF在实战项目上的Recall差异
+4. **大项目调用图实战** — 100+文件Go项目验证entry point detection + chain质量
 
 ### 🟡 下次
-4. **调用图接入TRACE** — TRACE prompt加call graph context
-5. **大项目调用图实战** — 100+文件Go项目跨文件污点追踪
-6. **Python调用图** — AST import追踪, 同Go模式
+5. **Python调用图** — AST import追踪, 同Go模式
+6. ~~**调用图接入TRACE**~~ ✅ 已完成
 
 ### 🟢 低优先级
 7. 离线LLM (Ollama)

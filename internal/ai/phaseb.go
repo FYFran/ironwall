@@ -47,7 +47,8 @@ type TraceResult struct {
 }
 
 // Trace runs Phase 2a (TRACE) — LLM data flow analysis.
-func (e *Engine) Trace(ctx context.Context, sections []ObservedSection) ([]TraceResult, error) {
+// chains is optional cross-file taint chains from call graph (nil = skip).
+func (e *Engine) Trace(ctx context.Context, sections []ObservedSection, chains []observe.TaintChain) ([]TraceResult, error) {
 	if len(sections) == 0 || !e.Available() {
 		return nil, nil
 	}
@@ -65,19 +66,19 @@ func (e *Engine) Trace(ctx context.Context, sections []ObservedSection) ([]Trace
 		if batchIdx > 0 {
 			time.Sleep(batchInterval)
 		}
-		batchResults, err := e.traceBatch(ctx, client, batch)
+		batchResults, err := e.traceBatch(ctx, client, batch, chains)
 		if err != nil {
 			log.Printf("[AI TRACE] batch %d/%d failed: %v", batchIdx+1, len(batches), err)
 			continue
 		}
 		results = append(results, batchResults...)
 	}
-	log.Printf("[AI TRACE] analyzed %d sections → %d potential vulns", len(sections), len(results))
+	log.Printf("[AI TRACE] analyzed %d sections → %d potential vulns (chains=%d)", len(sections), len(results), len(chains))
 	return results, nil
 }
 
-func (e *Engine) traceBatch(ctx context.Context, client *Client, sections []ObservedSection) ([]TraceResult, error) {
-	summary := buildTraceSummary(sections)
+func (e *Engine) traceBatch(ctx context.Context, client *Client, sections []ObservedSection, chains []observe.TaintChain) ([]TraceResult, error) {
+	summary := buildTraceSummaryWithCG(sections, chains)
 	prompt := fmt.Sprintf(PromptTrace, summary)
 
 	var response struct {
@@ -122,7 +123,7 @@ func (e *Engine) traceBatch(ctx context.Context, client *Client, sections []Obse
 	return results, nil
 }
 
-func buildTraceSummary(sections []ObservedSection) string {
+func buildTraceSummaryWithCG(sections []ObservedSection, chains []observe.TaintChain) string {
 	var sb strings.Builder
 	for i, s := range sections {
 		sb.WriteString(fmt.Sprintf("### Section %d\n", i+1))
@@ -138,9 +139,22 @@ func buildTraceSummary(sections []ObservedSection) string {
 		if len(s.Imports) > 0 {
 			sb.WriteString(fmt.Sprintf("Imports: %v\n", s.Imports))
 		}
-		sb.WriteString(fmt.Sprintf("```go\n%s\n```\n\n", s.CodeSnippet))
+		// v4.1: Inject cross-file taint chains if this function participates in any
+		if len(chains) > 0 {
+			relevant := observe.GetChainsForFunction(chains, s.FuncName)
+			if len(relevant) > 0 {
+				sb.WriteString("\n")
+				sb.WriteString(observe.FormatTaintChains(relevant))
+			}
+		}
+		sb.WriteString(fmt.Sprintf("\n```go\n%s\n```\n\n", s.CodeSnippet))
 	}
 	return sb.String()
+}
+
+// buildTraceSummary is the backward-compatible wrapper without call graph context.
+func buildTraceSummary(sections []ObservedSection) string {
+	return buildTraceSummaryWithCG(sections, nil)
 }
 
 func batchTraceSections(sections []ObservedSection, batchSize int) [][]ObservedSection {
@@ -529,9 +543,17 @@ func (e *Engine) AnalyzeDeep(ctx context.Context, target string) (*DeepAnalysisR
 	sections := obsResult.PrioritySections(priorityCount)
 	handlers := obsResult.HandlerSections()
 
-	// Phase 2a: TRACE data flow
+	// Phase 2a: TRACE data flow (with call graph cross-file chains if available)
 	log.Printf("[Phase B] TRACE: analyzing %d sections for data flow", len(sections))
-	if traces, err := e.Trace(ctx, sections); err == nil {
+	var taintChains []observe.TaintChain
+	if obsResult.CallGraph != nil {
+		taintChains = obsResult.CallGraph.WalkTaintFromEntryPoints(3) // max 3 hops
+		log.Printf("[Phase B] CallGraph: %d entry points → %d validated taint chains",
+			len(obsResult.CallGraph.FindEntryPoints()), len(taintChains))
+	} else {
+		log.Printf("[Phase B] CallGraph: nil (Python project or build error) — cross-file tracing disabled")
+	}
+	if traces, err := e.Trace(ctx, sections, taintChains); err == nil {
 		result.Traces = traces
 		log.Printf("[Phase B] TRACE: %d data flow traces", len(traces))
 		if len(traces) > 0 {

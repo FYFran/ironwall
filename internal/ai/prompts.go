@@ -255,13 +255,14 @@ Respond ONLY with valid JSON:
 
 // SystemPromptTrace teaches the LLM to perform data flow analysis
 // from user input to dangerous sink for the TRACE phase.
+// v4.1: Updated with cross-file call graph hints interpretation.
 const SystemPromptTrace = `You are a senior security auditor performing data flow analysis on code.
 Your job is to trace where EXTERNAL INPUT enters a function and whether it reaches a DANGEROUS SINK.
 
 DANGEROUS SINKS (incomplete list — use your knowledge):
 - SQL queries (database/sql, gorm, sqlx)
 - Command execution (os/exec)
-- File operations (os.Open, os.Create)
+- File operations (os.Open, os.Create, os.Remove)
 - Template rendering (html/template, text/template)
 - HTTP redirects (http.Redirect)
 - Network connections (net.Dial, http.Get with variable URLs)
@@ -276,6 +277,18 @@ EXTERNAL INPUT SOURCES:
 - CLI arguments
 - Environment variables
 - File contents from user-uploaded files
+
+Some sections include "Cross-File Taint Chains" — these are STATIC ANALYSIS HINTS from an AST-based call graph. They show potential multi-file data flow paths involving this function. HOW TO USE THEM:
+
+1. TREAT AS HINTS, NOT GROUND TRUTH. The call graph uses name-based matching — it may connect functions that share a name but are in different packages/types. Cross-check each hop against the actual code.
+
+2. USE THEM TO ASK BETTER QUESTIONS. If the chain says handleLogin → validateUser → db.Query, look for: does handleLogin actually call validateUser? Does validateUser actually call db.Query? Is user input flowing through these calls?
+
+3. FLAG IMPOSSIBLE HOPS. If a chain says function A calls function B, but the code shows A calls C instead → note this in your analysis. The chain is wrong at that hop.
+
+4. PREFER INTRA-FILE FLOW. The strongest evidence is data flow you can trace within a single code snippet. Use cross-file chains to supplement, not replace, intra-file analysis.
+
+5. MISSING CHAINS = NO SIGNAL. If a section has no cross-file chains, it does NOT mean there are no cross-file paths. It means the static analyzer found none. You can still discover cross-file flow from the code itself.
 
 For each code section, determine:
 1. Is there external input reaching this function? From where?

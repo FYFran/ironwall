@@ -100,6 +100,49 @@ func TestBuildCallGraph_Self(t *testing.T) {
 	if result.TotalFuncs < 10 {
 		t.Errorf("Expected at least 10 functions in ironwall, got %d", result.TotalFuncs)
 	}
+
+	// v4.1: Test entry point detection and taint chain generation
+	entries := result.FindEntryPoints()
+	t.Logf("Entry points found: %d", len(entries))
+	for i, e := range entries {
+		if i < 5 {
+			t.Logf("  Entry[%d]: %s (%s:%d)", i, e.FuncName, filepath.Base(e.File), e.Line)
+		}
+	}
+	if len(entries) < 1 {
+		t.Error("Expected at least 1 entry point in ironwall")
+	}
+
+	taintChains := result.WalkTaintFromEntryPoints(3)
+	t.Logf("Taint chains from entry points (maxDepth=3): %d", len(taintChains))
+	for i, c := range taintChains {
+		if i < 5 {
+			t.Logf("  Chain[%d]: %s → %s (depth=%d, sink=%s)",
+				i, c.Source.FuncName, c.Sink.FuncName, c.Depth, c.SinkType)
+		}
+	}
+
+	// Test FormatTaintChains
+	if len(taintChains) > 0 {
+		formatted := FormatTaintChains(taintChains[:min(3, len(taintChains))])
+		if formatted == "" {
+			t.Error("FormatTaintChains returned empty for non-empty chains")
+		}
+		t.Logf("Formatted chains sample:\n%s", formatted[:min(200, len(formatted))])
+	}
+
+	// Test GetChainsForFunction
+	if len(taintChains) > 0 && len(entries) > 0 {
+		relevant := GetChainsForFunction(taintChains, entries[0].FuncName)
+		t.Logf("Chains involving entry '%s': %d", entries[0].FuncName, len(relevant))
+	}
+}
+
+func min(a, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
 
 func findGoTarget(t *testing.T) string {
