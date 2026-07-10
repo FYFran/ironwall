@@ -67,9 +67,10 @@ type PatternMatchInfo struct {
 
 // ObserveResult holds the complete output of the OBSERVE phase.
 type ObserveResult struct {
-	Sections      []ObservedSection `json:"sections"`
-	TotalFiles    int               `json:"total_files"`
-	TotalFuncs    int               `json:"total_funcs"`
-	TotalSections int               `json:"total_sections"`
+	Sections      []ObservedSection  `json:"sections"`
+	TotalFiles    int                `json:"total_files"`
+	TotalFuncs    int                `json:"total_funcs"`
+	TotalSections int                `json:"total_sections"`
 	ConcernCounts map[ConcernType]int `json:"concern_counts"`
+	CallGraph     *CallGraphResult   `json:"callgraph,omitempty"` // Cross-file call graph (v4.1)
 }

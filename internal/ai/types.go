@@ -4,20 +4,6 @@ package ai
 // Every AI interaction now returns proper JSON that is unmarshaled,
 // NOT string-matched with contains().
 
-// TriageResult is the response from the fast triage stage (DeepSeek V3).
-type TriageResult struct {
-	Findings []TriageVerdict `json:"findings"`
-}
-
-// TriageVerdict is a single finding's triage decision.
-type TriageVerdict struct {
-	ID              string  `json:"id"`
-	IsFalsePositive bool    `json:"is_false_positive"`
-	Confidence      float64 `json:"confidence"`
-	Reason          string  `json:"reason"`
-	SeverityOverride string `json:"severity_override,omitempty"` // CRITICAL/HIGH/MEDIUM/LOW/INFO or empty
-}
-
 // AttackTestResult is the structured response from deep verification (DeepSeek R1).
 type AttackTestResult struct {
 	IsReal      bool    `json:"is_real"`

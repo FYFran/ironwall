@@ -78,6 +78,16 @@ func (o *Observer) Observe(target string) (*ObserveResult, error) {
 	result := buildResult(allSections)
 	result.TotalFiles = totalFiles
 
+	// Build cross-file call graph for Go projects (v4.1)
+	if len(goFiles) > 0 {
+		cg, cgErr := BuildCallGraph(target)
+		if cgErr != nil {
+			errs = append(errs, fmt.Sprintf("callgraph: %v", cgErr))
+		} else {
+			result.CallGraph = cg
+		}
+	}
+
 	if len(errs) > 0 {
 		return result, fmt.Errorf("observe: %d parse errors (first: %s)", len(errs), errs[0])
 	}

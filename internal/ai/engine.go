@@ -16,20 +16,18 @@ const maxConcurrency = 2   // max concurrent API calls (conservative for chat mo
 
 // Engine orchestrates multi-stage AI analysis for security findings.
 type Engine struct {
-	triageClient *Client // Fast model (DeepSeek V3 / deepseek-chat)
+	triageClient *Client // Fast model (DeepSeek V3 / deepseek-chat) — used as fallback for deep verify
 	deepClient   *Client // Reasoning model (DeepSeek R1 / deepseek-reasoner)
-	noTestFilter bool    // Skip test-file heuristic (for benchmarks)
 }
 
 // NewEngine creates a new multi-stage AI engine.
-// triageClient: fast model for initial filtering
+// triageClient: fast model, used as fallback when deepClient is unavailable
 // deepClient: reasoning model for adversarial verification
 // Either can be nil — the engine degrades gracefully.
-func NewEngine(triageClient, deepClient *Client, noTestFilter bool) *Engine {
+func NewEngine(triageClient, deepClient *Client) *Engine {
 	return &Engine{
 		triageClient: triageClient,
 		deepClient:   deepClient,
-		noTestFilter: noTestFilter,
 	}
 }
 
@@ -100,86 +98,6 @@ func (e *Engine) Analyze(ctx context.Context, findings []report.Finding) ([]repo
 	return verified, status
 }
 
-// runTriage runs the fast triage stage in batches.
-func (e *Engine) runTriage(ctx context.Context, findings []report.Finding) ([]report.Finding, AnalysisStatus) {
-	status := AnalysisStatus{}
-	// Filter: Critical(0), High(1), Medium(2) → review. Low(3), Info(4) → skip.
-	var reviewList []report.Finding
-	var passThrough []report.Finding
-	for _, f := range findings {
-		if f.Severity <= report.SevMedium {
-			reviewList = append(reviewList, f)
-		} else {
-			passThrough = append(passThrough, f)
-		}
-	}
-
-	if len(reviewList) == 0 {
-		return findings, status
-	}
-
-	batches := batchFindings(reviewList, aiBatchSize)
-	status.TriageRuns = len(batches)
-	status.FindingsAnalyzed = len(reviewList)
-
-	sysPrompt := SystemPromptTriage
-	if e.noTestFilter {
-		sysPrompt = SystemPromptTriageNoTestFilter
-	}
-
-	for batchIdx, batch := range batches {
-		if batchIdx > 0 {
-			time.Sleep(batchInterval)
-		}
-		summary := buildFindingSummary(batch)
-		prompt := fmt.Sprintf(PromptTriage, summary)
-
-		var result TriageResult
-		triageMaxTokens := 256 + len(batch) * 120
-		err := e.triageClient.ChatJSONWithMaxTokens(ctx, sysPrompt, prompt, &result, triageMaxTokens)
-		if err != nil {
-			log.Printf("[AI Triage] batch %d/%d failed (%d findings): %v", batchIdx+1, len(batches), len(batch), err)
-			status.TriageErrors++
-			continue
-		}
-
-		triageMap := make(map[string]TriageVerdict)
-		for _, tv := range result.Findings {
-			triageMap[strings.TrimSpace(tv.ID)] = tv
-		}
-
-		for i := range batch {
-			f := &batch[i]
-			key := findingKey(f)
-			tv, ok := triageMap[key]
-			if !ok {
-				continue
-			}
-			if tv.IsFalsePositive && tv.Confidence >= 0.8 {
-				f.Severity = report.SevInfo
-				f.AIConfidence = tv.Confidence
-				f.Description += fmt.Sprintf("\n[AI Triage: Likely false positive — %s]", tv.Reason)
-				status.FindingsFiltered++
-			}
-			if tv.SeverityOverride != "" {
-				if sev := parseSeverity(tv.SeverityOverride); sev != report.SevInfo {
-					f.Severity = sev
-				}
-			}
-		}
-	}
-
-	if status.FindingsFiltered > 0 {
-		log.Printf("[AI Triage] filtered %d findings across %d batches (%d total reviewed)", status.FindingsFiltered, len(batches), len(reviewList))
-	}
-	if status.TriageErrors > 0 {
-		status.Status = "partial"
-	} else {
-		status.Status = "full"
-	}
-	return append(reviewList, passThrough...), status
-}
-
 // batchFindings splits findings into batches of at most batchSize.
 func batchFindings(findings []report.Finding, batchSize int) [][]report.Finding {
 	var batches [][]report.Finding
@@ -191,11 +109,6 @@ func batchFindings(findings []report.Finding, batchSize int) [][]report.Finding 
 		batches = append(batches, findings[i:end])
 	}
 	return batches
-}
-
-// runDeepVerify runs adversarial verification on findings that survived triage.
-func (e *Engine) runDeepVerify(ctx context.Context, findings []report.Finding) ([]report.Finding, AnalysisStatus) {
-	return e.runDeepVerifyWithClient(ctx, findings, e.deepClient)
 }
 
 // runDeepVerifyWithClient runs deep verification using the specified client in batches.

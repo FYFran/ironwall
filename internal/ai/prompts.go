@@ -14,35 +14,6 @@ Your analysis must be:
 
 NEVER fabricate findings. If you're unsure, say so and set confidence low.`
 
-// SystemPromptTriage is for the fast triage stage (DeepSeek V3).
-const SystemPromptTriage = `You are a security triage engineer. Your job is to quickly identify OBVIOUS false positives.
-Respond ONLY with valid JSON.
-
-Rules for false positive:
-- Finding is in a test file (test_, _test., /test/, /testdata/, /fixtures/)
-- Finding is in example/demo/documentation code
-- Code is commented out or unreachable
-- Pattern matches but has proper sanitization right next to it
-- Variable name looks like a secret but value is clearly a placeholder ("password", "changeme", "example")
-
-If in doubt, mark as NOT false positive. Better to escalate than miss a real issue.`
-
-// SystemPromptTriageNoTestFilter is the same but without the test-file heuristic.
-// Use when scanning benchmarks or test suites where test files ARE the target.
-const SystemPromptTriageNoTestFilter = `You are a security triage engineer. Your job is to quickly identify OBVIOUS false positives.
-Respond ONLY with valid JSON.
-
-Rules for false positive:
-- Finding is in example/demo/documentation code
-- Code is commented out or unreachable
-- Pattern matches but has proper sanitization right next to it
-- Variable name looks like a secret but value is clearly a placeholder ("password", "changeme", "example")
-
-IMPORTANT: Files named like "BenchmarkTest*" or in /testcode/ directories ARE legitimate targets in this scan.
-Do NOT flag them as false positives based on filename alone.
-
-If in doubt, mark as NOT false positive. Better to escalate than miss a real issue.`
-
 // SystemPromptDeepVerify is for the deep adversarial verification stage (DeepSeek R1).
 const SystemPromptDeepVerify = `You are a senior penetration tester doing adversarial verification of SAST findings.
 Your job is to CHALLENGE each finding, not confirm it. Most SAST findings are false positives.
@@ -90,25 +61,6 @@ Respond ONLY with valid JSON in this exact format:
 }
 
 Findings to review:
-%s`
-
-// PromptTriage asks the fast triage model to filter obvious false positives.
-const PromptTriage = `Quickly review these security findings and flag obvious false positives.
-Only flag findings where you are >80%% confident they're false positives.
-
-Respond ONLY with valid JSON:
-{
-  "findings": [
-    {
-      "id": "<finding ID>",
-      "is_false_positive": true,
-      "confidence": 0.9,
-      "reason": "one sentence"
-    }
-  ]
-}
-
-Findings:
 %s`
 
 // PromptDeepVerifyBatch asks the deep model to verify multiple findings at once.

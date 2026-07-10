@@ -34,7 +34,6 @@ type Config struct {
 	AIEndpoint   string // API endpoint base URL
 	AIKey        string // API key (from env: IRONWALL_AI_KEY or DEEPSEEK_API_KEY)
 	AIEnabled    bool   // Whether AI analysis is enabled
-	NoTestFilter bool   // Skip test-file heuristic in AI triage (for benchmarks)
 
 	// TimeoutSeconds is the max time for the full scan (0 = no limit).
 	TimeoutSeconds int
