@@ -675,7 +675,8 @@ func (r *CallGraphResult) WalkTaint(sourceFile string, sourceFunc string, maxDep
 		node := queue[0]
 		queue = queue[1:]
 
-		key := node.fi.PkgPath + "." + node.fi.File
+		// Key: file + decl line uniquely identifies a function (multiple funcs can share a file)
+		key := fmt.Sprintf("%s:%d", node.fi.File, node.fi.DeclLine)
 		if visited[key] {
 			continue
 		}

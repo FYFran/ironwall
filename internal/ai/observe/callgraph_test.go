@@ -160,6 +160,203 @@ func findGoTarget(t *testing.T) string {
 	return ""
 }
 
+// TestCallGraphTarget runs the full call graph → taint chain pipeline on a multi-file
+// Go web app with known cross-file vulnerabilities (handlers → db sinks).
+func TestCallGraphTarget(t *testing.T) {
+	rootDir := findCallgraphTarget(t)
+	if rootDir == "" {
+		t.Skip("callgraph_target not found — skipping integration test")
+	}
+
+	result, err := BuildCallGraph(rootDir)
+	if err != nil {
+		t.Fatalf("BuildCallGraph failed: %v", err)
+	}
+
+	t.Logf("Callgraph target: %d funcs, %d edges, %d packages",
+		result.TotalFuncs, result.TotalEdges, len(result.Index.Packages))
+
+	// Verify cross-file edges exist (this is a multi-package project)
+	crossFileEdges := 0
+	for _, pkg := range result.Index.Packages {
+		for _, fi := range pkg.Funcs {
+			for _, callee := range fi.Callees {
+				if filepath.Base(callee.File) != filepath.Base(fi.File) {
+					crossFileEdges++
+				}
+			}
+		}
+	}
+	t.Logf("Cross-file edges: %d", crossFileEdges)
+	if crossFileEdges == 0 {
+		t.Error("Expected cross-file edges in multi-package project")
+	}
+
+	// Entry point detection
+	entries := result.FindEntryPoints()
+	t.Logf("Entry points: %d", len(entries))
+	for _, e := range entries {
+		t.Logf("  Entry: %s (%s:%d)", e.FuncName, filepath.Base(e.File), e.Line)
+	}
+
+	// Should find at least: LoginHandler, FileHandler, AdminHandler
+	entryNames := make(map[string]bool)
+	for _, e := range entries {
+		entryNames[e.FuncName] = true
+	}
+	expectedEntries := []string{"LoginHandler", "FileHandler", "AdminHandler"}
+	for _, name := range expectedEntries {
+		if !entryNames[name] {
+			t.Errorf("Entry point '%s' NOT detected — should be an HTTP handler", name)
+		}
+	}
+	if !entryNames["main"] {
+		t.Log("main() not detected as entry (may be expected — check params)")
+	}
+
+	// Taint chain generation
+	taintChains := result.WalkTaintFromEntryPoints(3)
+	t.Logf("Taint chains: %d", len(taintChains))
+	for i, c := range taintChains {
+		t.Logf("  Chain[%d]: %s (%s:%d) → %s (%s:%d) depth=%d sink=%s",
+			i, c.Source.FuncName, filepath.Base(c.Source.File), c.Source.Line,
+			c.Sink.FuncName, filepath.Base(c.Sink.File), c.Sink.Line,
+			c.Depth, c.SinkType)
+		for j, h := range c.Hops {
+			t.Logf("    Hop[%d]: %s (%s:%d)", j, h.FuncName, filepath.Base(h.File), h.Line)
+		}
+	}
+
+	// Should find at least one taint chain: LoginHandler → db.QueryUser (sql sink)
+	// or FileHandler → db.ReadFile (file_ops sink)
+	sqlChains := 0
+	fileChains := 0
+	for _, c := range taintChains {
+		if c.SinkType == "sql" {
+			sqlChains++
+		}
+		if c.SinkType == "file_ops" {
+			fileChains++
+		}
+	}
+	t.Logf("SQL chains: %d, File chains: %d", sqlChains, fileChains)
+
+	if sqlChains == 0 {
+		t.Error("Expected at least 1 SQL chain: LoginHandler → QueryUser → sqlQuery")
+	}
+	if fileChains == 0 {
+		t.Error("Expected at least 1 file_ops chain: FileHandler/AdminHandler → ReadFile")
+	}
+
+	// Test that GetChainsForFunction works for each entry point
+	for _, e := range entries {
+		relevant := GetChainsForFunction(taintChains, e.FuncName)
+		t.Logf("  Chains for %s: %d", e.FuncName, len(relevant))
+	}
+
+	// Verify LoginHandler has a SQL chain now
+	loginChains := GetChainsForFunction(taintChains, "LoginHandler")
+	foundSQL := false
+	for _, c := range loginChains {
+		if c.SinkType == "sql" {
+			foundSQL = true
+		}
+	}
+	if !foundSQL {
+		t.Error("LoginHandler should have a SQL taint chain: LoginHandler → QueryUser → sqlQuery")
+	}
+
+	// Verify SQL chain depth
+	for _, c := range taintChains {
+		if c.SinkType == "sql" && c.Source.FuncName == "LoginHandler" {
+			if c.Depth != 2 {
+				t.Errorf("LoginHandler SQL chain depth: got %d, expected 2 (→ QueryUser → sqlQuery)", c.Depth)
+			}
+		}
+	}
+
+	// Test FormatTaintChains
+	formatted := FormatTaintChains(taintChains)
+	if len(taintChains) > 0 && formatted == "" {
+		t.Error("FormatTaintChains returned empty for non-empty chains")
+	}
+	if len(taintChains) > 0 {
+		// Verify the warning is present
+		if !strings.Contains(formatted, "Static analysis only") {
+			t.Error("FormatTaintChains missing 'Static analysis only' warning")
+		}
+	}
+}
+
+// TestTaintChainValidation tests the dedup and validation logic.
+func TestTaintChainValidation(t *testing.T) {
+	rootDir := findCallgraphTarget(t)
+	if rootDir == "" {
+		t.Skip("callgraph_target not found")
+	}
+
+	result, err := BuildCallGraph(rootDir)
+	if err != nil {
+		t.Fatalf("BuildCallGraph: %v", err)
+	}
+
+	chains := result.WalkTaintFromEntryPoints(3)
+
+	// Verify no self-referential chains (source == sink)
+	for _, c := range chains {
+		if c.Source.FuncName == c.Sink.FuncName && c.Source.File == c.Sink.File {
+			t.Errorf("Self-referential chain: %s → %s (same file)", c.Source.FuncName, c.Sink.FuncName)
+		}
+	}
+
+	// Verify dedup: no duplicate (source, sink_type) pairs
+	seen := make(map[string]bool)
+	for _, c := range chains {
+		key := c.Source.FuncName + "|" + c.SinkType
+		if seen[key] {
+			t.Errorf("Duplicate chain key: %s (dedup should have removed this)", key)
+		}
+		seen[key] = true
+	}
+
+	// Verify depth limit
+	for _, c := range chains {
+		if c.Depth > 3 {
+			t.Errorf("Chain depth %d exceeds max 3: %s → %s", c.Depth, c.Source.FuncName, c.Sink.FuncName)
+		}
+	}
+
+	// Verify SinkType classification
+	sinkTypes := make(map[string]int)
+	for _, c := range chains {
+		sinkTypes[c.SinkType]++
+	}
+	t.Logf("Sink types: %v", sinkTypes)
+	// db.QueryUser should be classified as "sql"
+	for _, c := range chains {
+		if c.Sink.FuncName == "QueryUser" && c.SinkType != "sql" {
+			t.Errorf("QueryUser classified as '%s', expected 'sql'", c.SinkType)
+		}
+		if c.Sink.FuncName == "ReadFile" && c.SinkType != "file_ops" {
+			t.Errorf("ReadFile classified as '%s', expected 'file_ops'", c.SinkType)
+		}
+	}
+}
+
+func findCallgraphTarget(t *testing.T) string {
+	candidates := []string{
+		"../../../battle_test_candidates/callgraph_target",
+		"../../battle_test_candidates/callgraph_target",
+	}
+	for _, c := range candidates {
+		abs, _ := filepath.Abs(c)
+		if info, err := os.Stat(abs); err == nil && info.IsDir() {
+			return abs
+		}
+	}
+	return ""
+}
+
 func countMethods(methods map[string]map[string]*FuncInfo) int {
 	n := 0
 	for _, m := range methods {
