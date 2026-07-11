@@ -335,42 +335,45 @@ Respond ONLY with valid JSON:
 Code sections:
 %s`
 
-// SystemPromptVerify teaches the LLM to judge vulnerability findings.
-const SystemPromptVerify = `You are a senior application security engineer. Your task is to judge whether a potential vulnerability finding represents a REAL security issue.
+// SystemPromptVerify is the adversarial verification prompt for Phase B.3 (VERIFY).
+// Unified with DeepVerify philosophy: challenge findings, default to FALSE.
+// CONTRACT: Same adversarial philosophy as SystemPromptDeepVerifyCore.
+const SystemPromptVerify = `You are a senior penetration tester doing adversarial verification of AI-discovered vulnerability traces.
+Your job is to CHALLENGE each finding, not confirm it. Most AI traces are conceptual, not exploitable.
 
-STEPS:
-1. Read the finding carefully — understand the code, the data flow, and the claimed vulnerability.
-2. Check for false positive indicators:
-   - Is the user input REALLY attacker-controllable? (config values, internal data = NOT controllable)
-   - Is there implicit framework protection? (Go html/template auto-escapes, ORMs parameterize)
-   - Is the sink dangerous in this specific context? (reading a fixed file path = low risk)
-   - Are there likely compensating controls? (auth middleware before handler, network restrictions)
-3. Make your judgment.
-4. Output JSON.
+CRITICAL RULES:
+1. A data flow from input to sink is NOT enough. You need a CONCRETE attack scenario.
+2. If the trace doesn't show actual code-level exploitation → is_real=false.
+3. Framework protections (ORM parameterization, template auto-escaping, Flask/Jinja2 autoescape) negate the finding.
+4. Missing auth/validation on low-impact operations → confidence ≤ 0.5.
 
-IMPORTANT:
-- is_real=true means "YES this is a real security vulnerability that should be fixed."
-- is_real=false means "This is likely a false positive or not exploitable."
-- Only mark is_real=false if you can clearly articulate WHY it's not exploitable.
-- Default to is_real=true if you're unsure — better to flag for human review than miss a real vuln.
+For EACH finding, answer three questions. ONLY if ALL THREE have SPECIFIC, CONCRETE answers → is_real = true.
+If ANY question cannot be answered concretely → is_real = false.
+
+Q1 (Actor): What SPECIFIC role, access level, or preconditions does the attacker need?
+Q2 (Path): What is the CONCRETE step-by-step attack path? Each step must reference actual code lines.
+Q3 (Impact): What does the attacker ACTUALLY gain? Be specific. No vague "information disclosure".
 
 Respond ONLY with valid JSON.`
 
-// PromptVerify judges whether a potential vulnerability finding is real.
-const PromptVerify = `You are a senior application security engineer. Judge whether this potential finding is a REAL vulnerability.
+// PromptVerify is the per-finding adversarial verification prompt (Phase B.3).
+// Uses adversarial philosophy: challenge first, confirm only with concrete evidence.
+const PromptVerify = `Adversarially verify this AI-discovered vulnerability trace.
+CHALLENGE it — most traces are conceptual noise, not exploitable.
 
-First, check for reasons it might be a FALSE POSITIVE:
+First, check for FALSE POSITIVE indicators:
 - Is the input actually attacker-controllable? (config values are NOT)
-- Is there implicit framework protection? (auto-escaping, ORM parameterization, middleware)
-- Is the sink actually dangerous in this context?
-- Are there compensating controls? (firewall, container, allowlists)
+- Is there implicit framework protection? (ORM parameterization, template auto-escaping, Jinja2 autoescape)
+- Is the sink actually dangerous in this context? (reading a fixed file path = low risk)
+- Are there compensating controls? (auth middleware, firewall, network restrictions)
 
 THEN, make your judgment:
-- is_real: TRUE if this IS a real vulnerability. FALSE if it's a false positive.
-- confidence: How certain are you? (0.0-1.0)
+- is_real: TRUE only if a CONCRETE exploit scenario exists. FALSE otherwise.
+- confidence: How certain? (0.0-1.0). Use ≤0.5 for theoretical-only findings.
 - If is_real=true: provide severity, CWE, title, description, fix_hint
-- If is_real=false: use refutation_points to explain why it's NOT real
+- If is_real=false: use refutation_points to explain why it's NOT exploitable
 
+Respond ONLY with valid JSON:
 Respond ONLY with valid JSON:
 {
   "is_real": true,
