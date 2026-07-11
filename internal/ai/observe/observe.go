@@ -78,13 +78,22 @@ func (o *Observer) Observe(target string) (*ObserveResult, error) {
 	result := buildResult(allSections)
 	result.TotalFiles = totalFiles
 
-	// Build cross-file call graph for Go projects (v4.1)
+	// Build cross-file call graph (v4.1): Go first, Python fallback
 	if len(goFiles) > 0 {
 		cg, cgErr := BuildCallGraph(target)
 		if cgErr != nil {
-			errs = append(errs, fmt.Sprintf("callgraph: %v", cgErr))
+			errs = append(errs, fmt.Sprintf("callgraph(go): %v", cgErr))
 		} else {
 			result.CallGraph = cg
+		}
+	}
+	// Python call graph when no Go call graph available (v4.2)
+	if result.CallGraph == nil && len(pyFiles) > 0 {
+		pyCG, pyCGErr := BuildPythonCallGraph(target)
+		if pyCGErr != nil {
+			errs = append(errs, fmt.Sprintf("callgraph(py): %v", pyCGErr))
+		} else {
+			result.CallGraph = pyCG
 		}
 	}
 

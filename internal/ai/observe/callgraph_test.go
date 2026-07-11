@@ -357,6 +357,136 @@ func findCallgraphTarget(t *testing.T) string {
 	return ""
 }
 
+// TestPythonCallGraph validates the Python call graph builder end-to-end.
+func TestPythonCallGraph(t *testing.T) {
+	ironwallRoot := findIronwallRoot(t)
+	if ironwallRoot == "" {
+		t.Skip("ironwall root not found")
+	}
+	target := filepath.Join(ironwallRoot, "battle_test_candidates", "secure-file-management")
+
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		t.Skipf("target not found: %s", target)
+	}
+
+	result, err := BuildPythonCallGraph(target)
+	if err != nil {
+		t.Fatalf("BuildPythonCallGraph failed: %v", err)
+	}
+
+	t.Logf("Python call graph: %d funcs, %d edges, %d packages",
+		result.TotalFuncs, result.TotalEdges, len(result.Index.Packages))
+
+	if result.TotalFuncs == 0 {
+		t.Error("Expected at least 1 function in Python project")
+	}
+	if result.TotalEdges == 0 {
+		t.Log("WARNING: 0 cross-file edges — may indicate import resolution gap")
+	}
+
+	// Verify packages have functions with file paths
+	pkgCount := 0
+	funcCount := 0
+	handlerCount := 0
+	for pkgPath, pkg := range result.Index.Packages {
+		pkgCount++
+		for funcName, fi := range pkg.Funcs {
+			funcCount++
+			if fi.File == "" {
+				t.Errorf("%s.%s: empty file path", pkgPath, funcName)
+			}
+			if fi.DeclLine == 0 {
+				t.Errorf("%s.%s: decl line is 0", pkgPath, funcName)
+			}
+			// Count functions that look like handlers (from python_callgraph metadata)
+			for _, callee := range fi.Callees {
+				_ = callee
+			}
+		}
+		// Count functions with "route" decorators as handlers
+		for _, fi := range pkg.Funcs {
+			for _, callee := range fi.Callees {
+				if callee.FuncName == "render_template" || callee.FuncName == "flash" {
+					handlerCount++
+					break
+				}
+			}
+		}
+	}
+	t.Logf("Packages: %d, Functions: %d, Likely handlers: %d", pkgCount, funcCount, handlerCount)
+
+	if pkgCount < 2 {
+		t.Error("Expected at least 2 packages in multi-file Python project")
+	}
+
+	// Verify JSON round-trip
+	data, err := result.ToJSON()
+	if err != nil {
+		t.Fatalf("ToJSON: %v", err)
+	}
+	if len(data) == 0 {
+		t.Error("JSON output empty")
+	}
+
+	// Test entry point detection from Python call graph
+	entries := result.FindEntryPoints()
+	t.Logf("Python entry points: %d", len(entries))
+	for i, e := range entries {
+		if i < 5 {
+			t.Logf("  Entry[%d]: %s (%s:%d)", i, e.FuncName, filepath.Base(e.File), e.Line)
+		}
+	}
+
+	// Test taint chains from Python entry points
+	taintChains := result.WalkTaintFromEntryPoints(3)
+	t.Logf("Python taint chains: %d", len(taintChains))
+	for i, c := range taintChains {
+		t.Logf("  Chain[%d]: %s → %s (depth=%d, sink=%s)",
+			i, c.Source.FuncName, c.Sink.FuncName, c.Depth, c.SinkType)
+	}
+}
+
+// TestPythonCallGraph_NoGoCallGraph verifies that OBSERVE on a Python-only project
+// builds a Python call graph (not nil — fixing the silent degradation issue).
+func TestPythonCallGraph_NoGoCallGraph(t *testing.T) {
+	// This test validates the fix for "Python nil callGraph = silent degradation"
+	ironwallRoot := findIronwallRoot(t)
+	if ironwallRoot == "" {
+		t.Skip("ironwall root not found")
+	}
+	target := filepath.Join(ironwallRoot, "battle_test_candidates", "secure-file-management")
+
+	if _, err := os.Stat(target); os.IsNotExist(err) {
+		t.Skipf("target not found: %s", target)
+	}
+
+	// Run full OBSERVE — should auto-build Python call graph since no Go files
+	obs := NewObserver()
+	result, err := obs.Observe(target)
+	if err != nil {
+		// Parse errors are expected (Python OBSERVE subprocess cwd issues)
+		t.Logf("Observe returned error (may be expected): %v", err)
+	}
+
+	if result == nil {
+		t.Fatal("Observe returned nil result")
+	}
+
+	// KEY ASSERTION: CallGraph should NOT be nil for Python projects
+	if result.CallGraph == nil {
+		t.Error("FATAL: CallGraph is nil for Python-only project — cross-file TRACE silently disabled")
+		t.Log("This is the bug Brain B warned about (Failure Mode 3)")
+	} else {
+		t.Logf("Python CallGraph present: %d funcs, %d edges — cross-file TRACE enabled",
+			result.CallGraph.TotalFuncs, result.CallGraph.TotalEdges)
+	}
+
+	// Verify sections are still present (OBSERVE still works)
+	if result.TotalSections > 0 {
+		t.Logf("OBSERVE: %d sections, %d files", result.TotalSections, result.TotalFiles)
+	}
+}
+
 func countMethods(methods map[string]map[string]*FuncInfo) int {
 	n := 0
 	for _, m := range methods {

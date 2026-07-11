@@ -408,7 +408,7 @@ type TaintChain struct {
 
 // SinkType classifies a function name as a dangerous sink category.
 // Returns empty string if not recognized as a sink.
-// Excludes response writers (writeJSON, renderJSON, etc.) — those are outputs, not sinks.
+// Supports both Go and Python sink patterns.
 func SinkType(funcName string) string {
 	lower := strings.ToLower(funcName)
 	// Skip response writers — they format output, not sensitive operations
@@ -417,10 +417,30 @@ func SinkType(funcName string) string {
 		strings.Contains(lower, "jsonresponse") {
 		return ""
 	}
+
+	// Python sinks
+	if strings.Contains(lower, "os.remove") || strings.Contains(lower, "os.unlink") ||
+		strings.Contains(lower, "os.rmdir") {
+		return "file_ops"
+	}
+	if strings.Contains(lower, "os.system") || strings.Contains(lower, "os.popen") ||
+		strings.Contains(lower, "subprocess") {
+		return "command_exec"
+	}
+	if strings.Contains(lower, "requests.get") || strings.Contains(lower, "requests.post") ||
+		strings.Contains(lower, "urlopen") || strings.Contains(lower, "urllib") {
+		return "network"
+	}
+	if strings.Contains(lower, "eval(") || strings.Contains(lower, "exec(") ||
+		lower == "eval" || lower == "exec" || lower == "compile" {
+		return "command_exec"
+	}
+
+	// Go sinks
 	switch {
 	case strings.Contains(lower, "query") || strings.Contains(lower, "queryrow") || strings.Contains(lower, "querycontext"):
 		return "sql"
-	case strings.Contains(lower, "exec") && !strings.Contains(lower, "execut") && !strings.Contains(lower, "context"):
+	case strings.Contains(lower, "exec") && !strings.Contains(lower, "execut") && !strings.Contains(lower, "context") && !strings.Contains(lower, "os."):
 		return "command_exec"
 	case strings.Contains(lower, "open") || strings.Contains(lower, "create") || strings.Contains(lower, "readfile") || strings.Contains(lower, "writefile"):
 		return "file_ops"
@@ -441,7 +461,8 @@ func SinkType(funcName string) string {
 }
 
 // FindEntryPoints returns functions that are likely HTTP/gRPC handlers or main().
-// Only returns functions with concrete handler signatures, not just context.Context.
+// Go: checks for http.ResponseWriter + *http.Request or framework context params.
+// Python: checks for Flask/Django handler patterns in callees.
 func (r *CallGraphResult) FindEntryPoints() []TaintChainEntry {
 	var entries []TaintChainEntry
 
@@ -454,8 +475,15 @@ func (r *CallGraphResult) FindEntryPoints() []TaintChainEntry {
 				})
 				continue
 			}
-			// Only mark as handler if it has http.ResponseWriter + *http.Request or known framework context
+			// Go: HTTP handler signatures
 			if isStdHTTPHandler(fi) || isFrameworkCtx(fi) {
+				entries = append(entries, TaintChainEntry{
+					FuncName: name, File: fi.File, Line: fi.DeclLine, PkgPath: fi.PkgPath,
+				})
+				continue
+			}
+			// Python: Flask/Django handler patterns (render_template, jsonify, etc.)
+			if isPythonHandler(fi) {
 				entries = append(entries, TaintChainEntry{
 					FuncName: name, File: fi.File, Line: fi.DeclLine, PkgPath: fi.PkgPath,
 				})
@@ -463,6 +491,23 @@ func (r *CallGraphResult) FindEntryPoints() []TaintChainEntry {
 		}
 	}
 	return entries
+}
+
+// isPythonHandler detects Flask/Django/Starlette handlers by callee patterns.
+func isPythonHandler(fi *FuncInfo) bool {
+	handlerCallees := []string{
+		"render_template", "jsonify", "send_file", "flash",
+		"redirect", "url_for", "make_response", "Response",
+		"HttpResponse", "JsonResponse", "StreamingHttpResponse",
+	}
+	for _, callee := range fi.Callees {
+		for _, hc := range handlerCallees {
+			if callee.FuncName == hc || strings.HasSuffix(callee.FuncName, "."+hc) {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // isStdHTTPHandler checks for standard Go HTTP handler signature from FuncInfo params.
