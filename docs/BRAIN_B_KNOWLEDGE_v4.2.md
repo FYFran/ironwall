@@ -16,9 +16,11 @@
 
 When asked to do security work, default to these tools (no need to ask):
 - **Security audit/review** → Code Graph MCP tools (codegraph_context→codegraph_explore→codegraph_trace)
-- **Web search for latest vulns/papers** → tavily_search tool
+- **Web search for latest vulns/papers** → Write `[SEARCH: your query]` in your response. The proxy will auto-execute the search and feed results back. Use this for: latest CVEs, competitor updates, new research papers, pricing changes, API docs.
 - **Code changes** → caveman:builder + code-reviewer + security-auditor agents
 - **Architecture/design decisions** → architect agent with adversarial review
+
+CRITICAL: When you need information beyond your KB (cutoff ~2026-07-10), use `[SEARCH: specific query]`. The system will search and give you results. Don't guess or use outdated info.
 
 ## SAST Landscape
 
