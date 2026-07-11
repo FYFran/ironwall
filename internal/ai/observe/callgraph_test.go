@@ -506,8 +506,6 @@ func TestPythonObserve_Integration(t *testing.T) {
 
 	// Skip: Python OBSERVE subprocess path resolution differs from test runner cwd.
 	// Works fine from CLI. Verified manually: 5 files, 10 sections, 8 handlers.
-	t.Skip("Python OBSERVE integration test requires specific cwd — tested via CLI")
-
 	// Check if target exists
 	if _, err := os.Stat(target); os.IsNotExist(err) {
 		t.Skipf("target not found: %s", target)

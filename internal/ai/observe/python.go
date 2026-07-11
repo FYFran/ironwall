@@ -23,21 +23,38 @@ func NewPythonObserver() *PythonObserver {
 
 // locateSourceFile returns the directory of this source file at runtime.
 func locateSourceFile() string {
-	// Fallback: search from working directory
-	if _, err := os.Stat("internal/ai/observe/python_observe.py"); err == nil {
-		if abs, err := filepath.Abs("internal/ai/observe/python_observe.py"); err == nil {
+	scriptName := "python_observe.py"
+
+	// Walk up from working directory to find ironwall root (go.mod)
+	if wd, err := os.Getwd(); err == nil {
+		for dir := wd; dir != filepath.Dir(dir); dir = filepath.Dir(dir) {
+			candidate := filepath.Join(dir, "internal", "ai", "observe", scriptName)
+			if _, err := os.Stat(candidate); err == nil {
+				return candidate
+			}
+			if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
+				candidate := filepath.Join(dir, "internal", "ai", "observe", scriptName)
+				if _, err := os.Stat(candidate); err == nil {
+					return candidate
+				}
+				break
+			}
+		}
+	}
+	// Fallback: relative from working directory
+	if _, err := os.Stat(filepath.Join("internal", "ai", "observe", scriptName)); err == nil {
+		if abs, err := filepath.Abs(filepath.Join("internal", "ai", "observe", scriptName)); err == nil {
 			return abs
 		}
 	}
-	// Search from executable path
+	// Search from executable path (go run)
 	if exe, err := os.Executable(); err == nil {
-		dir := filepath.Dir(exe)
-		candidate := filepath.Join(dir, "internal", "ai", "observe", "python_observe.py")
+		candidate := filepath.Join(filepath.Dir(exe), "internal", "ai", "observe", scriptName)
 		if _, err := os.Stat(candidate); err == nil {
 			return candidate
 		}
 	}
-	return "internal/ai/observe/python_observe.py"
+	return filepath.Join("internal", "ai", "observe", scriptName)
 }
 
 // ObserveDir runs Python OBSERVE on a directory and returns parsed sections.
