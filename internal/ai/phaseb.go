@@ -232,6 +232,8 @@ func (e *Engine) TraceMissing(ctx context.Context, handlers []ObservedSection) (
 		}
 	}
 	log.Printf("[AI Missing] analyzed %d handlers → %d missing controls", len(handlers), len(results))
+		results = deduplicateMissingControls(results)
+		log.Printf("[AI Missing] after dedup: %d merged findings", len(results))
 	return results, nil
 }
 
@@ -487,7 +489,7 @@ func (e *Engine) verifyBatch(ctx context.Context, client *Client, traces []Trace
 		return nil, nil
 	}
 
-	// Build batch prompt
+	// Build batch prompt with explicit JSON format contract
 	var sb strings.Builder
 	sb.WriteString("Verify these potential vulnerability findings. For each, determine if it's a REAL vulnerability.\n\n")
 	for i, tr := range traces {
@@ -495,6 +497,24 @@ func (e *Engine) verifyBatch(ctx context.Context, client *Client, traces []Trace
 		sb.WriteString(buildVerifySummary(tr))
 		sb.WriteString("\n---\n\n")
 	}
+	sb.WriteString("Respond ONLY with valid JSON in this EXACT format. index is 0-based (Finding 1 = index 0).\n")
+	sb.WriteString("{\n")
+	sb.WriteString("  \"findings\": [\n")
+	sb.WriteString("    {\n")
+	sb.WriteString("      \"index\": 0,\n")
+	sb.WriteString("      \"is_real\": true,\n")
+	sb.WriteString("      \"confidence\": 0.95,\n")
+	sb.WriteString("      \"severity\": \"HIGH\",\n")
+	sb.WriteString("      \"cwe\": \"CWE-89\",\n")
+	sb.WriteString("      \"title\": \"SQL Injection in login\",\n")
+	sb.WriteString("      \"description\": \"User input flows to SQL query without parameterization\",\n")
+	sb.WriteString("      \"fix_hint\": \"Use parameterized queries\",\n")
+	sb.WriteString("      \"refutation\": \"\",\n")
+	sb.WriteString("      \"refutation_points\": []\n")
+	sb.WriteString("    }\n")
+	sb.WriteString("  ]\n")
+	sb.WriteString("}\n")
+	sb.WriteString("If is_real=false, leave severity/cwe/title/description/fix_hint empty and fill refutation + refutation_points.\n")
 
 	prompt := sb.String()
 
@@ -754,4 +774,70 @@ func DeduplicatePhaseB(phaseBFindings []report.Finding, sastFindings []report.Fi
 			len(phaseBFindings), len(unique), removed)
 	}
 	return unique
+}
+
+// deduplicateMissingControls merges same-handler findings into one per handler.
+// If handler has rate_limit + csrf + auth missing, produces 1 merged finding instead of 3.
+func deduplicateMissingControls(controls []MissingControl) []MissingControl {
+	if len(controls) <= 1 {
+		return controls
+	}
+	type group struct {
+		section  ObservedSection
+		controls []MissingControl
+		maxSev   string
+	}
+	groups := make(map[string]*group)
+	var order []string
+	for _, mc := range controls {
+		key := fmt.Sprintf("%s:%s:%d", mc.Section.FilePath, mc.Section.FuncName, mc.Section.LineStart)
+		if g, ok := groups[key]; ok {
+			g.controls = append(g.controls, mc)
+			if severityWeight(mc.Severity) > severityWeight(g.maxSev) {
+				g.maxSev = mc.Severity
+			}
+		} else {
+			groups[key] = &group{section: mc.Section, controls: []MissingControl{mc}, maxSev: mc.Severity}
+			order = append(order, key)
+		}
+	}
+	var merged []MissingControl
+	for _, key := range order {
+		g := groups[key]
+		if len(g.controls) <= 1 {
+			merged = append(merged, g.controls[0])
+			continue
+		}
+		var types, descs, fixes []string
+		for _, mc := range g.controls {
+			types = append(types, mc.ControlType)
+			descs = append(descs, mc.Description)
+			if mc.FixHint != "" {
+				fixes = append(fixes, mc.FixHint)
+			}
+		}
+		merged = append(merged, MissingControl{
+			Section:     g.section,
+			ControlType: strings.Join(types, "+"),
+			IsMissing:   true,
+			Confidence:  g.controls[0].Confidence,
+			Severity:    g.maxSev,
+			Title:       fmt.Sprintf("Missing %d security controls in %s", len(g.controls), g.section.FuncName),
+			Description: fmt.Sprintf("Handler %s is missing %d controls: %s. %s",
+				g.section.FuncName, len(g.controls), strings.Join(types, ", "), strings.Join(descs, " ")),
+			FixHint: strings.Join(fixes, "; "),
+			CWE:     "CWE-16",
+		})
+	}
+	return merged
+}
+
+func severityWeight(s string) int {
+	switch strings.ToUpper(s) {
+	case "CRITICAL": return 4
+	case "HIGH": return 3
+	case "MEDIUM": return 2
+	case "LOW": return 1
+	default: return 0
+	}
 }

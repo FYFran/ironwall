@@ -230,6 +230,13 @@ func (c *Client) ChatJSONWithMaxTokens(ctx context.Context, systemPrompt string,
 	}
 
 	if err := json.Unmarshal([]byte(jsonStr), target); err != nil {
+		// Fallback: AI sometimes returns bare array [{...}] instead of {"findings": [...]}
+		if strings.HasPrefix(strings.TrimSpace(jsonStr), "[") {
+			wrapped := `{"findings":` + jsonStr + `}`
+			if err2 := json.Unmarshal([]byte(wrapped), target); err2 == nil {
+				return nil
+			}
+		}
 		return fmt.Errorf("unmarshal AI JSON response (len=%d): %w\nJSON: %s", len(jsonStr), err, truncateStr(jsonStr, 500))
 	}
 

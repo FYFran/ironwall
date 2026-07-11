@@ -215,7 +215,7 @@ func BuildCallGraph(rootDir string) (*CallGraphResult, error) {
 					return true
 				}
 
-				calleePkg, calleeName := resolveCallTarget(call, imports, pkgPath)
+				calleePkg, calleeName, isLocalVar := resolveCallTargetEx(call, imports, pkgPath)
 				if calleeName == "" {
 					return true
 				}
@@ -233,12 +233,11 @@ func BuildCallGraph(rootDir string) (*CallGraphResult, error) {
 					calleePkg = pkgPath
 				}
 
+				added := false
 				if pkg, ok := result.Index.Packages[calleePkg]; ok {
 					if fi, ok := pkg.Funcs[calleeName]; ok {
 						fi.Callers = append(fi.Callers, edge)
 						result.TotalEdges++
-
-						// Add callee edge to caller
 						callerPkg := result.Index.Packages[pkgPath]
 						if callerPkg != nil {
 							if callerFi, ok := callerPkg.Funcs[callerName]; ok {
@@ -250,12 +249,33 @@ func BuildCallGraph(rootDir string) (*CallGraphResult, error) {
 								callerFi.Callees = append(callerFi.Callees, calleeEdge)
 							}
 						}
+						added = true
 					}
-					// Also try methods
-					if pkg.Methods != nil {
+					if !added && pkg.Methods != nil {
 						for _, methods := range pkg.Methods {
 							if fi, ok := methods[calleeName]; ok {
 								fi.Callers = append(fi.Callers, edge)
+								result.TotalEdges++
+								added = true
+							}
+						}
+					}
+				}
+
+				// Heuristic: local-var method calls (e.g. database.Query(), client.Get())
+				// CG cannot resolve receiver types, so infer from naming conventions.
+				if !added && isLocalVar {
+					syntheticName := inferLocalVarType(call, calleeName)
+					if syntheticName != "" {
+						callerPkg := result.Index.Packages[pkgPath]
+						if callerPkg != nil {
+							if callerFi, ok := callerPkg.Funcs[callerName]; ok {
+								calleeEdge := CallEdge{
+									File:     fpath,
+									FuncName: syntheticName,
+									Line:     callLine,
+								}
+								callerFi.Callees = append(callerFi.Callees, calleeEdge)
 								result.TotalEdges++
 							}
 						}
@@ -297,6 +317,66 @@ func resolveCallTarget(call *ast.CallExpr, imports map[string]string, currentPkg
 	default:
 		return "", ""
 	}
+}
+// resolveCallTargetEx is like resolveCallTarget but also reports if the call
+// is on a local variable (not a package or known identifier).
+func resolveCallTargetEx(call *ast.CallExpr, imports map[string]string, currentPkg string) (pkgPath, funcName string, isLocalVar bool) {
+	pkgPath, funcName = resolveCallTarget(call, imports, currentPkg)
+	if funcName == "" {
+		return "", "", false
+	}
+	// If the call was SelectorExpr(Ident, ...) and the Ident is NOT in imports,
+	// it's a local-variable method call (e.g. database.Query(), client.Get())
+	if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+		if ident, ok := sel.X.(*ast.Ident); ok {
+			if _, inImports := imports[ident.Name]; !inImports {
+				isLocalVar = true
+			}
+		}
+	}
+	return
+}
+
+// inferLocalVarType maps a variable name + method name to a synthetic stdlib function name.
+// This allows the CG to trace through local-var calls like database.Query() or client.Get().
+func inferLocalVarType(call *ast.CallExpr, methodName string) string {
+	if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+		if ident, ok := sel.X.(*ast.Ident); ok {
+			varName := strings.ToLower(ident.Name)
+			// Skip common utility methods that appear on many types
+			if methodName == "Close" || methodName == "Error" || methodName == "String" {
+				return ""
+			}
+			switch {
+			// DB handles: *sql.DB, *sql.Tx, *sql.Stmt, *sql.Rows, *sql.Row, *sql.Result
+			case varName == "db" || varName == "database" || varName == "conn" ||
+				varName == "tx" || varName == "stmt" || varName == "row" ||
+				varName == "rows" || varName == "result" || strings.Contains(varName, "db"):
+				return "sql." + methodName
+			// HTTP clients/requests: *http.Client, *http.Request
+			case varName == "client" || varName == "httpclient" || varName == "hc" ||
+				varName == "req" || varName == "request":
+				return "http.Client." + methodName
+			// HTTP response writers
+			case varName == "resp" || varName == "response" || varName == "w" ||
+				varName == "rw" || varName == "writer":
+				return "http.ResponseWriter." + methodName
+			// File/IO handles: *os.File, io.Reader, io.Writer
+			case varName == "file" || varName == "f" || varName == "fd" ||
+				varName == "reader" || varName == "writer" || varName == "buf" ||
+				varName == "dst" || varName == "src":
+				return "os.File." + methodName
+			// exec.Cmd, os.Process
+			case varName == "cmd" || varName == "command" || varName == "proc" ||
+				varName == "process":
+				return "exec.Cmd." + methodName
+			// Network connections
+			case varName == "socket" || varName == "listener" || varName == "ln":
+				return "net.Conn." + methodName
+			}
+		}
+	}
+	return ""
 }
 
 // resolvePkgPath computes the Go import path from a file path and module root.
@@ -435,8 +515,22 @@ func SinkType(funcName string) string {
 		lower == "eval" || lower == "exec" || lower == "compile" {
 		return "command_exec"
 	}
+	// Python DB-API methods (sqlite3, psycopg2, MySQLdb)
+	if lower == "execute" || lower == "executemany" || lower == "executescript" ||
+		strings.Contains(lower, "fetchall") || strings.Contains(lower, "fetchone") ||
+		strings.Contains(lower, "fetchmany") || strings.Contains(lower, "cursor.") {
+		return "sql"
+	}
+	// Python SSTI / template injection
+	if strings.Contains(lower, "render_template_string") || strings.Contains(lower, "render_template") {
+		return "template"
+	}
+	// Python file ops (send_file, file read/write)
+	if strings.Contains(lower, "send_file") || strings.Contains(lower, "sendfile") {
+		return "file_ops"
+	}
 
-	// Go sinks
+	// Go sinks (stdlib)
 	switch {
 	case strings.Contains(lower, "query") || strings.Contains(lower, "queryrow") || strings.Contains(lower, "querycontext"):
 		return "sql"
@@ -447,6 +541,74 @@ func SinkType(funcName string) string {
 	case strings.Contains(lower, "execute") || strings.Contains(lower, "redirect"):
 		return "network"
 	}
+
+	// Heuristic: wrapper functions whose names imply dangerous operations.
+	// These wrap stdlib calls (Query, http.Get, exec.Command, os.ReadFile)
+	// that the CG can't trace because local variables lose type info.
+	switch {
+	// DB wrappers: SearchUsers, GetUserByID, FindUser, QueryUsers, LookupUser, etc.
+	case strings.HasPrefix(lower, "search") || strings.HasPrefix(lower, "getuser") ||
+		strings.HasPrefix(lower, "finduser") || strings.HasPrefix(lower, "queryuser") ||
+		strings.HasPrefix(lower, "lookupuser") || strings.HasPrefix(lower, "fetchuser") ||
+		strings.Contains(lower, "userby") || strings.Contains(lower, "byid") ||
+		strings.HasPrefix(lower, "insert") || strings.HasPrefix(lower, "delete") && !strings.Contains(lower, "file"):
+		return "sql"
+	// Network wrappers: FetchURL, GetURL, PostData, SendRequest, CallAPI, Webhook
+	case strings.HasPrefix(lower, "fetchurl") || strings.HasPrefix(lower, "geturl") ||
+		strings.HasPrefix(lower, "posturl") || strings.HasPrefix(lower, "sendrequest") ||
+		strings.HasPrefix(lower, "callapi") || strings.HasPrefix(lower, "webhook") ||
+		strings.HasPrefix(lower, "fetch") && strings.Contains(lower, "url"):
+		return "network"
+	// Network: http.Get, http.Post, client.Do
+	case strings.Contains(lower, "http.get") || strings.Contains(lower, "http.post") ||
+		strings.Contains(lower, "http.do") || strings.Contains(lower, "client.get") ||
+		strings.Contains(lower, "client.post") || strings.Contains(lower, "client.do"):
+		return "network"
+	// Command wrappers: Ping, RunCommand, ExecCmd, ShellExec, SystemCall
+	case lower == "ping" || strings.HasPrefix(lower, "ping") ||
+		strings.HasPrefix(lower, "runcommand") || strings.HasPrefix(lower, "execcmd") ||
+		strings.HasPrefix(lower, "shellexec") || strings.HasPrefix(lower, "systemcall"):
+		return "command_exec"
+	// File wrappers: ReadFile, WriteFile, DownloadFile, SaveToFile
+	case strings.HasPrefix(lower, "readfile") || strings.HasPrefix(lower, "writefile") ||
+		strings.HasPrefix(lower, "downloadfile") || strings.HasPrefix(lower, "savetofile") ||
+		strings.HasPrefix(lower, "uploadfile"):
+		return "file_ops"
+	// Python DB wrappers: specific multi-word patterns only (no bare prefixes)
+	case strings.HasPrefix(lower, "get_user") || strings.HasPrefix(lower, "get_record") ||
+		strings.HasPrefix(lower, "get_all_") || strings.HasPrefix(lower, "search_user") ||
+		strings.HasPrefix(lower, "search_record") || strings.Contains(lower, "delete_user") ||
+		strings.Contains(lower, "list_users") || strings.Contains(lower, "list_records") ||
+		strings.Contains(lower, "update_user") || strings.Contains(lower, "update_record") ||
+		strings.Contains(lower, "_by_id") || strings.Contains(lower, "_by_username") ||
+		strings.Contains(lower, "_by_email"):
+		return "sql"
+	// Python network wrappers: specific multi-word patterns only
+	case strings.HasPrefix(lower, "send_email") || strings.HasPrefix(lower, "send_notification") ||
+		strings.HasPrefix(lower, "send_webhook") || strings.HasPrefix(lower, "send_message") ||
+		strings.HasPrefix(lower, "call_api") || strings.HasPrefix(lower, "post_data") ||
+		strings.HasPrefix(lower, "fetch_url") || strings.HasPrefix(lower, "get_url") ||
+		strings.HasPrefix(lower, "notify_user") || strings.HasPrefix(lower, "push_notification"):
+		return "network"
+	// Python command wrappers: specific patterns only
+	case strings.HasPrefix(lower, "exec_cmd") || strings.HasPrefix(lower, "exec_command") ||
+		strings.HasPrefix(lower, "run_cmd") || strings.HasPrefix(lower, "run_command") ||
+		strings.HasPrefix(lower, "shell_exec") || strings.HasPrefix(lower, "system_call") ||
+		strings.HasPrefix(lower, "subprocess_"):
+		return "command_exec"
+	// Python file wrappers: specific patterns only
+	case strings.HasPrefix(lower, "save_file") || strings.HasPrefix(lower, "save_to_file") ||
+		strings.HasPrefix(lower, "write_file") || strings.HasPrefix(lower, "write_to_file") ||
+		strings.HasPrefix(lower, "load_file") || strings.HasPrefix(lower, "read_file") ||
+		strings.HasPrefix(lower, "download_file") || strings.HasPrefix(lower, "upload_file"):
+		return "file_ops"
+	// Python template wrappers: both snake_case and CamelCase
+	case strings.HasPrefix(lower, "render_template") || strings.HasPrefix(lower, "render_page") ||
+		strings.HasPrefix(lower, "template_render") || strings.Contains(lower, "rendertemplate") ||
+		strings.Contains(lower, "templaterender") || strings.Contains(lower, "renderpage"):
+		return "template"
+	}
+
 	// Check against known dangerous patterns
 	dangerous := []string{
 		"sql", "queryrow", "command", "remove",

@@ -344,8 +344,17 @@ Your job is to CHALLENGE each finding, not confirm it. Most AI traces are concep
 CRITICAL RULES:
 1. A data flow from input to sink is NOT enough. You need a CONCRETE attack scenario.
 2. If the trace doesn't show actual code-level exploitation → is_real=false.
-3. Framework protections (ORM parameterization, template auto-escaping, Flask/Jinja2 autoescape) negate the finding.
+3. Framework protections (ORM parameterization, template files with Jinja2 autoescape) MAY negate findings.
 4. Missing auth/validation on low-impact operations → confidence ≤ 0.5.
+
+PYTHON/FLASK GOTCHAS — common false-negatives to avoid:
+- render_template_string() does NOT auto-escape. It processes the string AS a Jinja2 template.
+  Input like {{config}} or {{7*7}} IS executable SSTI. Do NOT reject as "auto-escaped."
+- Flask's send_file() does NOT sanitize paths. os.path.join with user input IS path traversal.
+- f-string SQLi: MD5 hash of password prevents injection through password field BUT other
+  interpolated fields (username, search terms) remain injectable. Check each field separately.
+- Python sqlite3 by default does NOT allow multiple statements in execute(), but single-statement
+  SQLi (UNION, OR 1=1, subqueries) still works.
 
 For EACH finding, answer three questions. ONLY if ALL THREE have SPECIFIC, CONCRETE answers → is_real = true.
 If ANY question cannot be answered concretely → is_real = false.
@@ -363,9 +372,14 @@ CHALLENGE it — most traces are conceptual noise, not exploitable.
 
 First, check for FALSE POSITIVE indicators:
 - Is the input actually attacker-controllable? (config values are NOT)
-- Is there implicit framework protection? (ORM parameterization, template auto-escaping, Jinja2 autoescape)
+- Is there implicit framework protection? (ORM parameterization, Jinja2 autoescape in .html template FILES)
 - Is the sink actually dangerous in this context? (reading a fixed file path = low risk)
 - Are there compensating controls? (auth middleware, firewall, network restrictions)
+
+PYTHON/FLASK WARNING — do NOT falsely reject these:
+- render_template_string() has NO auto-escaping — it IS SSTI-vulnerable with user input
+- send_file() has NO path sanitization — os.path.join with user input IS path traversal
+- sqlite3 single-statement limit blocks stacked queries but NOT UNION/OR/subquery SQLi
 
 THEN, make your judgment:
 - is_real: TRUE only if a CONCRETE exploit scenario exists. FALSE otherwise.
@@ -373,7 +387,6 @@ THEN, make your judgment:
 - If is_real=true: provide severity, CWE, title, description, fix_hint
 - If is_real=false: use refutation_points to explain why it's NOT exploitable
 
-Respond ONLY with valid JSON:
 Respond ONLY with valid JSON:
 {
   "is_real": true,
