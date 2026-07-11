@@ -448,22 +448,113 @@ func (e *Engine) VerifyTraces(ctx context.Context, traces []TraceResult) ([]Veri
 	}
 
 	var verified []VerifiedFinding
-	for i, tr := range traces {
-		if i > 0 {
-			time.Sleep(200 * time.Millisecond)
+	// Batch verify: 5 traces per API call (reduces API calls from N to N/5)
+	batches := batchVerifyTraces(traces, 5)
+	for batchIdx, batch := range batches {
+		if batchIdx > 0 {
+			time.Sleep(batchInterval)
 		}
-		vf, err := e.verifyOne(ctx, client, tr)
+		batchResults, err := e.verifyBatch(ctx, client, batch)
 		if err != nil {
-			log.Printf("[AI VERIFY] %s:%d %s() failed: %v",
-				tr.Section.FilePath, tr.Section.LineStart, tr.Section.FuncName, err)
+			log.Printf("[AI VERIFY] batch %d/%d failed: %v", batchIdx+1, len(batches), err)
+			// Fall back to one-by-one for failed batches
+			for _, tr := range batch {
+				if vf, err := e.verifyOne(ctx, client, tr); err == nil && vf != nil {
+					verified = append(verified, *vf)
+				}
+			}
 			continue
 		}
-		if vf != nil {
-			verified = append(verified, *vf)
-		}
+		verified = append(verified, batchResults...)
 	}
-	log.Printf("[AI VERIFY] %d traces → %d confirmed vulns", len(traces), len(verified))
+	log.Printf("[AI VERIFY] %d traces → %d confirmed vulns (%d batches)", len(traces), len(verified), len(batches))
 	return verified, nil
+}
+
+// verifyBatch sends multiple traces in a single API call.
+func (e *Engine) verifyBatch(ctx context.Context, client *Client, traces []TraceResult) ([]VerifiedFinding, error) {
+	if len(traces) == 0 {
+		return nil, nil
+	}
+	if len(traces) == 1 {
+		vf, err := e.verifyOne(ctx, client, traces[0])
+		if err != nil {
+			return nil, err
+		}
+		if vf != nil {
+			return []VerifiedFinding{*vf}, nil
+		}
+		return nil, nil
+	}
+
+	// Build batch prompt
+	var sb strings.Builder
+	sb.WriteString("Verify these potential vulnerability findings. For each, determine if it's a REAL vulnerability.\n\n")
+	for i, tr := range traces {
+		sb.WriteString(fmt.Sprintf("### Finding %d\n", i+1))
+		sb.WriteString(buildVerifySummary(tr))
+		sb.WriteString("\n---\n\n")
+	}
+
+	prompt := sb.String()
+
+	// Parse batch response
+	var response struct {
+		Findings []struct {
+			Index            int      `json:"index"`
+			IsReal           bool     `json:"is_real"`
+			Confidence       float64  `json:"confidence"`
+			Severity         string   `json:"severity"`
+			CWE              string   `json:"cwe"`
+			Title            string   `json:"title"`
+			Description      string   `json:"description"`
+			FixHint          string   `json:"fix_hint"`
+			Refutation       string   `json:"refutation"`
+			RefutationPoints []string `json:"refutation_points"`
+		} `json:"findings"`
+	}
+
+	maxTokens := 2048 + len(traces)*512
+	err := client.ChatJSONWithMaxTokens(ctx, SystemPromptVerify, prompt, &response, maxTokens)
+	if err != nil {
+		return nil, err
+	}
+
+	var verified []VerifiedFinding
+	for _, r := range response.Findings {
+		if r.Index < 0 || r.Index >= len(traces) {
+			continue
+		}
+		tr := traces[r.Index]
+		if !r.IsReal || r.Confidence < 0.7 {
+			log.Printf("[AI VERIFY] %s:%d %s() — REJECTED: %s (confidence=%.2f)",
+				tr.Section.FilePath, tr.Section.LineStart, tr.Section.FuncName,
+				r.Refutation, r.Confidence)
+			continue
+		}
+		log.Printf("[AI VERIFY] %s:%d %s() — CONFIRMED: %s (confidence=%.2f)",
+			tr.Section.FilePath, tr.Section.LineStart, tr.Section.FuncName,
+			r.Title, r.Confidence)
+		verified = append(verified, VerifiedFinding{
+			Trace: tr, IsReal: true, Confidence: r.Confidence,
+			Severity: r.Severity, CWE: r.CWE,
+			Title: r.Title, Description: r.Description,
+			FixHint: r.FixHint, Refutation: r.Refutation,
+		})
+	}
+	return verified, nil
+}
+
+func batchVerifyTraces(traces []TraceResult, batchSize int) [][]TraceResult {
+	var batches [][]TraceResult
+	for i := 0; i < len(traces); i += batchSize {
+		end := i + batchSize
+		if end > len(traces) {
+			end = len(traces)
+		}
+		batches = append(batches, traces[i:end])
+	}
+	return batches
 }
 
 func (e *Engine) verifyOne(ctx context.Context, client *Client, tr TraceResult) (*VerifiedFinding, error) {
