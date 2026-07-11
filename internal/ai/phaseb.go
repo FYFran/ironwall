@@ -234,6 +234,8 @@ func (e *Engine) TraceMissing(ctx context.Context, handlers []ObservedSection) (
 	log.Printf("[AI Missing] analyzed %d handlers → %d missing controls", len(handlers), len(results))
 		results = deduplicateMissingControls(results)
 		log.Printf("[AI Missing] after dedup: %d merged findings", len(results))
+		results = filterMissingControls(results)
+		log.Printf("[AI Missing] after filter: %d actionable findings", len(results))
 	return results, nil
 }
 
@@ -830,6 +832,39 @@ func deduplicateMissingControls(controls []MissingControl) []MissingControl {
 		})
 	}
 	return merged
+}
+
+
+// filterMissingControls removes low-value MISSING findings to reduce noise.
+// Rules:
+//  1. Drop LOW severity (not actionable)
+//  2. Drop rate_limiting on health/read-only endpoints
+//  3. Drop CSRF on GET-only handlers (no state change)
+//  4. Drop content_type validation on GET handlers (no request body)
+func filterMissingControls(controls []MissingControl) []MissingControl {
+	var filtered []MissingControl
+	for _, mc := range controls {
+		sev := strings.ToUpper(mc.Severity)
+		if sev == "LOW" || sev == "INFO" {
+			continue // Rule 1: LOW severity = noise
+		}
+		fn := strings.ToLower(mc.Section.FuncName)
+		ct := strings.ToLower(mc.ControlType)
+		// Rule 2: rate limiting on utility endpoints
+		if strings.Contains(ct, "rate_limit") && (strings.Contains(fn, "health") || strings.Contains(fn, "ping") || strings.Contains(fn, "index") || strings.Contains(fn, "status") || strings.Contains(fn, "ready")) {
+			continue
+		}
+		// Rule 3: CSRF on GET-only handlers (no state change)
+		if strings.Contains(ct, "csrf") && (strings.HasPrefix(fn, "get") || strings.HasPrefix(fn, "list") || strings.HasPrefix(fn, "show") || strings.HasPrefix(fn, "view")) {
+			continue
+		}
+		// Rule 4: content_type on GET handlers
+		if strings.Contains(ct, "content_type") && (strings.HasPrefix(fn, "get") || strings.HasPrefix(fn, "list")) {
+			continue
+		}
+		filtered = append(filtered, mc)
+	}
+	return filtered
 }
 
 func severityWeight(s string) int {

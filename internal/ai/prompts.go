@@ -502,22 +502,31 @@ Only report issues with confidence >= 0.7.
 Respond ONLY with valid JSON.`
 
 // PromptConfigAudit is the config security review prompt.
-const PromptConfigAudit = `Review these code sections for dangerous configuration patterns.
+const PromptConfigAudit = `Review each code section below for EXACTLY these 5 configuration issues.
 
-Check for: debug mode enabled, dangerous defaults, missing security headers, weak session config, insecure dependency config.
+For EACH section, check ALL 5 patterns. Do not skip any section. Be systematic.
+
+1. DEBUG MODE: Is debug=True, DEBUG=true, or debug mode enabled? (CWE-489)
+2. BIND ALL INTERFACES: Is the server binding to 0.0.0.0 or ::? (CWE-668)
+3. HARDCODED SECRETS: Are there hardcoded passwords, API keys, tokens? (CWE-798)
+4. WEAK TLS: Is TLS 1.0/1.1 used, or are weak ciphers configured? (CWE-326)
+5. MISSING COOKIE FLAGS: Are session cookies missing HttpOnly/Secure/SameSite? (CWE-614)
+
+CRITICAL: If you are UNSURE about a finding, set confidence to 0. Only report if you can see the exact code pattern.
+CRITICAL: Output EXACTLY ONE finding per issue. Do not combine multiple issues into one finding.
 
 Respond ONLY with valid JSON:
 {
   "issues": [
     {
-      "func_name": "function name",
-      "issue_type": "debug-mode",
-      "confidence": 0.90,
-      "severity": "MEDIUM",
-      "title": "Debug mode enabled on all interfaces",
-      "description": "Server configured with debug=True and host='0.0.0.0', exposing debug endpoints to the network",
-      "fix_hint": "Set debug=False in production. Use environment-specific config.",
-      "cwe": "CWE-489"
+      "func_name": "function or file name where found",
+      "issue_type": "one of: debug_mode, bind_all, hardcoded_secret, weak_tls, missing_cookie_flags",
+      "confidence": 0.95,
+      "severity": "CRITICAL|HIGH|MEDIUM|LOW",
+      "title": "short title",
+      "description": "detailed description with code evidence",
+      "fix_hint": "specific fix",
+      "cwe": "CWE-XXX"
     }
   ]
 }
