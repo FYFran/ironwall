@@ -512,7 +512,7 @@ For EACH section, check ALL 5 patterns. Do not skip any section. Be systematic.
 4. WEAK TLS: Is TLS 1.0/1.1 used, or are weak ciphers configured? (CWE-326)
 5. MISSING COOKIE FLAGS: Are session cookies missing HttpOnly/Secure/SameSite? (CWE-614)
 
-CRITICAL: If you are UNSURE about a finding, set confidence to 0. Only report if you can see the exact code pattern.
+CRITICAL: Report any pattern that CLEARLY matches. Use confidence 0.85-0.95 for exact code matches, 0.70-0.85 for strong inference. Output at least 1 finding if any of the 5 patterns exist in the code.
 CRITICAL: Output EXACTLY ONE finding per issue. Do not combine multiple issues into one finding.
 
 Respond ONLY with valid JSON:
