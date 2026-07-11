@@ -1,113 +1,120 @@
-# NEXT_SESSION — 铁壁 (2026-07-10 晚间存档)
+# NEXT_SESSION — 铁壁 (2026-07-11 深夜存档)
 
-> Brain B v4.1注入 | 死代码清理 | 调用图 | Flask条件化 | 验证统一 | 全测试通过
-
----
-
-## 本轮完成 (7.10晚间)
-
-### 🔴 Brain B升级 ✅
-- KB v4.1: +Arnica AI SAST +CSA 2026 +竞争缺口
-- Proxy注入: `main.py`启动读KB → system prompt (13KB)
-- tavily_search可用 → Brain B独立联网搜索
-- KB路径: `docs/BRAIN_B_KNOWLEDGE.md`
-- Proxy文档: `docs/CODEX_PROXY_FIXES.md`
-
-### 🔴 死代码清理 ✅ — 170行移除
-- `runTriage` (78行) + `runDeepVerify` wrapper (3行)
-- 3个triage prompts + 2个triage types
-- `noTestFilter` from Engine/NewEngine/scan.go/config.go
-- `--no-test-filter` CLI flag
-
-### 🔴 调用图 ✅ — AST-based, 零依赖
-- 新文件: `internal/ai/observe/callgraph.go` (330行)
-- Ironwall自身: 799函数, 1439调用边, 38包
-- `WalkTaint()` BFS跨文件追踪
-- 集成进 `ObserveResult` + OBSERVE pipeline
-- 测试: `callgraph_test.go`
-
-### 🟡 Verify Prompt统一 ✅
-- `verifyBatchOneByOne` 现在用 `SystemPromptDeepVerify` (同batch)
-- 阈值一致: `!IsReal && Confidence >= 0.7`
-- 文档化一致性契约
-
-### 🟡 Flask规则条件化 ✅
-- `DeepVerifyPrompt(hasPython)` 动态选择prompt
-- `Engine.SetLanguages(hasGo, hasPython)` API
-- `detectLanguages()` 自动检测目标语言
-- 非Python项目每次batch省~120 tokens
-
-### 🟡 Python OBSERVE ✅
-- CLI验证: 5文件, 10 sections, 8 handlers
-- SAST发现30个(6 CRITICAL + 19 HIGH)
-- MISSING应能找到: `delete_file`/`unshare_file` 缺CSRF保护(CWE-352)
-- Phase B AI全pipeline: 需更长timeout (当前120s不够)
+> v4.2完成 | 11 commits | 调用图Go+Python | Brain B v4.2 | Late Alpha评估
 
 ---
 
-## 代码统计
+## 本轮完成 (7.11全天)
 
-- 提交: `b5afabd` — 5文件, +86/-20行 (Flask conditioning + verify fix)
-- 提交: `00213f5` — Python OBSERVE集成测试
-- 提交: `1eafe6e` — Brain B v4.1 + 死代码 + 调用图 (10文件, +676/-166)
-- **总计: +819/-186行, 3 commits**
+### 调用图 v4.1-4.2 ✅
+- 调用图→TRACE集成 (Option C: validated taint chains + 5 guardrails)
+- visited-key bug修复 — 同文件多函数链断裂 (关键修复!)
+- Python调用图 — stdlib ast, 15 funcs, 24 taint chains
+- callgraph_target测试夹具 (4文件/3包, LoginHandler→QueryUser→sqlQuery)
+- Go entry points: 77 (strict handler detection). Python: 11 (Flask patterns)
 
----
+### 管线优化 ✅
+- HTTP timeout 120s→300s (DeepSeek R1), --deep auto-900s
+- VERIFY批量 5x (was 1 trace/call → 5 traces/call)
+- Verify prompt哲学统一 (PromptVerify + DeepVerify → adversarial by default)
+- Python OBSERVE path resolution修复 (parse errors 36→1)
 
-## 下一步
+### Brain B v4.2 ✅
+- KB压缩 13KB→4.5KB (-65%, -2135 tokens/session)
+- 双模型默认: deepseek-chat(V3/triage) + deepseek-reasoner(R1/deep)
+- SEARCH命令: [SEARCH: query] + DSML tag auto-detect
+- Proxy system prompt: 5 critical rules
+- Codex proxy已重启 (单实例, port 4000)
 
-### ✅ 本次完成 (2026-07-10 深夜)
-1. **Brain B对抗审查** — Option A(per-section raw CG)被否决，选Option C(pre-computed validated taint chains)
-2. **调用图→TRACE集成** — `WalkTaintFromEntryPoints()` + `ValidateChain()` + `DeduplicateChains()` + `GetChainsForFunction()`
-3. **TRACE prompt升级** — `SystemPromptTrace` 新增5条call graph hints解读规则
-4. **Pipeline连接** — `AnalyzeDeep()` 自动计算taint chains传入`Trace()`
-5. **全测试通过** — observe(4.4s) + pipeline(1.7s) + report/scanner 无回归
-6. **Brain B攻击点**: 名称匹配over-match、token预算爆炸、Python nil静默退化、LLM信任错误图数据→更危险的幻觉 — 全部通过Option C guardrails防御
-
-### 🔴 继续优先
-1. ~~**Python TRACE AI实战 — 超时修复**~~ ✅ HTTP timeout 120s→300s, --deep auto-900s
-2. **Brain B模型升级** — DeepSeek → Claude Opus 4.8 (SAST F1差~0.1)
-3. **Recall审计** — 对比TRACE call graph ON vs OFF在实战项目上的Recall差异
-4. **大项目调用图实战** — 100+文件Go项目验证entry point detection + chain质量
-5. **Python TRACE 端到端测试** — 用secure-file-management跑完整Phase B (需API key)
-
-### 🟡 下次
-5. **Python调用图** — AST import追踪, 同Go模式
-6. ~~**调用图接入TRACE**~~ ✅ 已完成
-
-### 🟢 低优先级
-7. 离线LLM (Ollama)
-8. IDE插件
-9. 定价模型
-10. 闲鱼/GitHub发布
+### 测试 ✅
+- observe: 16 tests (0 skip!), ai: 5 tests, pipeline: 9 tests
+- PythonObserve_Integration 不再skip: 5 files, 10 sections, 8 handlers
+- secure-file-management fixture 从submodule转普通文件
 
 ---
 
-## 启动指令
+## Brain B评估: LATE ALPHA
+
+**Verdict**: 引擎sophisticated (research-grade), 验证thin (1个数据点)。
+
+| 已验证 | 未验证 |
+|--------|--------|
+| Go target 12 vulns, 89% recall, $0.016 | Python端到端从未用AI跑过 |
+| OBSERVE Go+Python | Python TRACE找漏洞能力未知 |
+| Call graph 跨文件链 | VERIFY批量FP率未知 |
+| TRACE prompt construction | MISSING在Python上行为未知 |
+| Pipeline runs end-to-end | Call graph提升TRACE多少未知 |
+
+**最大风险**: 虚假信心。工具看起来权威但Python管线未验证。
+
+---
+
+## 🔴 下个会话: Python端到端实战
+
+### 启动指令
 
 ```
-1. python -m mempalace wake-up --wing claudefiles
-2. python -m mempalace search "ironwall v4.1" --wing claudefiles
-3. 读 docs/NEXT_SESSION.md (本文件)
-4. Codex proxy port 4000 (应已运行, KB自动注入)
-5. Brain B测试: curl -s http://localhost:4000/v1/responses -H "Content-Type: application/json" -d '{"input":[{"role":"user","content":"What is Arnica AI SAST?"}],"stream":false}' | grep delta
+1. Codex proxy应已运行 (port 4000). 检查: curl -s http://localhost:4000/health
+2. 读 docs/NEXT_SESSION.md (本文件)
+3. DEEPSEEK_API_KEY应在env
+4. 确认secure-file-management fixture: ls battle_test_candidates/secure-file-management/app/routes.py
 ```
 
-## 关键文件
+### P0任务
+
+**1. Python端到端 (secure-file-management, 544行Flask)**
+
+```bash
+cd f:/ClaudeFiles/_research/ironwall
+go run ./cmd/ironwall/ scan ./battle_test_candidates/secure-file-management --ai --deep --format terminal
+```
+
+观察: TRACE产生几个finding? VERIFY通过几个? MISSING找到什么? 总成本?
+
+**2. 建Python漏洞target** (Flask app, 5-10个已知漏洞)
+
+SQL注入(cursor.execute拼接) + SSTI(render_template_string) + Auth bypass(缺@login_required) + Path traversal(os.path.join用户输入) + SSRF(requests.get用户URL)
+
+目标: 测量Ironwall recall + FPR。
+
+**3. Call Graph ON vs OFF消融实验**
+
+同一target跑两次: 一次正常(--deep), 一次改代码跳过call graph注入。对比TRACE finding数量+质量。
+
+### 关键文件
 
 | 文件 | 说明 |
 |------|------|
-| `docs/BRAIN_B_KNOWLEDGE.md` | v4.1知识库 |
-| `docs/CODEX_PROXY_FIXES.md` | Codex代理修复 |
-| `internal/ai/observe/callgraph.go` | 调用图引擎 (NEW) |
-| `internal/ai/observe/callgraph_test.go` | 调用图测试 (NEW) |
-| `internal/ai/engine.go` | 死代码清理 + verify统一 |
-| `internal/ai/prompts.go` | Flask条件化 + DeepVerifyPrompt() |
-| `internal/ai/types.go` | 砍TriageResult/TriageVerdict |
-| `cmd/ironwall/scan.go` | detectLanguages() + SetLanguages |
-| `internal/config/config.go` | 砍NoTestFilter |
+| `internal/ai/observe/callgraph.go` | Go调用图 + WalkTaint + entry points |
+| `internal/ai/observe/python_callgraph.py` | Python调用图 |
+| `internal/ai/observe/python_callgraph.go` | Python CG → Go bridge |
+| `internal/ai/phaseb.go` | Phase B: TRACE/VERIFY/MISSING/CONFIG管线 |
+| `internal/ai/prompts.go` | 所有AI prompt (已统一adversarial) |
+| `internal/ai/client.go` | AI HTTP client (300s timeout) |
+| `internal/ai/trace_test.go` | TRACE prompt 5测试 |
+| `internal/ai/observe/callgraph_test.go` | 调用图 13测试 |
+| `battle_test_candidates/callgraph_target/` | Go跨文件漏洞target |
+| `battle_test_candidates/secure-file-management/` | Python Flask target |
+| `docs/BRAIN_B_KNOWLEDGE_v4.2.md` | Brain B知识库 (4.5KB compact) |
+
+### 新对话提示词
+
+```
+继续铁壁开发。上次会话完成v4.2 — 调用图Go+Python双语言、VERIFY批量、
+Brain B KB压缩、visited-key修复、Python OBSERVE路径修复。16 observer tests + 5 ai tests + 9 pipeline tests全通过。
+
+Brain B评估为Late Alpha: 引擎competent，验证只有1个Go数据点。Python管线从未用真实AI跑过。
+
+DEEPSEEK_API_KEY在env。现在要做:
+1. Python端到端实战 — 用--ai --deep跑secure-file-management (544行Flask)
+2. 建Python漏洞target (5-10 planted vulns: SQLi/SSTI/auth bypass/path traversal/SSRF)
+3. Call Graph ON vs OFF消融实验
+
+启动: 确认proxy port 4000 OK, 读NEXT_SESSION.md, 直接开干。
+```
 
 ---
 
-*皮特 + Brain B (DeepSeek-v4-pro via Codex) | 2026-07-10 晚间存档*
-*三连commit: 1eafe6e → 00213f5 → b5afabd*
+*皮特 + Brain B (DeepSeek v4-pro via Codex) | 2026-07-11 深夜存档*
+*11 commits: 7d8a921→c00cda8*
+*Next: Python end-to-end with real AI.*
