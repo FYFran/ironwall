@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Upload File{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h2 class="mb-4">Upload File</h2>
+        <div id="upload-card" class="card shadow-sm p-4 mb-4" style="border-radius: 18px; border: 2px dashed #90caf9; background: #f8fafc;">
+            <form id="uploadForm" method="POST" action="{{ url_for('main.upload_file') }}" enctype="multipart/form-data">
+                <div class="form-group mb-3 text-center">
+                    <label for="file" class="w-100" style="cursor:pointer;">
+                        <div id="drop-area" class="py-5" style="border-radius: 12px; background: #e3f2fd; border: 2px dashed #64b5f6; transition: background 0.2s;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#64b5f6" viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
+                            <div class="mt-2 font-weight-bold" style="color:#1976d2;">Drag & drop a file here, or click to select</div>
+                            <div class="small text-muted mt-1">Accepted: PDF, JPG, PNG, GIF, TXT (max 10MB)</div>
+                        </div>
+                        <input type="file" class="d-none" id="file" name="file" required>
+                    </label>
+                </div>
+                <div id="file-preview" class="mb-3" style="display:none;"></div>
+                <button type="submit" class="btn btn-success btn-block">Upload</button>
+            </form>
+        </div>
+        <div id="message" class="alert" role="alert" style="display: none;"></div>
+    </div>
+</div>
+
+<script>
+// Drag and drop logic
+const dropArea = document.getElementById('drop-area');
+const fileInput = document.getElementById('file');
+const filePreview = document.getElementById('file-preview');
+
+['dragenter', 'dragover'].forEach(eventName => {
+  dropArea.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.style.background = '#bbdefb';
+  }, false);
+});
+['dragleave', 'drop'].forEach(eventName => {
+  dropArea.addEventListener(eventName, (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dropArea.style.background = '#e3f2fd';
+  }, false);
+});
+dropArea.addEventListener('drop', (e) => {
+  if (e.dataTransfer.files.length) {
+    fileInput.files = e.dataTransfer.files;
+    showFilePreview();
+  }
+});
+dropArea.addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('change', showFilePreview);
+
+function showFilePreview() {
+  if (fileInput.files.length) {
+    const file = fileInput.files[0];
+    let icon = '<span class="mr-2">📄</span>';
+    if (["jpg","jpeg","png","gif","bmp","webp"].includes(file.name.split('.').pop().toLowerCase())) {
+      icon = '<span class="mr-2">🖼️</span>';
+    } else if (file.name.split('.').pop().toLowerCase() === 'pdf') {
+      icon = '<span class="mr-2">📕</span>';
+    }
+    filePreview.innerHTML = `<div class="alert alert-info d-flex align-items-center justify-content-between mb-0">${icon}<span>${file.name} (${(file.size/1024/1024).toFixed(2)} MB)</span><button type="button" class="close ml-2" aria-label="Remove" onclick="removeFile()"><span aria-hidden="true">&times;</span></button></div>`;
+    filePreview.style.display = '';
+  } else {
+    filePreview.style.display = 'none';
+  }
+}
+window.removeFile = function() {
+  fileInput.value = '';
+  filePreview.style.display = 'none';
+};
+</script>
+{% endblock %}

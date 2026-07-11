@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}File Management{% endblock %}</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="background: #f5f6fa;">
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm" style="height: 64px;">
+        <a class="navbar-brand font-weight-bold" href="{{ url_for('main.index') }}" style="font-size: 1.5rem; letter-spacing: 1px;">File Management System</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ml-auto">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="navbar-text">{{ current_user.username }}</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Logout</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Register</a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+    </nav>
+    <div class="d-flex" style="min-height: 100vh;">
+        {% if current_user.is_authenticated %}
+        <div class="bg-white shadow-sm p-3" style="width: 220px; min-height: 100vh;">
+            <a href="{{ url_for('main.index') }}" class="btn btn-primary btn-block mb-3">My Drive</a>
+            <a href="{{ url_for('main.upload_file') }}" class="btn btn-outline-primary btn-block mb-3">Upload</a>
+            <!-- Add more sidebar items as needed -->
+        </div>
+        {% endif %}
+        <div class="flex-grow-1 p-4">
+            {% with messages = get_flashed_messages() %}
+              {% if messages %}
+                <div class="alert alert-info">
+                  {% for message in messages %}
+                    <div>{{ message }}</div>
+                  {% endfor %}
+                </div>
+              {% endif %}
+            {% endwith %}
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
