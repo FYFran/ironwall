@@ -139,6 +139,7 @@ var banditCWE = map[string]string{
 	// Ironwall custom plugins
 	"B901": "CWE-501", // trust_boundary_violation
 	"B902": "CWE-90",  // ldap_injection
+	"B903": "CWE-22",  // path_traversal
 }
 
 // ToFindings converts bandit findings to ironwall Finding structs.

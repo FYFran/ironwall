@@ -1,0 +1,2530 @@
+{
+  "version": "0.7.0",
+  "target": "./testdata/benchmark_50/",
+  "started_at": "2026-07-12T14:36:58+08:00",
+  "completed_at": "2026-07-12T14:38:45+08:00",
+  "duration": "1m46.803s",
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 0,
+    "low": 3,
+    "info": 99,
+    "total": 102
+  },
+  "findings": [
+    {
+      "id": "IRON-BANDIT-003",
+      "title": "[B314] blacklist: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B314 detected: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — The XML file is loaded from a hardcoded path (helpers.utils.RES_DIR + '/employees.xml'), not from user input. The attacker cannot control the XML content, so XML attacks (e.g., XXE, billion laughs) are not possible. This is a false positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00013.py",
+      "line_number": 55,
+      "code_snippet": "54 \t\ttry:\n55 \t\t\troot = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')\n56 \t\t\tquery = f\"/Employees/Employee[@emplid=\\'{bar}\\']\"\n",
+      "step": 2,
+      "category": "bandit-b314",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The XML file is loaded from a hardcoded path (helpers.utils.RES_DIR + '/employees.xml'), not from user input. The attacker cannot control the XML content, so XML attacks (e.g., XXE, billion laughs) are not possible. This is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B314 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b314.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-005",
+      "title": "[B314] blacklist: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B314 detected: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00014.py",
+      "line_number": 56,
+      "code_snippet": "55 \t\ttry:\n56 \t\t\troot = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')\n57 \t\t\tquery = f\"/Employees/Employee[@emplid=\\'{bar}\\']\"\n",
+      "step": 2,
+      "category": "bandit-b314",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B314 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b314.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-007",
+      "title": "[B314] blacklist: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B314 detected: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00015.py",
+      "line_number": 56,
+      "code_snippet": "55 \t\ttry:\n56 \t\t\troot = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')\n57 \t\t\tquery = f\"/Employees/Employee[@emplid=\\'{bar}\\']\"\n",
+      "step": 2,
+      "category": "bandit-b314",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B314 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b314.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-009",
+      "title": "[B314] blacklist: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B314 detected: Using xml.etree.ElementTree.parse to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree.parse with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00016.py",
+      "line_number": 58,
+      "code_snippet": "57 \t\ttry:\n58 \t\t\troot = ET.parse(f'{helpers.utils.RES_DIR}/employees.xml')\n59 \t\t\tquery = f\"/Employees/Employee[@emplid=\\'{bar}\\']\"\n",
+      "step": 2,
+      "category": "bandit-b314",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-BANDIT-003: the XML file is loaded from a hardcoded path, not user-controlled. No attack vector."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B314 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b314.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-012",
+      "title": "[B317] blacklist: Using xml.sax.make_parser to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.sax.make_parser with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B317 detected: Using xml.sax.make_parser to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.sax.make_parser with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — The XML parser is used with a hardcoded file path (helpers.utils.RES_DIR + '/employees.xml'), not user input. The attacker cannot control the XML content, so XML attacks are not possible. False positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00017.py",
+      "line_number": 49,
+      "code_snippet": "48 \t\ttry:\n49 \t\t\tparser = xml.sax.make_parser()\n50 \t\t\t# all features are disabled by default\n",
+      "step": 2,
+      "category": "bandit-b317",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The XML parser is used with a hardcoded file path (helpers.utils.RES_DIR + '/employees.xml'), not user input. The attacker cannot control the XML content, so XML attacks are not possible. False positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B317 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b317.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-013",
+      "title": "[B318] blacklist: Using xml.dom.minidom.parseString to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom.parseString with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called",
+      "description": "Bandit rule B318 detected: Using xml.dom.minidom.parseString to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom.parseString with its defusedxml equivalent function or make sure defusedxml.defuse_stdlib() is called (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — The parseString call uses 'bar' which is derived from user input (via request.form.get), but the XML content is still from a hardcoded file (employees.xml). The attacker cannot control the XML structure, only the XPath query parameter. No XML injection vector exists. False positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00017.py",
+      "line_number": 52,
+      "code_snippet": "51 \n52 \t\t\tdoc = xml.dom.minidom.parseString(bar, parser)\n53 \n",
+      "step": 2,
+      "category": "bandit-b318",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The parseString call uses 'bar' which is derived from user input (via request.form.get), but the XML content is still from a hardcoded file (employees.xml). The attacker cannot control the XML structure, only the XPath query parameter. No XML injection vector exists. False positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B318 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b318.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-019",
+      "title": "[B324] hashlib: Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "description": "Bandit rule B324 detected: Use of weak MD5 hash for security. Consider usedforsecurity=False (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — The MD5 hash is used on user input, but the code does not indicate it is used for security (e.g., password hashing, signatures). It may be used for non-security purposes like checksums. Without evidence of security use, this is a false positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00054.py",
+      "line_number": 64,
+      "code_snippet": "63 \n64 \t\thash = hashlib.new('md5')\n65 \t\thash.update(input)\n",
+      "step": 2,
+      "category": "bandit-b324",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The MD5 hash is used on user input, but the code does not indicate it is used for security (e.g., password hashing, signatures). It may be used for non-security purposes like checksums. Without evidence of security use, this is a false positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-328",
+      "cvss": 9.8,
+      "tool_output": "Bandit rule: B324 | Severity: HIGH | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b324.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-020",
+      "title": "[B324] hashlib: Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "description": "Bandit rule B324 detected: Use of weak MD5 hash for security. Consider usedforsecurity=False (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — Same as IRON-BANDIT-019: MD5 used but no security context. False positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00057.py",
+      "line_number": 65,
+      "code_snippet": "64 \n65 \t\thash = hashlib.md5()\n66 \t\thash.update(input)\n",
+      "step": 2,
+      "category": "bandit-b324",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-BANDIT-019: MD5 used but no security context. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-328",
+      "cvss": 9.8,
+      "tool_output": "Bandit rule: B324 | Severity: HIGH | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b324.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-021",
+      "title": "[B324] hashlib: Use of weak SHA1 hash for security. Consider usedforsecurity=False",
+      "description": "Bandit rule B324 detected: Use of weak SHA1 hash for security. Consider usedforsecurity=False (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — SHA1 used but no security context. False positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00058.py",
+      "line_number": 65,
+      "code_snippet": "64 \n65 \t\thash = hashlib.sha1()\n66 \t\thash.update(input)\n",
+      "step": 2,
+      "category": "bandit-b324",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "SHA1 used but no security context. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-328",
+      "cvss": 9.8,
+      "tool_output": "Bandit rule: B324 | Severity: HIGH | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b324.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-022",
+      "title": "[B324] hashlib: Use of weak SHA1 hash for security. Consider usedforsecurity=False",
+      "description": "Bandit rule B324 detected: Use of weak SHA1 hash for security. Consider usedforsecurity=False (confidence: HIGH)\n[AI Deep Verify: Attack scenario not viable — Same as IRON-BANDIT-021: SHA1 used but no security context. False positive.]",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00059.py",
+      "line_number": 63,
+      "code_snippet": "62 \n63 \t\thash = hashlib.sha1()\n64 \t\thash.update(input)\n",
+      "step": 2,
+      "category": "bandit-b324",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-BANDIT-021: SHA1 used but no security context. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-328",
+      "cvss": 9.8,
+      "tool_output": "Bandit rule: B324 | Severity: HIGH | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b324.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-023",
+      "title": "[B307] blacklist: Use of possibly insecure function - consider using safer ast.literal_eval.",
+      "description": "Bandit rule B307 detected: Use of possibly insecure function - consider using safer ast.literal_eval. (confidence: HIGH)",
+      "severity": 3,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00073.py",
+      "line_number": 54,
+      "code_snippet": "53 \t\t\tRESPONSE += (\n54 \t\t\t\teval(bar)\n55 \t\t\t)\n",
+      "step": 2,
+      "category": "bandit-b307",
+      "attack_scenario": {
+        "actor": "Any unauthenticated user who can send HTTP requests to the endpoint that calls eval(bar).",
+        "path": "1. Attacker sends a POST request with a crafted 'bar' parameter containing malicious Python code (e.g., '__import__(\"os\").system(\"rm -rf /\")'). 2. The application calls eval(bar) on line 54, executing the attacker's code. 3. The result is appended to RESPONSE and returned to the attacker.",
+        "impact": "Remote code execution: attacker can execute arbitrary Python commands on the server, leading to full system compromise, data exfiltration, or denial of service.",
+        "is_real": true,
+        "explanation": "eval() on user-controlled input is a classic code injection vulnerability. The attacker controls 'bar' via request.form.get(), and the result is reflected in the response, confirming execution."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-94",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B307 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b307.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-024",
+      "title": "[B102] exec_used: Use of exec detected.",
+      "description": "Bandit rule B102 detected: Use of exec detected. (confidence: HIGH)",
+      "severity": 3,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00074.py",
+      "line_number": 51,
+      "code_snippet": "50 \t\ttry:\n51 \t\t\texec(bar)\n52 \t\texcept:\n",
+      "step": 2,
+      "category": "bandit-b102",
+      "attack_scenario": {
+        "actor": "Any unauthenticated user who can send HTTP requests to the endpoint that calls exec(bar).",
+        "path": "1. Attacker sends a POST request with a crafted 'bar' parameter containing malicious Python code (e.g., '__import__(\"os\").system(\"rm -rf /\")'). 2. The application calls exec(bar) on line 51, executing the attacker's code. 3. The attacker gains code execution.",
+        "impact": "Remote code execution: attacker can execute arbitrary Python commands on the server, leading to full system compromise.",
+        "is_real": true,
+        "explanation": "exec() on user-controlled input is a critical code injection vulnerability. The attacker controls 'bar' via request.form.get()."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-94",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B102 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b102.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-026",
+      "title": "[B301] blacklist: Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue.",
+      "description": "Bandit rule B301 detected: Pickle and modules that wrap it can be unsafe when used to deserialize untrusted data, possible security issue. (confidence: HIGH)",
+      "severity": 3,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00078.py",
+      "line_number": 53,
+      "code_snippet": "52 \t\ttry:\n53 \t\t\tunpickled = pickle.loads(base64.urlsafe_b64decode(bar))\n54 \t\texcept:\n",
+      "step": 2,
+      "category": "bandit-b301",
+      "attack_scenario": {
+        "actor": "Any unauthenticated user who can send HTTP requests to the endpoint that calls pickle.loads on user input.",
+        "path": "1. Attacker crafts a malicious pickle payload (e.g., using __reduce__ to execute arbitrary code). 2. Attacker base64-encodes the payload and sends it as the 'bar' parameter. 3. The application calls base64.urlsafe_b64decode(bar) then pickle.loads() on line 53, deserializing the malicious pickle. 4. The attacker's code executes during deserialization.",
+        "impact": "Remote code execution: attacker can execute arbitrary Python commands on the server via pickle deserialization.",
+        "is_real": true,
+        "explanation": "pickle.loads() on user-controlled data is a well-known RCE vector. The attacker controls 'bar' via request.form.get()."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-502",
+      "cvss": 7.5,
+      "tool_output": "Bandit rule: B301 | Severity: MEDIUM | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b301.html"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-001",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — The finding points to line 26 which is a comment ('requires login'), not actual cookie-setting code. No set_cookie call is present. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00001.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding points to line 26 which is a comment ('requires login'), not actual cookie-setting code. No set_cookie call is present. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-002",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00002.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-003",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00003.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-004",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00004.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-005",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00005.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-006",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00006.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-007",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00007.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-001: line 26 is a comment, not cookie code. False positive."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-008",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — The finding is based on a generic rule that flags any set_cookie call without explicit secure/httponly/samesite flags. However, the code snippet only shows 'requires login' comment, not the actual set_cookie call. Without seeing the actual cookie being set, we cannot confirm the vulnerability. Additionally, Flask's default session cookie is already set with httponly=True and samesite='Lax' in modern versions. The finding lacks concrete evidence of insecure cookie configuration.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00011.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is based on a generic rule that flags any set_cookie call without explicit secure/httponly/samesite flags. However, the code snippet only shows 'requires login' comment, not the actual set_cookie call. Without seeing the actual cookie being set, we cannot confirm the vulnerability. Additionally, Flask's default session cookie is already set with httponly=True and samesite='Lax' in modern versions. The finding lacks concrete evidence of insecure cookie configuration."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-009",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call. Without the actual code, we cannot determine if the cookie is truly insecure. Flask's default session cookie is secure by default in recent versions.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00013.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call. Without the actual code, we cannot determine if the cookie is truly insecure. Flask's default session cookie is secure by default in recent versions."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-010",
+      "title": "python.lang.security.use-defused-xml-parse.use-defused-xml-parse: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.",
+      "description": "Semgrep rule python.lang.security.use-defused-xml-parse.use-defused-xml-parse detected: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.\n[AI Deep Verify: Attack scenario not viable — The finding flags use of native xml library but only shows a comment line. Without seeing the actual XML parsing code and whether user input is involved, we cannot confirm an XXE vulnerability. The finding lacks context about how the XML is parsed and whether external entities are enabled.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00013.py",
+      "line_number": 55,
+      "code_snippet": "  55 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding flags use of native xml library but only shows a comment line. Without seeing the actual XML parsing code and whether user input is involved, we cannot confirm an XXE vulnerability. The finding lacks context about how the XML is parsed and whether external entities are enabled."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "defusedxml.etree.ElementTree.parse(f'{helpers.utils.RES_DIR}/employees.xml')",
+      "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.lang.security.use-defused-xml-parse.use-defused-xml-parse | Severity: ERROR | OWASP: [A04:2017 - XML External Entities (XXE) A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.use-defused-xml-parse.use-defused-xml-parse"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-011",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call. Without the actual code, we cannot determine if the cookie is truly insecure.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00014.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call. Without the actual code, we cannot determine if the cookie is truly insecure."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-012",
+      "title": "python.lang.security.use-defused-xml-parse.use-defused-xml-parse: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.",
+      "description": "Semgrep rule python.lang.security.use-defused-xml-parse.use-defused-xml-parse detected: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code. Without context, we cannot confirm an XXE vulnerability.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00014.py",
+      "line_number": 56,
+      "code_snippet": "  56 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code. Without context, we cannot confirm an XXE vulnerability."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "defusedxml.etree.ElementTree.parse(f'{helpers.utils.RES_DIR}/employees.xml')",
+      "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.lang.security.use-defused-xml-parse.use-defused-xml-parse | Severity: ERROR | OWASP: [A04:2017 - XML External Entities (XXE) A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.use-defused-xml-parse.use-defused-xml-parse"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-013",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00015.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-014",
+      "title": "python.lang.security.use-defused-xml-parse.use-defused-xml-parse: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.",
+      "description": "Semgrep rule python.lang.security.use-defused-xml-parse.use-defused-xml-parse detected: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00015.py",
+      "line_number": 56,
+      "code_snippet": "  56 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "defusedxml.etree.ElementTree.parse(f'{helpers.utils.RES_DIR}/employees.xml')",
+      "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.lang.security.use-defused-xml-parse.use-defused-xml-parse | Severity: ERROR | OWASP: [A04:2017 - XML External Entities (XXE) A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.use-defused-xml-parse.use-defused-xml-parse"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-015",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00016.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-016",
+      "title": "python.lang.security.use-defused-xml-parse.use-defused-xml-parse: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.",
+      "description": "Semgrep rule python.lang.security.use-defused-xml-parse.use-defused-xml-parse detected: The native Python `xml` library is vulnerable to XML External Entity (XXE) attacks.  These attacks can leak confidential data and \"XML bombs\" can cause denial of service. Do not use this library to parse untrusted input. Instead  the Python documentation recommends using `defusedxml`.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00016.py",
+      "line_number": 58,
+      "code_snippet": "  58 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-010. The finding only shows a comment line, not the actual XML parsing code."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "defusedxml.etree.ElementTree.parse(f'{helpers.utils.RES_DIR}/employees.xml')",
+      "cwe": "CWE-611: Improper Restriction of XML External Entity Reference",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.lang.security.use-defused-xml-parse.use-defused-xml-parse | Severity: ERROR | OWASP: [A04:2017 - XML External Entities (XXE) A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.use-defused-xml-parse.use-defused-xml-parse"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-017",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00017.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-018",
+      "title": "python.django.security.injection.raw-html-format.raw-html-format: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`django.shortcuts.render`) which will safely render HTML instead.",
+      "description": "Semgrep rule python.django.security.injection.raw-html-format.raw-html-format detected: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`django.shortcuts.render`) which will safely render HTML instead.\n[AI Deep Verify: Attack scenario not viable — The finding flags raw HTML formatting but only shows a comment line. Without seeing the actual code that constructs HTML, we cannot confirm an XSS vulnerability. Additionally, the rule name mentions Django but the file is in a Flask project, suggesting a false positive due to rule misapplication.]\n[Also reported by another step: Semgrep rule python.flask.security.injection.raw-html-concat.raw-html-format detected: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`flask.render_template`) which will safely render HTML instead.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-018. The finding only shows a comment line, not the actual HTML construction code. Without context, we cannot confirm an XSS vulnerability.]]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00017.py",
+      "line_number": 63,
+      "code_snippet": "  63 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding flags raw HTML formatting but only shows a comment line. Without seeing the actual code that constructs HTML, we cannot confirm an XSS vulnerability. Additionally, the rule name mentions Django but the file is in a Flask project, suggesting a false positive due to rule misapplication."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.injection.raw-html-format.raw-html-format | Severity: WARNING | OWASP: [A07:2017 - Cross-Site Scripting (XSS) A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.injection.raw-html-format.raw-html-format"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-020",
+      "title": "python.django.security.injection.raw-html-format.raw-html-format: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`django.shortcuts.render`) which will safely render HTML instead.",
+      "description": "Semgrep rule python.django.security.injection.raw-html-format.raw-html-format detected: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`django.shortcuts.render`) which will safely render HTML instead.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-018. The finding only shows a comment line, not the actual HTML construction code.]\n[Also reported by another step: Semgrep rule python.flask.security.injection.raw-html-concat.raw-html-format detected: Detected user input flowing into a manually constructed HTML string. You may be accidentally bypassing secure methods of rendering HTML by manually constructing HTML and this could create a cross-site scripting vulnerability, which could let attackers steal sensitive user data. To be sure this is safe, check that the HTML is rendered safely. Otherwise, use templates (`flask.render_template`) which will safely render HTML instead.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-018. The finding only shows a comment line, not the actual HTML construction code.]]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00017.py",
+      "line_number": 67,
+      "code_snippet": "  67 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-018. The finding only shows a comment line, not the actual HTML construction code."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.injection.raw-html-format.raw-html-format | Severity: WARNING | OWASP: [A07:2017 - Cross-Site Scripting (XSS) A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.injection.raw-html-format.raw-html-format"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-022",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00018.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-023",
+      "title": "semgrep.ironwall.injection.xpath-dynamic-query: User input flows into an XPath query via f-string without sanitization. Use parameterized XPath queries or validate input against a whitelist.",
+      "description": "Semgrep rule semgrep.ironwall.injection.xpath-dynamic-query detected: User input flows into an XPath query via f-string without sanitization. Use parameterized XPath queries or validate input against a whitelist.\n[AI Deep Verify: Attack scenario not viable — The finding flags XPath injection but only shows a comment line. Without seeing the actual XPath query construction and whether user input is properly sanitized, we cannot confirm the vulnerability. The finding lacks concrete evidence of an exploitable injection point.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00018.py",
+      "line_number": 49,
+      "code_snippet": "  49 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding flags XPath injection but only shows a comment line. Without seeing the actual XPath query construction and whether user input is properly sanitized, we cannot confirm the vulnerability. The finding lacks concrete evidence of an exploitable injection point."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-643: Improper Neutralization of Data within XPath Expressions",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.injection.xpath-dynamic-query | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.injection.xpath-dynamic-query"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-024",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00019.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-025",
+      "title": "semgrep.ironwall.injection.xpath-dynamic-query: User input flows into an XPath query via f-string without sanitization. Use parameterized XPath queries or validate input against a whitelist.",
+      "description": "Semgrep rule semgrep.ironwall.injection.xpath-dynamic-query detected: User input flows into an XPath query via f-string without sanitization. Use parameterized XPath queries or validate input against a whitelist.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-023. The finding only shows a comment line, not the actual XPath query construction.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00019.py",
+      "line_number": 53,
+      "code_snippet": "  53 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-023. The finding only shows a comment line, not the actual XPath query construction."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-643: Improper Neutralization of Data within XPath Expressions",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.injection.xpath-dynamic-query | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.injection.xpath-dynamic-query"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-026",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00020.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-027",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00021.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-008. The finding only shows a comment line, not the actual set_cookie call."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-028",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. Additionally, the code snippet only shows 'requires login' comment, not actual cookie setting. No concrete attack path can be constructed.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00025.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. Additionally, the code snippet only shows 'requires login' comment, not actual cookie setting. No concrete attack path can be constructed."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-029",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-028: test file, no actual cookie setting code shown.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00026.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-028: test file, no actual cookie setting code shown."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-030",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00027.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-031",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00028.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-032",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00029.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-033",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00030.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-034",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00031.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-035",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00032.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-036",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00033.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-037",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00034.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-038",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00035.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-039",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00036.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-040",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00037.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-041",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00054.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-042",
+      "title": "python.lang.security.insecure-hash-function.insecure-hash-function: Detected use of an insecure MD4 or MD5 hash function. These functions have known vulnerabilities and are considered deprecated. Consider using 'SHA256' or a similar function instead.",
+      "description": "Semgrep rule python.lang.security.insecure-hash-function.insecure-hash-function detected: Detected use of an insecure MD4 or MD5 hash function. These functions have known vulnerabilities and are considered deprecated. Consider using 'SHA256' or a similar function instead.\n[AI Deep Verify: Attack scenario not viable — The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. The code snippet only shows 'requires login' comment, not actual hash usage. No concrete attack path can be constructed.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00054.py",
+      "line_number": 64,
+      "code_snippet": "  64 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. The code snippet only shows 'requires login' comment, not actual hash usage. No concrete attack path can be constructed."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.insecure-hash-function.insecure-hash-function | Severity: WARNING | OWASP: [A03:2017 - Sensitive Data Exposure A02:2021 - Cryptographic Failures A04:2025 - Cryptographic Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.insecure-hash-function.insecure-hash-function"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-043",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00055.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-044",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00056.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-045",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00057.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-046",
+      "title": "python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5: Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.",
+      "description": "Semgrep rule python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5 detected: Detected MD5 hash algorithm which is considered insecure. MD5 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.\n[AI Deep Verify: Attack scenario not viable — The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. The code snippet only shows 'requires login' comment, not actual hash usage. No concrete attack path can be constructed.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00057.py",
+      "line_number": 65,
+      "code_snippet": "  65 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is in a test file (testdata/benchmark_50/), which is explicitly excluded per rule #4. The code snippet only shows 'requires login' comment, not actual hash usage. No concrete attack path can be constructed."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5 | Severity: WARNING | OWASP: [A03:2017 - Sensitive Data Exposure A02:2021 - Cryptographic Failures A04:2025 - Cryptographic Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.insecure-hash-algorithms-md5.insecure-hash-algorithm-md5"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-047",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Same as above: test file, no cookie setting code.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00058.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as above: test file, no cookie setting code."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-048",
+      "title": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.",
+      "description": "Semgrep rule python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1 detected: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.\n[AI Deep Verify: Attack scenario not viable — SHA1 is used for hashing, not for cryptographic signatures. The finding is a false positive because SHA1 is still acceptable for non-security-critical hashing (e.g., checksums, internal identifiers) and the code does not indicate it is used for signatures.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00058.py",
+      "line_number": 65,
+      "code_snippet": "  65 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "SHA1 is used for hashing, not for cryptographic signatures. The finding is a false positive because SHA1 is still acceptable for non-security-critical hashing (e.g., checksums, internal identifiers) and the code does not indicate it is used for signatures."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "hashlib.sha256()",
+      "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1 | Severity: WARNING | OWASP: [A03:2017 - Sensitive Data Exposure A02:2021 - Cryptographic Failures A04:2025 - Cryptographic Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-049",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — The finding is in a test file (testdata/benchmark_50). Code in test files is considered a false positive per the rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00059.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is in a test file (testdata/benchmark_50). Code in test files is considered a false positive per the rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-050",
+      "title": "python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.",
+      "description": "Semgrep rule python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1 detected: Detected SHA1 hash algorithm which is considered insecure. SHA1 is not collision resistant and is therefore not suitable as a cryptographic signature. Use SHA256 or SHA3 instead.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-048: SHA1 used for non-cryptographic hashing. No evidence it is used for signatures.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00059.py",
+      "line_number": 63,
+      "code_snippet": "  63 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-048: SHA1 used for non-cryptographic hashing. No evidence it is used for signatures."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "hashlib.sha256()",
+      "cwe": "CWE-327: Use of a Broken or Risky Cryptographic Algorithm",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1 | Severity: WARNING | OWASP: [A03:2017 - Sensitive Data Exposure A02:2021 - Cryptographic Failures A04:2025 - Cryptographic Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-sha1"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-051",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00064.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-052",
+      "title": "python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content: Be careful with `flask.make_response()`. If this response is rendered onto a webpage, this could create a cross-site scripting (XSS) vulnerability. `flask.make_response()` will not autoescape HTML. If you are rendering HTML, write your HTML in a template file and use `flask.render_template()` which will take care of escaping. If you are returning data from an API, consider using `flask.jsonify()`.",
+      "description": "Semgrep rule python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content detected: Be careful with `flask.make_response()`. If this response is rendered onto a webpage, this could create a cross-site scripting (XSS) vulnerability. `flask.make_response()` will not autoescape HTML. If you are rendering HTML, write your HTML in a template file and use `flask.render_template()` which will take care of escaping. If you are returning data from an API, consider using `flask.jsonify()`.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00064.py",
+      "line_number": 61,
+      "code_snippet": "  61 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content | Severity: WARNING | OWASP: [A07:2017 - Cross-Site Scripting (XSS) A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-053",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00064.py",
+      "line_number": 62,
+      "code_snippet": "  62 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-054",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00065.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-055",
+      "title": "python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content: Be careful with `flask.make_response()`. If this response is rendered onto a webpage, this could create a cross-site scripting (XSS) vulnerability. `flask.make_response()` will not autoescape HTML. If you are rendering HTML, write your HTML in a template file and use `flask.render_template()` which will take care of escaping. If you are returning data from an API, consider using `flask.jsonify()`.",
+      "description": "Semgrep rule python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content detected: Be careful with `flask.make_response()`. If this response is rendered onto a webpage, this could create a cross-site scripting (XSS) vulnerability. `flask.make_response()` will not autoescape HTML. If you are rendering HTML, write your HTML in a template file and use `flask.render_template()` which will take care of escaping. If you are returning data from an API, consider using `flask.jsonify()`.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00065.py",
+      "line_number": 62,
+      "code_snippet": "  62 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Improper Neutralization of Input During Web Page Generation ('Cross-site Scripting')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content | Severity: WARNING | OWASP: [A07:2017 - Cross-Site Scripting (XSS) A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.xss.make-response-with-unknown-content.make-response-with-unknown-content"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-056",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00065.py",
+      "line_number": 63,
+      "code_snippet": "  63 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-057",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00067.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-058",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00070.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-059",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00071.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-060",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00073.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-061",
+      "title": "python.lang.security.audit.eval-detected.eval-detected: Detected the use of eval(). eval() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.",
+      "description": "Semgrep rule python.lang.security.audit.eval-detected.eval-detected detected: Detected the use of eval(). eval() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00073.py",
+      "line_number": 53,
+      "code_snippet": "  53 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.audit.eval-detected.eval-detected | Severity: WARNING | OWASP: [A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.audit.eval-detected.eval-detected"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-062",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00074.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-063",
+      "title": "python.lang.security.audit.exec-detected.exec-detected: Detected the use of exec(). exec() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.",
+      "description": "Semgrep rule python.lang.security.audit.exec-detected.exec-detected detected: Detected the use of exec(). exec() can be dangerous if used to evaluate dynamic content. If this content can be input from outside the program, this may be a code injection vulnerability. Ensure evaluated content is not definable by external sources.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00074.py",
+      "line_number": 51,
+      "code_snippet": "  51 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code ('Eval Injection')",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.lang.security.audit.exec-detected.exec-detected | Severity: WARNING | OWASP: [A03:2021 - Injection A05:2025 - Injection]",
+      "references": [
+        "https://semgrep.dev/r/python.lang.security.audit.exec-detected.exec-detected"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-064",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00076.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-065",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00078.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-066",
+      "title": "python.flask.security.insecure-deserialization.insecure-deserialization: Detected the use of an insecure deserialization library in a Flask route. These libraries are prone to code execution vulnerabilities. Ensure user data does not enter this function. To fix this, try to avoid serializing whole objects. Consider instead using a serializer such as JSON.",
+      "description": "Semgrep rule python.flask.security.insecure-deserialization.insecure-deserialization detected: Detected the use of an insecure deserialization library in a Flask route. These libraries are prone to code execution vulnerabilities. Ensure user data does not enter this function. To fix this, try to avoid serializing whole objects. Consider instead using a serializer such as JSON.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]\n[Also reported by another step: Semgrep rule python.lang.security.deserialization.pickle.avoid-pickle detected: Avoid using `pickle`, which is known to lead to code execution vulnerabilities. When unpickling, the serialized data could be manipulated to run arbitrary code. Instead, consider serializing the relevant data as JSON or a similar text-based serialization format.\n[AI Deep Verify: Attack scenario not viable — Test file (testdata/benchmark_50). False positive per rules.]]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00078.py",
+      "line_number": 53,
+      "code_snippet": "  53 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Test file (testdata/benchmark_50). False positive per rules."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-502: Deserialization of Untrusted Data",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.insecure-deserialization.insecure-deserialization | Severity: ERROR | OWASP: [A08:2017 - Insecure Deserialization A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.insecure-deserialization.insecure-deserialization"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-068",
+      "title": "python.flask.security.audit.secure-set-cookie.secure-set-cookie: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.",
+      "description": "Semgrep rule python.flask.security.audit.secure-set-cookie.secure-set-cookie detected: Found a Flask cookie with insecurely configured properties.  By default the secure, httponly and samesite ar configured insecurely. cookies should be handled securely by setting `secure=True`, `httponly=True`, and `samesite='Lax'` in response.set_cookie(...). If these parameters are not properly set, your cookies are not properly protected and are at risk of being stolen by an attacker. Include the `secure=True`, `httponly=True`, `samesite='Lax'` arguments or set these to be true in the Flask configuration.\n[AI Deep Verify: Attack scenario not viable — The finding is based on a default configuration warning, but the code snippet only shows 'requires login' comment, not actual cookie setting. Without seeing the actual response.set_cookie() call, we cannot confirm insecure cookie attributes. Additionally, the file is in testdata, which is likely test code, making this a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00079.py",
+      "line_number": 26,
+      "code_snippet": "  26 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is based on a default configuration warning, but the code snippet only shows 'requires login' comment, not actual cookie setting. Without seeing the actual response.set_cookie() call, we cannot confirm insecure cookie attributes. Additionally, the file is in testdata, which is likely test code, making this a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-614: Sensitive Cookie in HTTPS Session Without 'Secure' Attribute",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.secure-set-cookie.secure-set-cookie | Severity: WARNING | OWASP: [A05:2021 - Security Misconfiguration A02:2025 - Security Misconfiguration]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.secure-set-cookie.secure-set-cookie"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-069",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — The finding claims user input from request.form.get flows to a string response without HTML escaping. However, the code snippet only shows 'requires login' comment. Without seeing the actual response construction, we cannot confirm the vulnerability. Additionally, Flask's default response handling may include auto-escaping or the response might be a redirect, making this a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00082.py",
+      "line_number": 31,
+      "code_snippet": "  31 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding claims user input from request.form.get flows to a string response without HTML escaping. However, the code snippet only shows 'requires login' comment. Without seeing the actual response construction, we cannot confirm the vulnerability. Additionally, Flask's default response handling may include auto-escaping or the response might be a redirect, making this a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-070",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00083.py",
+      "line_number": 31,
+      "code_snippet": "  31 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-071",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00084.py",
+      "line_number": 31,
+      "code_snippet": "  31 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-072",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00096.py",
+      "line_number": 31,
+      "code_snippet": "  31 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-073",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive.]",
+      "severity": 4,
+      "file_path": "testdata\\benchmark_50\\BenchmarkTest00165.py",
+      "line_number": 31,
+      "code_snippet": "  31 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-069. The code snippet only shows 'requires login' comment, no actual response construction. Without concrete evidence of unescaped user input in the response, this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-001",
+      "title": "[B608] hardcoded_sql_expressions: Possible SQL injection vector through string-based query construction.",
+      "description": "Bandit rule B608 detected: Possible SQL injection vector through string-based query construction. (confidence: LOW)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00011.py",
+      "line_number": 47,
+      "code_snippet": "46 \n47 \t\tsql = f'SELECT username from USERS where password = ?'\n48 \t\tcon = helpers.db_sqlite.get_connection()\n",
+      "step": 2,
+      "category": "bandit-b608",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-89",
+      "cvss": 5,
+      "tool_output": "Bandit rule: B608 | Severity: MEDIUM | Confidence: LOW",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b608.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-002",
+      "title": "[B405] blacklist: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B405 detected: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00013.py",
+      "line_number": 51,
+      "code_snippet": "50 \t\timport elementpath\n51 \t\timport xml.etree.ElementTree as ET\n52 \t\timport helpers.utils\n",
+      "step": 2,
+      "category": "bandit-b405",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B405 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b405.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-004",
+      "title": "[B405] blacklist: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B405 detected: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00014.py",
+      "line_number": 46,
+      "code_snippet": "45 \t\timport elementpath\n46 \t\timport xml.etree.ElementTree as ET\n47 \t\timport helpers.utils\n",
+      "step": 2,
+      "category": "bandit-b405",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B405 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b405.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-006",
+      "title": "[B405] blacklist: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B405 detected: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00015.py",
+      "line_number": 46,
+      "code_snippet": "45 \t\timport elementpath\n46 \t\timport xml.etree.ElementTree as ET\n47 \t\timport helpers.utils\n",
+      "step": 2,
+      "category": "bandit-b405",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B405 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b405.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-008",
+      "title": "[B405] blacklist: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B405 detected: Using xml.etree.ElementTree to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.etree.ElementTree with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00016.py",
+      "line_number": 48,
+      "code_snippet": "47 \t\timport elementpath\n48 \t\timport xml.etree.ElementTree as ET\n49 \t\timport helpers.utils\n",
+      "step": 2,
+      "category": "bandit-b405",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-611",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B405 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b405.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-010",
+      "title": "[B408] blacklist: Using xml.dom.minidom to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B408 detected: Using xml.dom.minidom to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.dom.minidom with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00017.py",
+      "line_number": 45,
+      "code_snippet": "44 \n45 \t\timport xml.dom.minidom\n46 \t\timport xml.sax.handler\n",
+      "step": 2,
+      "category": "bandit-b408",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-327",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B408 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b408.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-011",
+      "title": "[B406] blacklist: Using xml.sax.handler to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.sax.handler with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called.",
+      "description": "Bandit rule B406 detected: Using xml.sax.handler to parse untrusted XML data is known to be vulnerable to XML attacks. Replace xml.sax.handler with the equivalent defusedxml package, or make sure defusedxml.defuse_stdlib() is called. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00017.py",
+      "line_number": 46,
+      "code_snippet": "45 \t\timport xml.dom.minidom\n46 \t\timport xml.sax.handler\n47 \n",
+      "step": 2,
+      "category": "bandit-b406",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-327",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B406 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b406.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-014",
+      "title": "[B311] blacklist: Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "description": "Bandit rule B311 detected: Standard pseudo-random generators are not suitable for security/cryptographic purposes. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00027.py",
+      "line_number": 54,
+      "code_snippet": "53 \t\tcookie = f'rememberMe{num}'\n54 \t\tvalue = str(base64.b64encode(random.randbytes(32)))\n55 \n",
+      "step": 2,
+      "category": "bandit-b311",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-330",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B311 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b311.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-015",
+      "title": "[B311] blacklist: Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "description": "Bandit rule B311 detected: Standard pseudo-random generators are not suitable for security/cryptographic purposes. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00028.py",
+      "line_number": 52,
+      "code_snippet": "51 \t\tcookie = f'rememberMe{num}'\n52 \t\tvalue = str(base64.b64encode(random.randbytes(32)))\n53 \n",
+      "step": 2,
+      "category": "bandit-b311",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-330",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B311 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b311.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-016",
+      "title": "[B311] blacklist: Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "description": "Bandit rule B311 detected: Standard pseudo-random generators are not suitable for security/cryptographic purposes. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00029.py",
+      "line_number": 56,
+      "code_snippet": "55 \t\tcookie = f'rememberMe{num}'\n56 \t\tvalue = str(random.randint(0, 2**32))\n57 \n",
+      "step": 2,
+      "category": "bandit-b311",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-330",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B311 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b311.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-017",
+      "title": "[B311] blacklist: Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "description": "Bandit rule B311 detected: Standard pseudo-random generators are not suitable for security/cryptographic purposes. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00030.py",
+      "line_number": 52,
+      "code_snippet": "51 \t\tcookie = f'rememberMe{num}'\n52 \t\tvalue = str(random.randint(0, 2**32))\n53 \n",
+      "step": 2,
+      "category": "bandit-b311",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-330",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B311 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b311.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-018",
+      "title": "[B311] blacklist: Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
+      "description": "Bandit rule B311 detected: Standard pseudo-random generators are not suitable for security/cryptographic purposes. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00031.py",
+      "line_number": 51,
+      "code_snippet": "50 \t\tcookie = f'rememberMe{num}'\n51 \t\tvalue = str(random.randint(0, 2**32))\n52 \n",
+      "step": 2,
+      "category": "bandit-b311",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-330",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B311 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b311.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-025",
+      "title": "[B403] blacklist: Consider possible security implications associated with pickle module.",
+      "description": "Bandit rule B403 detected: Consider possible security implications associated with pickle module. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00078.py",
+      "line_number": 46,
+      "code_snippet": "45 \n46 \t\timport pickle\n47 \t\timport base64\n",
+      "step": 2,
+      "category": "bandit-b403",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-502",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B403 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b403.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-027",
+      "title": "[B404] blacklist: Consider possible security implications associated with the subprocess module.",
+      "description": "Bandit rule B404 detected: Consider possible security implications associated with the subprocess module. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00165.py",
+      "line_number": 45,
+      "code_snippet": "44 \t\timport os\n45 \t\timport subprocess\n46 \t\timport helpers.utils\n",
+      "step": 2,
+      "category": "bandit-b404",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-78",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B404 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b404.html"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-028",
+      "title": "[B603] subprocess_without_shell_equals_true: subprocess call - check for execution of untrusted input.",
+      "description": "Bandit rule B603 detected: subprocess call - check for execution of untrusted input. (confidence: HIGH)",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/BenchmarkTest00165.py",
+      "line_number": 57,
+      "code_snippet": "56 \n57 \t\tproc = subprocess.run(argList, capture_output=True, encoding=\"utf-8\")\n58 \t\tRESPONSE += (\n",
+      "step": 2,
+      "category": "bandit-b603",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-78",
+      "cvss": 2.5,
+      "tool_output": "Bandit rule: B603 | Severity: LOW | Confidence: HIGH",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b603.html"
+      ]
+    },
+    {
+      "id": "IRON-102",
+      "title": "SBOM generated: 0 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 0 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-103",
+      "title": "Not a git repository — supply chain checks limited",
+      "description": "Supply chain security checks (SBOM provenance, SLSA) require a git repository. Without git history, we cannot verify commit signatures or build provenance.",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-1104",
+      "cvss": 2
+    },
+    {
+      "id": "IRON-104",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan ./testdata/benchmark_50/ -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-105",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "./testdata/benchmark_50/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    }
+  ],
+  "analysis_status": "partial"
+}

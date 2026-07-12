@@ -223,15 +223,24 @@ def _trace_to_source(name, assignments, visited=None, depth=0):
                     has_taint = True
                     taint_line = l
             continue
-        # Expression: walk for tainted nested names
-        for child in ast.walk(source_node):
-            if isinstance(child, ast.Name) and child.id != name:
-                if child.id not in visited:
-                    t, l = _trace_to_source(child.id, assignments, visited.copy(), depth + 1)
-                    if t:
-                        has_taint = True
-                        taint_line = l
-                        break
+        # Expression: check for nested request calls AND tainted names
+        if _is_request_source(source_node):
+            has_taint = True
+            taint_line = src_lineno
+        else:
+            for child in ast.walk(source_node):
+                # Check nested request calls (e.g., urllib.parse.unquote_plus(request.cookies.get(...)))
+                if _is_request_source(child):
+                    has_taint = True
+                    taint_line = src_lineno
+                    break
+                if isinstance(child, ast.Name) and child.id != name:
+                    if child.id not in visited:
+                        t, l = _trace_to_source(child.id, assignments, visited.copy(), depth + 1)
+                        if t:
+                            has_taint = True
+                            taint_line = l
+                            break
 
     return (True, taint_line) if has_taint else (False, 0)
 
@@ -385,6 +394,113 @@ def _detect_ldap_injection(tree, filename):
     return findings
 
 
+# ── CWE-22: Path Traversal ────────────────────────────────────────────
+
+FILE_OPEN_FUNCS = {"open", "codecs.open", "io.open", "pathlib.Path.open"}
+
+def _is_file_open_call(call_node):
+    """Check if call is a file open: open(...), codecs.open(...), etc."""
+    func = call_node.func
+    if isinstance(func, ast.Name) and func.id == "open":
+        return True
+    if isinstance(func, ast.Attribute):
+        if func.attr == "open":
+            return True
+        # codecs.open -> func.value is Name('codecs'), func.attr is 'open'
+        if isinstance(func.value, ast.Name):
+            full = f"{func.value.id}.{func.attr}"
+            if full in FILE_OPEN_FUNCS:
+                return True
+    return False
+
+
+def _extract_path_vars(path_node):
+    """Extract variable names from path expressions (f-string, os.path.join, concat)."""
+    vars_found = set()
+
+    if isinstance(path_node, ast.JoinedStr):  # f-string
+        for child in ast.walk(path_node):
+            if isinstance(child, ast.FormattedValue):
+                val = child.value
+                if isinstance(val, ast.Name):
+                    vars_found.add(val.id)
+                elif isinstance(val, ast.Attribute):
+                    if isinstance(val.value, ast.Name):
+                        vars_found.add(val.value.id)
+
+    elif isinstance(path_node, ast.Call):  # os.path.join(...)
+        if isinstance(path_node.func, ast.Attribute):
+            if path_node.func.attr == "join":
+                for arg in path_node.args[1:]:  # skip first arg (base dir)
+                    if isinstance(arg, ast.Name):
+                        vars_found.add(arg.id)
+                    elif isinstance(arg, ast.JoinedStr):
+                        for child in ast.walk(arg):
+                            if isinstance(child, ast.FormattedValue):
+                                if isinstance(child.value, ast.Name):
+                                    vars_found.add(child.value.id)
+
+    elif isinstance(path_node, ast.Name):
+        vars_found.add(path_node.id)
+
+    elif isinstance(path_node, ast.BinOp) and isinstance(path_node.op, ast.Add):
+        for side in [path_node.left, path_node.right]:
+            if isinstance(side, ast.Name):
+                vars_found.add(side.id)
+            elif isinstance(side, ast.JoinedStr):
+                for child in ast.walk(side):
+                    if isinstance(child, ast.FormattedValue):
+                        if isinstance(child.value, ast.Name):
+                            vars_found.add(child.value.id)
+
+    return vars_found
+
+
+def _detect_path_traversal(tree, filename):
+    """Walk module for file open calls with tainted path variables."""
+    findings = []
+
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        assignments = _build_assignments(func)
+
+        for child in ast.walk(func):
+            if not isinstance(child, ast.Call):
+                continue
+            if not _is_file_open_call(child):
+                continue
+            if not child.args:
+                continue
+
+            path_node = child.args[0]
+            path_vars = _extract_path_vars(path_node)
+            if not path_vars:
+                continue
+
+            for var in path_vars:
+                tainted, taint_line = _trace_to_source(var, assignments)
+                if tainted:
+                    findings.append({
+                        "filename": filename,
+                        "test_id": "B903",
+                        "test_name": "path_traversal",
+                        "issue_severity": "MEDIUM",
+                        "issue_confidence": "MEDIUM",
+                        "issue_text": (
+                            f"Path traversal (CWE-22): "
+                            f"file path contains user-controlled variable '{var}' "
+                            f"(tainted at line {taint_line}). "
+                            f"Use os.path.realpath() + whitelist, or reject paths containing '..'."
+                        ),
+                        "line_number": child.lineno,
+                        "code": ast.unparse(child)[:200] if hasattr(ast, 'unparse') else "see source",
+                        "more_info": "https://cwe.mitre.org/data/definitions/22.html",
+                    })
+                    break
+    return findings
+
+
 # ── Scanner Runner ────────────────────────────────────────────────────
 
 def scan_file(filepath):
@@ -397,7 +513,7 @@ def scan_file(filepath):
         tree = ast.parse(source)
     except SyntaxError:
         return []
-    return _detect_trust_boundary(tree, filepath) + _detect_ldap_injection(tree, filepath)
+    return _detect_trust_boundary(tree, filepath) + _detect_ldap_injection(tree, filepath) + _detect_path_traversal(tree, filepath)
 
 
 def scan_directory(target):
