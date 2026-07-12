@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 
@@ -378,8 +379,53 @@ func (e *Engine) TraceConfig(ctx context.Context, sections []ObservedSection) ([
 			}
 		}
 	}
-	log.Printf("[AI Config] analyzed %d sections → %d config issues", len(sections), len(results))
-	return results, nil
+		// Merge with deterministic pre-scan results
+		detResults := scanConfigPatterns(sections)
+		results = append(results, detResults...)
+		log.Printf("[AI Config] %d sections -> %d AI + %d deterministic = %d config issues", len(sections), len(results)-len(detResults), len(detResults), len(results))
+		return results, nil
+	}
+
+
+// scanConfigPatterns does deterministic regex scanning for obvious config issues.
+// This catches patterns the AI might miss (module-level code outside handlers).
+func scanConfigPatterns(sections []ObservedSection) []ConfigIssue {
+	var issues []ConfigIssue
+	debugRe := regexp.MustCompile(`(?i)debug\s*=\s*True`)
+	bindRe := regexp.MustCompile(`0\.0\.0\.0`)
+	secretRe := regexp.MustCompile(`(?i)secret_key\s*=\s*["'][^"']{8,}["']`)
+
+	for _, s := range sections {
+		code := s.CodeSnippet
+		if debugRe.MatchString(code) {
+			issues = append(issues, ConfigIssue{
+				Section: s, IssueType: "debug_mode", Confidence: 0.95,
+				Severity: "CRITICAL", Title: "Debug mode enabled",
+				Description: fmt.Sprintf("debug=True found in %s. Werkzeug debugger exposes /console for remote code execution.", s.FuncName),
+				FixHint: "Set debug=False in production. Use environment variable: debug=os.getenv('DEBUG','false').lower()=='true'",
+				CWE: "CWE-489",
+			})
+		}
+		if bindRe.MatchString(code) {
+			issues = append(issues, ConfigIssue{
+				Section: s, IssueType: "bind_all", Confidence: 0.95,
+				Severity: "HIGH", Title: "Server binds to all interfaces (0.0.0.0)",
+				Description: fmt.Sprintf("Server binding to 0.0.0.0 in %s exposes the service on all network interfaces.", s.FuncName),
+				FixHint: "Bind to 127.0.0.1 for local-only services, or use a reverse proxy for production.",
+				CWE: "CWE-668",
+			})
+		}
+		if secretRe.MatchString(code) {
+			issues = append(issues, ConfigIssue{
+				Section: s, IssueType: "hardcoded_secret", Confidence: 0.95,
+				Severity: "HIGH", Title: "Hardcoded secret key detected",
+				Description: fmt.Sprintf("Hardcoded secret_key found in %s. Session forgery possible if source code is exposed.", s.FuncName),
+				FixHint: "Use os.Getenv('SECRET_KEY') or generate random key: secrets.token_hex(32)",
+				CWE: "CWE-798",
+			})
+		}
+	}
+	return issues
 }
 
 func buildConfigSummary(sections []ObservedSection) string {
