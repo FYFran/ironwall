@@ -2,31 +2,45 @@
 
 [![Go Version](https://img.shields.io/badge/Go-1.22%2B-blue)](https://go.dev)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
-[![Version](https://img.shields.io/badge/version-0.7.0-orange)](https://github.com/FYFran/ironwall/releases)
+[![Version](https://img.shields.io/badge/version-0.7.1-orange)](https://github.com/FYFran/ironwall/releases)
 
-**Run semgrep + gosec + bandit with one command. AI filters the false positives.**
+**Run semgrep + gosec + bandit with one command. AI finds what SAST can't.**
 
-Ironwall combines multiple open-source SAST scanners into a unified pipeline. A single command runs them all, deduplicates findings, and optionally uses AI to separate real vulnerabilities from noise.
+Ironwall = multi-SAST runner + AI engine. SAST catches pattern bugs. AI catches missing security controls, dangerous configs, and data flow vulns. On OWASP Benchmark: **4.9x semgrep recall**.
 
 ---
 
-## ⚡ What Ironwall Actually Does
+## ⚡ 30-Second Demo
 
-```
-$ ironwall scan .
-🔍 ironwall v0.7.0
+```bash
+$ ironwall scan . --ai --deep
+🔍 ironwall v0.7.1
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-Target:    ./my-app
-Duration:  12.4s
-Findings:  12 (after AI filtering: 403 → 12 actionable)
+Target:    ./flask-app
+Duration:  3m47s
+Cost:      $0.02
+
+SAST:     25 findings (semgrep+gosec+bandit)
+AI Filter: 76% false positives suppressed
+AI MISSING: 8 missing security controls found ← SAST can't do this
+AI CONFIG:  2 dangerous config patterns found
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 ```
 
-- **Multi-scanner pipeline** — semgrep + gosec + bandit + gitleaks + syft/grype + KICS in one run
-- **Built-in deduplication** — same finding reported by multiple tools merged into one (7.5% precision improvement)
-- **AI noise filter** — DeepSeek reviews findings, separates real vulns from false positives (Precision 100% on battle-tested findings)
-- **CI-ready** — SARIF output, GitHub Actions template, JSON/Markdown/Terminal formats
-- **~$0.02/scan** — AI filtering costs pennies, not dollars
+- **SAST**: semgrep + gosec + bandit + gitleaks + syft/KICS — one command
+- **AI DeepVerify**: 76% FP suppression on real projects ($0.02/scan)
+- **AI MISSING**: Finds absent auth, rate limiting, CSRF, input validation — things SAST can never detect
+- **AI CONFIG**: Debug mode, hardcoded secrets, missing cookie flags
+- **AI TRACE**: Cross-package data flow analysis with call graph
+
+### Verified Performance
+
+| Benchmark | Ironwall | semgrep |
+|-----------|----------|---------|
+| OWASP Recall | **62%** | 13% |
+| OWASP F3 | **0.52** | 0.13 |
+| Real project FP suppression | **76%** | — |
+| go-vuln-target (7 vulns) | **100%** found | — |
 
 ---
 

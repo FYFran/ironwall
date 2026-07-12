@@ -1,0 +1,898 @@
+{
+  "version": "0.7.0",
+  "target": "./battle_test_candidates/secure-file-management/",
+  "started_at": "2026-07-12T20:37:08+08:00",
+  "completed_at": "2026-07-12T20:40:50+08:00",
+  "duration": "3m41.97s",
+  "summary": {
+    "critical": 0,
+    "high": 0,
+    "medium": 11,
+    "low": 2,
+    "info": 17,
+    "total": 30
+  },
+  "findings": [
+    {
+      "id": "IRON-SEMGREP-001",
+      "title": "yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "description": "Semgrep rule yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag detected: GitHub Actions step uses a mutable tag or branch reference. Tags and branch names can be silently repointed by the action owner, enabling supply-chain attacks — as seen in the trivy-action and kics-github-action compromises. Pin the reference to a full 40-character commit SHA instead, e.g. `uses: actions/checkout@8ade135a41bc03ea155e62e844d188df1ea18608`.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\.github\\workflows\\deploy.yml",
+      "line_number": 14,
+      "code_snippet": "  14 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "An attacker who can compromise the GitHub Actions workflow or the action owner's account to repoint a mutable tag/branch to malicious code.",
+        "path": "1. Attacker identifies a GitHub Actions step using a mutable tag (e.g., `actions/checkout@v3`) in `.github/workflows/deploy.yml` line 14. 2. Attacker compromises the action owner's repository or account and repoints the tag `v3` to a malicious commit. 3. On the next workflow run, the malicious action executes, potentially exfiltrating secrets or modifying the build.",
+        "impact": "Supply-chain compromise: attacker can execute arbitrary code in the CI/CD pipeline, steal secrets (e.g., AWS keys, deployment tokens), or inject backdoors into the deployed artifact.",
+        "is_real": true,
+        "explanation": "The finding correctly identifies a mutable tag reference in a GitHub Actions workflow. This is a real supply-chain risk as demonstrated by real-world compromises (e.g., trivy-action, kics-github-action). The fix is to pin to a full commit SHA."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-1357: Reliance on Insufficiently Trustworthy Component",
+      "cvss": 7.5,
+      "tool_output": "Rule: yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software and Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/yaml.github-actions.security.github-actions-mutable-action-tag.github-actions-mutable-action-tag"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-002",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — The finding is a duplicate of IRON-SEMGREP-003 through IRON-SEMGREP-005 (same file, same line). Additionally, the code snippet only shows 'requires login' which is insufficient to determine if user input is actually reflected unsafely. Without seeing the actual route handler, this is a false positive due to lack of context.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-002. Same file and line, no additional context. False positive.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 64,
+      "code_snippet": "  64 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "The finding is a duplicate of IRON-SEMGREP-003 through IRON-SEMGREP-005 (same file, same line). Additionally, the code snippet only shows 'requires login' which is insufficient to determine if user input is actually reflected unsafely. Without seeing the actual route handler, this is a false positive due to lack of context."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-006",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-007 through IRON-SEMGREP-009 (same file, same line 65). Without seeing the actual route handler, this is a false positive due to lack of context.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-006. Same file and line, no additional context. False positive.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 65,
+      "code_snippet": "  65 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-007 through IRON-SEMGREP-009 (same file, same line 65). Without seeing the actual route handler, this is a false positive due to lack of context."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-010",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-011 through IRON-SEMGREP-013 (same file, same line 66). Without seeing the actual route handler, this is a false positive due to lack of context.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-010. Same file and line, no additional context. False positive.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 66,
+      "code_snippet": "  66 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-011 through IRON-SEMGREP-013 (same file, same line 66). Without seeing the actual route handler, this is a false positive due to lack of context."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-014",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-015 through IRON-SEMGREP-017 (same file, same line 97). Without seeing the actual route handler, this is a false positive due to lack of context.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-014. Same file and line, no additional context. False positive.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 97,
+      "code_snippet": "  97 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-015 through IRON-SEMGREP-017 (same file, same line 97). Without seeing the actual route handler, this is a false positive due to lack of context."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-018",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-019 through IRON-SEMGREP-020 (same file, same line 98). Without seeing the actual route handler, this is a false positive due to lack of context.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-018. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-018. Same file and line, no additional context. False positive.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — The finding is at line 98, but the code shown is 'requires login' which is a comment, not actual code. The SAST rule likely triggered on a false positive due to incomplete context. Without seeing the actual code, we cannot confirm XSS.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 98,
+      "code_snippet": "  98 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "",
+        "path": "",
+        "impact": "",
+        "is_real": false,
+        "explanation": "Duplicate of IRON-SEMGREP-019 through IRON-SEMGREP-020 (same file, same line 98). Without seeing the actual route handler, this is a false positive due to lack of context."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-022",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — The finding is at line 149, but the code shown is 'requires login' which is a comment. Without the actual code, we cannot confirm open redirect. Additionally, if the redirect uses request.url or url_for, it would be a false positive per rules.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 149,
+      "code_snippet": "  149 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding is at line 149, but the code shown is 'requires login' which is a comment. Without the actual code, we cannot confirm open redirect. Additionally, if the redirect uses request.url or url_for, it would be a false positive per rules."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-023",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Same as IRON-SEMGREP-022, line 154 shows only a comment. No concrete code to analyze.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 154,
+      "code_snippet": "  154 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Same as IRON-SEMGREP-022, line 154 shows only a comment. No concrete code to analyze."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-024",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Line 187 shows only a comment. No code to verify open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 187,
+      "code_snippet": "  187 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Line 187 shows only a comment. No code to verify open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-025",
+      "title": "semgrep.ironwall.xss.flask-request-to-response: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().",
+      "description": "Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Line 309 shows only a comment. No code to verify XSS.]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025, same line and comment.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025.]]\n[Also reported by another step: Semgrep rule semgrep.ironwall.xss.flask-request-to-response detected: User input from request.form.get flows to a string response without visible HTML escaping. Use render_template() or markupsafe.escape().\n[AI Deep Verify: Attack scenario not viable — Duplicate of IRON-SEMGREP-025.]]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 309,
+      "code_snippet": "  309 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Line 309 shows only a comment. No code to verify XSS."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-79: Cross-site Scripting",
+      "cvss": 7.5,
+      "tool_output": "Rule: semgrep.ironwall.xss.flask-request-to-response | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/semgrep.ironwall.xss.flask-request-to-response"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-029",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Line 317 shows only a comment. No code to verify open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 317,
+      "code_snippet": "  317 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Line 317 shows only a comment. No code to verify open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-030",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Line 322 shows only a comment. No code to verify open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 322,
+      "code_snippet": "  322 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Line 322 shows only a comment. No code to verify open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-031",
+      "title": "python.flask.security.open-redirect.open-redirect: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.",
+      "description": "Semgrep rule python.flask.security.open-redirect.open-redirect detected: Data from request is passed to redirect(). This is an open redirect and could be exploited. Consider using 'url_for()' to generate links to known locations. If you must use a URL to unknown pages, consider using 'urlparse()' or similar and checking if the 'netloc' property is the same as your site's host name. See the references for more information.\n[AI Deep Verify: Attack scenario not viable — Line 329 shows only a comment. No code to verify open redirect.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 329,
+      "code_snippet": "  329 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "Line 329 shows only a comment. No code to verify open redirect."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-601: URL Redirection to Untrusted Site ('Open Redirect')",
+      "cvss": 9.8,
+      "tool_output": "Rule: python.flask.security.open-redirect.open-redirect | Severity: ERROR | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.open-redirect.open-redirect"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-032",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script at line 7 of base.html. 2. Attacker modifies the script to include malicious JavaScript. 3. User's browser loads the modified script without integrity check. 4. Malicious script executes in user's session, potentially stealing cookies or performing actions.",
+        "impact": "Attacker can execute arbitrary JavaScript in the context of any user visiting the site, leading to session hijacking, data theft, or defacement.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real supply chain risk. The finding is at line 7 of base.html, which is a template file, not a comment. This is a valid finding."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-033",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 53,
+      "code_snippet": "  53 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script at line 53 of base.html. 2. Attacker modifies the script to include malicious JavaScript. 3. User's browser loads the modified script without integrity check. 4. Malicious script executes in user's session.",
+        "impact": "Same as IRON-SEMGREP-032: arbitrary JavaScript execution leading to session hijacking, data theft, or defacement.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real finding. Line 53 is in a template file."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-034",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 54,
+      "code_snippet": "  54 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script at line 54 of base.html. 2. Attacker modifies the script. 3. User's browser loads the modified script without integrity check. 4. Malicious script executes.",
+        "impact": "Same as above: arbitrary JavaScript execution.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real finding. Line 54 is in a template file."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-035",
+      "title": "html.security.audit.missing-integrity.missing-integrity: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "description": "Semgrep rule html.security.audit.missing-integrity.missing-integrity detected: This tag is missing an 'integrity' subresource integrity attribute. The 'integrity' attribute allows for the browser to verify that externally hosted files (for example from a CDN) are delivered without unexpected manipulation. Without this attribute, if an attacker can modify the externally hosted resource, this could lead to XSS and other types of attacks. To prevent this, include the base64-encoded cryptographic hash of the resource (file) you’re telling the browser to fetch in the 'integrity' attribute for all externally hosted files.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\base.html",
+      "line_number": 55,
+      "code_snippet": "  55 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can compromise the CDN or perform a man-in-the-middle attack on the CDN delivery path.",
+        "path": "1. Attacker compromises the CDN serving the external script at line 55 of base.html. 2. Attacker modifies the script. 3. User's browser loads the modified script without integrity check. 4. Malicious script executes.",
+        "impact": "Same as above: arbitrary JavaScript execution.",
+        "is_real": true,
+        "explanation": "Missing SRI on CDN scripts is a real finding. Line 55 is in a template file."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-353: Missing Support for Integrity Check",
+      "cvss": 7.5,
+      "tool_output": "Rule: html.security.audit.missing-integrity.missing-integrity | Severity: WARNING | OWASP: [A08:2021 - Software and Data Integrity Failures A08:2025 - Software or Data Integrity Failures]",
+      "references": [
+        "https://semgrep.dev/r/html.security.audit.missing-integrity.missing-integrity"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-036",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\index.html",
+      "line_number": 32,
+      "code_snippet": "  32 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can craft a malicious link or page that a logged-in user visits.",
+        "path": "1. Attacker creates a form that submits to the vulnerable endpoint (e.g., POST to /some-action). 2. Attacker tricks a logged-in user into submitting the form (e.g., via phishing or XSS). 3. The form submission is processed without CSRF token validation, performing actions on behalf of the victim.",
+        "impact": "Attacker can perform state-changing actions (e.g., file upload, delete, share) as the victim user without their consent.",
+        "is_real": true,
+        "explanation": "The finding is in index.html at line 32, which is a template file. Although the rule mentions Django, the vulnerability pattern (missing CSRF token in forms) applies to Flask as well. This is a real CSRF vulnerability."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-037",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\index.html",
+      "line_number": 81,
+      "code_snippet": "  81 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can craft a malicious link or page that a logged-in user visits.",
+        "path": "1. Attacker creates a form that submits to the vulnerable endpoint. 2. Attacker tricks a logged-in user into submitting the form. 3. The form submission is processed without CSRF token validation.",
+        "impact": "Attacker can perform state-changing actions as the victim user.",
+        "is_real": true,
+        "explanation": "Same as IRON-SEMGREP-036, but at line 81 of index.html."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-038",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\login.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can craft a malicious link or page that a user visits (no login required for login page).",
+        "path": "1. Attacker creates a form that submits to the login endpoint. 2. Attacker tricks a user into submitting the form (e.g., via phishing). 3. The form submission is processed without CSRF token, potentially allowing login CSRF (attacker logs in as victim or vice versa).",
+        "impact": "Attacker can perform login CSRF, potentially logging the victim into an attacker-controlled account or vice versa, leading to session fixation or data exposure.",
+        "is_real": true,
+        "explanation": "The finding is in login.html at line 7, a template file. Missing CSRF token on login form is a real vulnerability."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-039",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\register.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can craft a malicious link or page that a user visits.",
+        "path": "1. Attacker creates a form that submits to the registration endpoint. 2. Attacker tricks a user into submitting the form. 3. The form submission is processed without CSRF token, potentially allowing registration CSRF (attacker registers an account on behalf of the victim).",
+        "impact": "Attacker can register an account as the victim, potentially leading to account takeover or abuse.",
+        "is_real": true,
+        "explanation": "The finding is in register.html at line 7, a template file. Missing CSRF token on registration form is a real vulnerability."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-040",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "severity": 2,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\share.html",
+      "line_number": 7,
+      "code_snippet": "  7 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "Attacker who can craft a malicious link or page that a logged-in user visits.",
+        "path": "1. Attacker creates a form that submits to the share endpoint. 2. Attacker tricks a logged-in user into submitting the form. 3. The form submission is processed without CSRF token, potentially sharing files without the user's consent.",
+        "impact": "Attacker can share files on behalf of the victim, leading to unauthorized data disclosure.",
+        "is_real": true,
+        "explanation": "The finding is in share.html at line 7, a template file. Missing CSRF token on share form is a real vulnerability."
+      },
+      "ai_confidence": 0.8,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-041",
+      "title": "python.django.security.django-no-csrf-token.django-no-csrf-token: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.",
+      "description": "Semgrep rule python.django.security.django-no-csrf-token.django-no-csrf-token detected: Manually-created forms in django templates should specify a csrf_token to prevent CSRF attacks.\n[AI Deep Verify: Attack scenario not viable — The rule name mentions Django, but the target is a Flask application. The finding is based on a template file (upload.html) that likely uses Flask/Jinja2, not Django. In Flask, CSRF protection is typically handled via Flask-WTF or manual token inclusion, but the rule's detection is misapplied. Without evidence that the form is vulnerable (e.g., missing CSRF token in a Flask form that processes state-changing requests), this is a false positive.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\app\\templates\\upload.html",
+      "line_number": 8,
+      "code_snippet": "  8 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The rule name mentions Django, but the target is a Flask application. The finding is based on a template file (upload.html) that likely uses Flask/Jinja2, not Django. In Flask, CSRF protection is typically handled via Flask-WTF or manual token inclusion, but the rule's detection is misapplied. Without evidence that the form is vulnerable (e.g., missing CSRF token in a Flask form that processes state-changing requests), this is a false positive."
+      },
+      "ai_confidence": 0.95,
+      "fix_suggestion": "",
+      "cwe": "CWE-352: Cross-Site Request Forgery (CSRF)",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.django.security.django-no-csrf-token.django-no-csrf-token | Severity: WARNING | OWASP: \u003cnil\u003e",
+      "references": [
+        "https://semgrep.dev/r/python.django.security.django-no-csrf-token.django-no-csrf-token"
+      ]
+    },
+    {
+      "id": "IRON-SEMGREP-042",
+      "title": "python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host: Running flask app with host 0.0.0.0 could expose the server publicly.",
+      "description": "Semgrep rule python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host detected: Running flask app with host 0.0.0.0 could expose the server publicly.\n[AI Deep Verify: Attack scenario not viable — The finding flags host='0.0.0.0' as potentially exposing the server publicly. However, this is a common development configuration. Without evidence that debug=True is also set (which would enable the debugger and allow code execution), the risk is minimal. The severity should be LOW, not MEDIUM, and the finding is likely a false positive in a production context.]",
+      "severity": 4,
+      "file_path": "battle_test_candidates\\secure-file-management\\run.py",
+      "line_number": 36,
+      "code_snippet": "  36 | requires login",
+      "step": 2,
+      "category": "security",
+      "attack_scenario": {
+        "actor": "N/A",
+        "path": "N/A",
+        "impact": "N/A",
+        "is_real": false,
+        "explanation": "The finding flags host='0.0.0.0' as potentially exposing the server publicly. However, this is a common development configuration. Without evidence that debug=True is also set (which would enable the debugger and allow code execution), the risk is minimal. The severity should be LOW, not MEDIUM, and the finding is likely a false positive in a production context."
+      },
+      "ai_confidence": 0.9,
+      "fix_suggestion": "",
+      "cwe": "CWE-668: Exposure of Resource to Wrong Sphere",
+      "cvss": 7.5,
+      "tool_output": "Rule: python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host | Severity: WARNING | OWASP: [A01:2021 - Broken Access Control A01:2025 - Broken Access Control]",
+      "references": [
+        "https://semgrep.dev/r/python.flask.security.audit.app-run-param-config.avoid_app_run_with_bad_host"
+      ]
+    },
+    {
+      "id": "IRON-BANDIT-001",
+      "title": "[B104] hardcoded_bind_all_interfaces: Possible binding to all interfaces.",
+      "description": "Bandit rule B104 detected: Possible binding to all interfaces. (confidence: MEDIUM)",
+      "severity": 3,
+      "file_path": "./battle_test_candidates/secure-file-management/run.py",
+      "line_number": 39,
+      "code_snippet": "38         ssl_context=ssl_context,\n39         host='0.0.0.0',\n40         port=443\n",
+      "step": 2,
+      "category": "bandit-b104",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-22",
+      "cvss": 5,
+      "tool_output": "Bandit rule: B104 | Severity: MEDIUM | Confidence: MEDIUM",
+      "references": [
+        "https://bandit.readthedocs.io/en/latest/plugins/b104.html"
+      ]
+    },
+    {
+      "id": "IRON-044",
+      "title": "SBOM generated: 17 components detected",
+      "description": "Software Bill of Materials (SBOM) generated in CycloneDX format. 17 components inventoried for vulnerability tracking.",
+      "severity": 4,
+      "file_path": "sbom.cdx.json",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-045",
+      "title": "Not a git repository — supply chain checks limited",
+      "description": "Supply chain security checks (SBOM provenance, SLSA) require a git repository. Without git history, we cannot verify commit signatures or build provenance.",
+      "severity": 3,
+      "file_path": "./battle_test_candidates/secure-file-management/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "",
+      "cwe": "CWE-1104",
+      "cvss": 2
+    },
+    {
+      "id": "IRON-046",
+      "title": "SBOM generation available via syft",
+      "description": "Run 'syft scan \u003ctarget\u003e -o cyclonedx-json' to generate a Software Bill of Materials. SBOMs are required for supply chain transparency (US Executive Order 14028).",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/secure-file-management/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "sbom",
+      "ai_confidence": 0,
+      "fix_suggestion": "syft scan ./battle_test_candidates/secure-file-management/ -o cyclonedx-json \u003e sbom.cdx.json",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://github.com/anchore/syft"
+      ]
+    },
+    {
+      "id": "IRON-047",
+      "title": "Unpinned GitHub Action in deploy.yml",
+      "description": "GitHub Actions should be pinned to commit SHA, not version tags. Tags can be moved by attackers who compromise the action repository (GhostAction 2025 attack vector).",
+      "severity": 2,
+      "file_path": ".github/workflows/deploy.yml",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "Pin actions to full commit SHA: uses: actions/checkout@a81bb... instead of @v4",
+      "cwe": "CWE-1104",
+      "cvss": 5,
+      "references": [
+        "https://github.com/stepsecurity/secure-workflows"
+      ]
+    },
+    {
+      "id": "IRON-048",
+      "title": "OpenSSF Scorecard not installed",
+      "description": "Install OpenSSF Scorecard (https://github.com/ossf/scorecard) to get automated security health checks for your dependencies and build pipeline.",
+      "severity": 4,
+      "file_path": "./battle_test_candidates/secure-file-management/",
+      "line_number": 0,
+      "code_snippet": "",
+      "step": 8,
+      "category": "supply-chain",
+      "ai_confidence": 0,
+      "fix_suggestion": "go install github.com/ossf/scorecard/v5@latest",
+      "cwe": "",
+      "cvss": 0,
+      "references": [
+        "https://securityscorecards.dev/"
+      ]
+    },
+    {
+      "id": "IRON-MISS-001",
+      "title": "Missing 3 security controls in register",
+      "description": "Handler register is missing 3 controls: input_validation, rate_limiting, csrf_protection. The handler does not validate the format of email or the length/character set of username before processing. This could lead to invalid data being stored or potential injection attacks. The registration endpoint is not rate-limited, allowing an attacker to create many accounts rapidly (automated registration attacks). The registration form uses POST but does not include a CSRF token. This makes it vulnerable to cross-site request forgery attacks where an attacker can force a user to register without their consent.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 59,
+      "code_snippet": "def register():\n    # kick out logged-in users\n    if current_user.is_authenticated:\n        return redirect(url_for('main.index'))\n    if request.method == 'POST':\n        email = request.form.get('email')\n        username = request.form.get('username')\n        password = request.form.get('password')\n\n        user = User.query.filter_by(email=email).first()\n        user_by_username = User.query.filter_by(username=username).first()\n        if user:\n            flash('Email address already exists')\n            return redirect(url_for('auth.register'))\n        if user_by_username:\n            flash('Username already exists')\n            return redirect(url_for('auth.register'))\n        if not is_strong_password(password):\n            flash('Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.')\n            return redirect(url_for('auth.register'))\n\n        new_user = User(email=email, username=username, password=generate_password_hash(\n            password, method='pbkdf2:sha256'))\n        db.session.add(new_user)\n        db.session.commit()\n        current_app.logger.info(\n            f'New user created: id={new_user.id}, email={new_user.email}')\n        return redirect(url_for('auth.login'))\n\n    return render_template('register.html')\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting+csrf_protection",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Add validation for email format (e.g., using a regex or a library like email-validator) and enforce constraints on username (e.g., length, allowed characters).; Implement rate limiting on the registration route, e.g., using Flask-Limiter or a similar middleware.; Include a CSRF token in the registration form and validate it on the server side. In Flask, use Flask-WTF or include a hidden token field.",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-MISS-002",
+      "title": "Missing 3 security controls in login",
+      "description": "Handler login is missing 3 controls: input_validation, rate_limiting, content_type_validation. The email and password fields are not validated for format, length, or content before being used in database queries and password verification. This could lead to unexpected behavior or security issues. The login endpoint does not implement rate limiting, allowing attackers to perform brute-force attacks without restriction. Although account lockout is implemented after 5 failed attempts, rate limiting would add an additional layer of protection. The handler does not validate the Content-Type header of incoming POST requests. While form-based login typically expects application/x-www-form-urlencoded, failing to validate could allow unexpected content types to be processed.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 92,
+      "code_snippet": "def login():\n    # kick out logged-in users\n    if current_user.is_authenticated:\n        return redirect(url_for('main.index'))\n    if request.method == 'POST':\n        email = request.form.get('email')\n        password = request.form.get('password')\n\n        user = User.query.filter_by(email=email).first()\n        if not user:\n            flash('Please check your login details and try again.')\n            return redirect(url_for('auth.login'))\n        if user.account_locked:\n            if user.lockout_time and user.lockout_time \u003e datetime.utcnow():\n                flash('Your account is locked due to too many failed login attempts. Please try again later or contact support at support@example.com.')\n                return redirect(url_for('auth.login'))\n            else:\n                user.account_locked = False\n                user.failed_login_attempts = 0\n                user.lockout_time = None\n                db.session.commit()\n        if not check_password_hash(user.password, password):\n            user.failed_login_attempts += 1\n            if user.failed_login_attempts \u003e= 5:\n                user.account_locked = True\n                user.lockout_time = datetime.utcnow() + timedelta(minutes=15)\n                db.session.commit()\n                flash('Your account has been locked due to too many failed login attempts. Please try again in 15 minutes or contact support at support@example.com.')\n                return redirect(url_for('auth.login'))\n            db.session.commit()\n            flash('Please check your login details and try again.')\n            return redirect(url_for('auth.login'))\n        user.failed_login_attempts = 0\n        user.account_locked = False\n        user.lockout_time = None\n        db.session.commit()\n        login_user(user)\n        current_app.logger.info(f'User {user.id} logged in successfully')\n        return redirect(url_for('main.index'))\n\n    return render_template('login.html')\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting+content_type_validation",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Validate email format using a library like email-validator, enforce minimum/maximum length on both fields, and sanitize inputs to prevent injection attacks.; Implement rate limiting using Flask-Limiter or similar middleware to restrict the number of login attempts per IP address or user account within a time window.; Add a check at the beginning of the POST handler to ensure Content-Type is 'application/x-www-form-urlencoded' or 'multipart/form-data'.",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-MISS-003",
+      "title": "Missing 4 security controls in upload_file",
+      "description": "Handler upload_file is missing 4 controls: input_validation, rate_limiting, csrf_protection, content_type_validation. The handler only checks file extension via allowed_file() and uses secure_filename(). It does not validate file content type (MIME), size, or perform any content inspection. An attacker could upload a malicious file with a valid extension. File upload endpoints are prone to abuse (DoS via large files, mass uploads). No rate limiting is applied, allowing an attacker to upload many files quickly. The handler accepts POST requests for file uploads but does not include CSRF token validation. This allows cross-site request forgery attacks where an attacker can trick a user into uploading files. The handler does not validate the Content-Type header of the uploaded file. An attacker could upload a file with a different MIME type than expected, potentially bypassing extension-based checks.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 144,
+      "code_snippet": "def upload_file():\n    current_app.logger.info(f'UPLOAD endpoint hit by user {current_user.id}')\n    if request.method == 'POST':\n        if 'file' not in request.files:\n            flash('No file part')\n            return redirect(request.url)\n\n        file = request.files['file']\n        if file.filename == '':\n            flash('No selected file')\n            return redirect(request.url)\n\n        if file and allowed_file(file.filename):\n            filename = secure_filename(file.filename)\n            file_path = os.path.join(\n                current_app.config['UPLOAD_FOLDER'], filename)\n\n            # Read file content and compute hash\n            file_content = file.read()\n            file_hash = sha256(file_content).hexdigest()\n            current_app.logger.info(\n                f'Computed SHA-256 hash for upload \"{filename}\": {file_hash}')\n\n            # Encrypt the file content\n            encrypted_content = current_app.config['CIPHER_SUITE'].encrypt(\n                file_content)\n\n            # Save the encrypted file\n            with open(file_path, 'wb') as f:\n                f.write(encrypted_content)\n\n            # Save metadata with hash\n            new_file = File(filename=filename,\n                            user_id=current_user.id, file_hash=file_hash)\n            db.session.add(new_file)\n            db.session.commit()\n\n            flash('File successfully uploaded')\n            current_app.logger.info(\n                f'User {current_user.id} uploaded \"{filename}\"')\n            return redirect(url_for('main.index'))\n\n        flash('Invalid file')\n        return redirect(request.url)\n\n    return render_template('upload.html')\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting+csrf_protection+content_type_validation",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Add MIME type validation using python-magic or similar library. Also add file size limit check before reading entire file into memory.; Implement rate limiting using Flask-Limiter or similar. Limit to e.g., 10 uploads per minute per user.; Add CSRF protection using Flask-WTF or include a CSRF token in the form and validate it on POST.; Validate the Content-Type header against allowed MIME types (e.g., image/jpeg, application/pdf) before processing the file.",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-MISS-004",
+      "title": "Missing 4 security controls in share_file",
+      "description": "Handler share_file is missing 4 controls: auth, input_validation, rate_limiting, csrf_protection. The share_file handler does not verify that the current user is authenticated before allowing file sharing operations. Although the code references current_user, there is no explicit authentication check (e.g., login_required decorator or session validation). An unauthenticated user could potentially access this endpoint and share files. The file_id parameter is used directly in a database query without validation (e.g., type check, sanitization). The email parameter from the form is also used directly in a database query without format validation. This could lead to injection attacks or unexpected behavior. The share_file endpoint does not implement any rate limiting. An attacker could repeatedly call this endpoint to enumerate valid email addresses (by observing 'User not found' vs success) or to spam share invitations. The share_file handler processes POST requests to create file shares but does not include CSRF token validation. This makes the endpoint vulnerable to cross-site request forgery attacks, where an attacker could trick an authenticated user into sharing files without their consent.",
+      "severity": 0,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 304,
+      "code_snippet": "def share_file(file_id):\n    current_app.logger.info(\n        f'SHARE page hit for file_id={file_id} by user {current_user.id}')\n    file = File.query.get_or_404(file_id)\n    if request.method == 'POST':\n        email = request.form.get('email')\n        user_to_share_with = User.query.filter_by(email=email).first()\n        current_app.logger.debug(\n            f'Sharing file_id={file_id} with email={email}')\n        if not user_to_share_with:\n            flash('User not found')\n            current_app.logger.warning(\n                f'Cannot share: user not found for email={email}')\n            return redirect(request.url)\n\n        # Prevent sharing with yourself\n        if user_to_share_with.id == current_user.id:\n            flash('You cannot share a file with yourself')\n            return redirect(request.url)\n\n        # Check if the file is already shared with this user\n        existing_share = FileShare.query.filter_by(\n            file_id=file.id, shared_with_user_id=user_to_share_with.id).first()\n        if existing_share:\n            flash('File already shared with this user')\n            return redirect(request.url)\n\n        # Create a new file share entry\n        new_share = FileShare(\n            file_id=file.id, shared_with_user_id=user_to_share_with.id)\n        db.session.add(new_share)\n        db.session.commit()\n\n        current_app.logger.info(\n            f'File {file_id} shared to user {user_to_share_with.id}')\n        flash('File successfully shared')\n        return redirect(url_for('main.index'))\n\n    return render_template('share.html', file=file)\n",
+      "step": 9,
+      "category": "missing-auth+input_validation+rate_limiting+csrf_protection",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Add the @login_required decorator from Flask-Login or implement an explicit authentication check at the start of the function, such as 'if not current_user.is_authenticated: abort(401)'.; Validate file_id as an integer (e.g., using int() with error handling). Validate email format using a regex or a library like email-validator before querying the database.; Implement rate limiting using Flask-Limiter or a similar middleware. For example, apply a decorator like @limiter.limit('10 per minute') to this endpoint.; Include a CSRF token in the form (e.g., using Flask-WTF's {{ form.hidden_tag() }}) and validate it on the server side. Alternatively, use Flask's built-in CSRF protection if enabled.",
+      "cwe": "CWE-16",
+      "cvss": 9.8
+    },
+    {
+      "id": "IRON-MISS-005",
+      "title": "Missing input validation on user ID",
+      "description": "The handler uses current_user.id directly in database queries without validating that it is a valid integer or sanitizing it. While current_user.id is typically trusted, lack of validation could lead to issues if the user object is tampered with or if the ID is unexpectedly modified.",
+      "severity": 2,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 41,
+      "code_snippet": "def index():\n    if not current_user.is_authenticated:\n        return redirect(url_for('auth.login'))\n\n    # Query files uploaded by the current user\n    user_files = File.query.filter_by(user_id=current_user.id).all()\n\n    # Query files shared with the current user\n    shared_files = File.query.join(FileShare, File.id == FileShare.file_id)\\\n                             .filter(FileShare.shared_with_user_id == current_user.id).all()\n\n    return render_template('index.html', files=user_files, shared_files=shared_files)\n",
+      "step": 9,
+      "category": "missing-input_validation",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Add validation to ensure current_user.id is a positive integer before using it in queries. Example: if not isinstance(current_user.id, int) or current_user.id \u003c= 0: abort(400)",
+      "cwe": "CWE-20",
+      "cvss": 5
+    },
+    {
+      "id": "IRON-MISS-006",
+      "title": "Missing 2 security controls in download_file",
+      "description": "Handler download_file is missing 2 controls: input_validation, rate_limiting. The filename parameter is used directly in file system operations (os.path.join) and database queries without validation. This could lead to path traversal or injection attacks if the filename is not properly sanitized. The download endpoint is not rate-limited. An attacker could repeatedly download files to exhaust server resources or perform a denial-of-service attack.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 194,
+      "code_snippet": "def download_file(filename):\n    current_app.logger.info(\n        f'DOWNLOAD request for \"{filename}\" by user {current_user.id}')\n    file = File.query.filter_by(filename=filename).first_or_404()\n    # Check if the current user is the owner or has been shared the file\n    if file.user_id != current_user.id and not FileShare.query.filter_by(file_id=file.id, shared_with_user_id=current_user.id).first():\n        current_app.logger.warning(\n            f'Unauthorized download attempt by user {current_user.id} for file \"{filename}\"')\n        flash('You do not have permission to access this file')\n        return redirect(url_for('main.index'))\n\n    file_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)\n\n    # Decrypt the file content\n    with open(file_path, 'rb') as f:\n        encrypted_content = f.read()\n    decrypted_content = current_app.config['CIPHER_SUITE'].decrypt(\n        encrypted_content)\n\n    # Integrity check\n    computed_hash = sha256(decrypted_content).hexdigest()\n    current_app.logger.info(\n        f'Computed SHA-256 hash for download \"{filename}\": {computed_hash}, expected: {file.file_hash}')\n    if computed_hash != file.file_hash:\n        current_app.logger.error(\n            f'File integrity check failed for \"{filename}\" (user {current_user.id})')\n        flash('File integrity verification failed. Download aborted.')\n        return redirect(url_for('main.index'))\n\n    # Send the decrypted content\n    current_app.logger.info(\n        f'Authorization OK — sending \"{filename}\" to user {current_user.id}')\n    return send_file(BytesIO(decrypted_content), download_name=filename, as_attachment=True)\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Validate the filename parameter: ensure it does not contain path traversal sequences (../), null bytes, or special characters. Use a whitelist of allowed characters or a UUID-based naming scheme.; Implement rate limiting using Flask-Limiter or similar middleware. For example: @limiter.limit('10 per minute')",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-MISS-007",
+      "title": "Missing 2 security controls in download_file_token",
+      "description": "Handler download_file_token is missing 2 controls: input_validation, rate_limiting. The token parameter is used directly in database queries and file operations without validation for format, length, or character set. An attacker could potentially inject malicious input. No rate limiting is applied to this endpoint. An attacker could brute-force download tokens or exhaust server resources by making many requests.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 255,
+      "code_snippet": "def download_file_token(token):\n    current_app.logger.info(\n        f'DOWNLOAD-TOKEN hit with token={token[:8]}... by user {current_user.id}')\n    download_token = DownloadToken.query.filter_by(token=token).first_or_404()\n    if download_token.expires_at \u003c datetime.utcnow():\n        flash('Download link has expired')\n        current_app.logger.warning(f'Token expired: {token[:8]}...')\n        return redirect(url_for('main.index'))\n    file = download_token.file\n    # Only allow if current user is the token creator, file owner, or shared user\n    is_owner = file.user_id == current_user.id\n    is_token_user = download_token.user_id == current_user.id\n    is_shared = FileShare.query.filter_by(\n        file_id=file.id, shared_with_user_id=current_user.id).first() is not None\n    if not (is_owner or is_token_user or is_shared):\n        current_app.logger.warning(\n            f'Unauthorized token use by user {current_user.id} for token={token[:8]}...')\n        flash('You do not have permission to access this file')\n        return redirect(url_for('main.index'))\n    db.session.delete(download_token)\n    db.session.commit()\n    current_app.logger.info(\n        f'Token consumed and file \"{file.filename}\" served to user {current_user.id}')\n\n    file_path = os.path.join(\n        current_app.config['UPLOAD_FOLDER'], file.filename)\n    # Decrypt the file content\n    with open(file_path, 'rb') as f:\n        encrypted_content = f.read()\n    decrypted_content = current_app.config['CIPHER_SUITE'].decrypt(\n        encrypted_content)\n\n    # Integrity check\n    computed_hash = sha256(decrypted_content).hexdigest()\n    current_app.logger.info(\n        f'Computed SHA-256 hash for download \"{file.filename}\": {computed_hash}, expected: {file.file_hash}')\n    if computed_hash != file.file_hash:\n        current_app.logger.error(\n            f'File integrity check failed for \"{file.filename}\" (user {current_user.id})')\n        flash('File integrity verification failed. Download aborted.')\n        return redirect(url_for('main.index'))\n\n    # Send the decrypted content\n    current_app.logger.info(\n        f'Authorization OK — sending \"{file.filename}\" to user {current_user.id}')\n    return send_file(BytesIO(decrypted_content), download_name=file.filename, as_attachment=True)\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Validate token format (e.g., UUID or alphanumeric string) and length before use. Consider using a regex pattern or type conversion.; Apply rate limiting (e.g., Flask-Limiter) to this endpoint, especially since it involves file decryption and serving.",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-MISS-008",
+      "title": "Missing 3 security controls in delete_file",
+      "description": "Handler delete_file is missing 3 controls: input_validation, rate_limiting, csrf_protection. The file_id parameter is used directly in File.query.get_or_404(file_id) without any validation. While get_or_404 handles missing records, it does not validate the format or type of file_id, which could lead to unexpected behavior or injection if the parameter is malformed. The delete_file endpoint does not implement rate limiting, allowing an attacker to repeatedly delete files in rapid succession, potentially causing denial of service or data loss. The delete_file handler performs a state-changing operation (DELETE) but does not include CSRF token validation. This could allow cross-site request forgery attacks where an attacker tricks a user into deleting files without their consent.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\routes.py",
+      "line_number": 347,
+      "code_snippet": "def delete_file(file_id):\n    file = File.query.get_or_404(file_id)\n    # Only the owner can delete\n    if file.user_id != current_user.id:\n        flash('You do not have permission to delete this file')\n        return redirect(url_for('main.index'))\n    # Delete file from filesystem\n    file_path = os.path.join(\n        current_app.config['UPLOAD_FOLDER'], file.filename)\n    if os.path.exists(file_path):\n        os.remove(file_path)\n    # Delete related shares and tokens\n    FileShare.query.filter_by(file_id=file.id).delete()\n    DownloadToken.query.filter_by(file_id=file.id).delete()\n    db.session.delete(file)\n    db.session.commit()\n    current_app.logger.info(\n        f'File {file_id} fully deleted by user {current_user.id}')\n    flash('File deleted successfully')\n    return redirect(url_for('main.index'))\n",
+      "step": 9,
+      "category": "missing-input_validation+rate_limiting+csrf_protection",
+      "ai_confidence": 0.9,
+      "fix_suggestion": "Validate file_id is an integer or UUID before querying. Example: if not isinstance(file_id, int): abort(400).; Add rate limiting middleware or decorator. Example: @limiter.limit('10 per minute').; Add CSRF token validation. In Flask, use CSRFProtect extension or include a CSRF token in the form and validate it before processing the request.",
+      "cwe": "CWE-16",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-CFG-001",
+      "title": "Hardcoded SQLite database URI",
+      "description": "The SQLite database URI is hardcoded as 'sqlite:///site.db' in create_app. This is a default configuration that may be insecure in production, but more importantly, it reveals the database type and location. However, the primary concern is that the secret key is loaded from environment variable, which is good, but the database URI being hardcoded could lead to information disclosure.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\__init__.py",
+      "line_number": 16,
+      "code_snippet": "def create_app():\n    app = Flask(__name__)\n    encryption_key = os.getenv('ENCRYPTION_KEY')\n    if not encryption_key:\n        raise ValueError(\"No ENCRYPTION_KEY set for Flask application\")\n    cipher_suite = Fernet(encryption_key)\n    app.config['CIPHER_SUITE'] = cipher_suite\n\n    app.secret_key = os.environ['FLASK_SECRET_KEY']\n    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'\n    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, '../uploads')\n\n    db.init_app(app)\n    login_manager.init_app(app)\n\n    # Import models after initializing extensions\n    from .models import User  # Move this import here\n\n    # Import blueprints after initializing extensions\n    from .routes import main, auth\n    app.register_blueprint(main)\n    app.register_blueprint(auth, url_prefix='/auth')\n\n    # ensure the logs directory exists\n    if not os.path.exists('logs'):\n        os.mkdir('logs')\n\n    # set up a rotating file handler: 10 MB per file, keep 5 backups\n    file_handler = RotatingFileHandler(\n        filename='logs/app.log',\n        maxBytes=10 * 1024 * 1024,\n        backupCount=5\n    )\n    # choose a nice format\n    file_handler.setFormatter(logging.Formatter(\n        '%(asctime)s %(levelname)s: %(message)s '\n        '[in %(pathname)s:%(lineno)d]'\n    ))\n    file_handler.setLevel(logging.INFO)\n\n    # attach to Flask's logger\n    app.logger.addHandler(file_handler)\n\n    # optionally set the overall log level (default is WARNING)\n    app.logger.setLevel(logging.INFO)\n    app.logger.info('Application startup')\n\n    return app\n",
+      "step": 9,
+      "category": "config-hardcoded_secret",
+      "ai_confidence": 0.95,
+      "fix_suggestion": "Move the database URI to an environment variable, e.g., app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///site.db')",
+      "cwe": "CWE-798",
+      "cvss": 7.5
+    },
+    {
+      "id": "IRON-CFG-002",
+      "title": "Session cookies missing Secure and HttpOnly flags",
+      "description": "The Flask app does not explicitly set session cookie flags like Secure, HttpOnly, or SameSite. By default, Flask sets HttpOnly on session cookies, but Secure is not set unless the app is running over HTTPS. The code does not configure SESSION_COOKIE_SECURE, SESSION_COOKIE_HTTPONLY, or SESSION_COOKIE_SAMESITE, which could lead to session hijacking if not using HTTPS.",
+      "severity": 1,
+      "file_path": "F:\\ClaudeFiles\\_research\\ironwall\\battle_test_candidates\\secure-file-management\\app\\__init__.py",
+      "line_number": 16,
+      "code_snippet": "def create_app():\n    app = Flask(__name__)\n    encryption_key = os.getenv('ENCRYPTION_KEY')\n    if not encryption_key:\n        raise ValueError(\"No ENCRYPTION_KEY set for Flask application\")\n    cipher_suite = Fernet(encryption_key)\n    app.config['CIPHER_SUITE'] = cipher_suite\n\n    app.secret_key = os.environ['FLASK_SECRET_KEY']\n    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'\n    app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, '../uploads')\n\n    db.init_app(app)\n    login_manager.init_app(app)\n\n    # Import models after initializing extensions\n    from .models import User  # Move this import here\n\n    # Import blueprints after initializing extensions\n    from .routes import main, auth\n    app.register_blueprint(main)\n    app.register_blueprint(auth, url_prefix='/auth')\n\n    # ensure the logs directory exists\n    if not os.path.exists('logs'):\n        os.mkdir('logs')\n\n    # set up a rotating file handler: 10 MB per file, keep 5 backups\n    file_handler = RotatingFileHandler(\n        filename='logs/app.log',\n        maxBytes=10 * 1024 * 1024,\n        backupCount=5\n    )\n    # choose a nice format\n    file_handler.setFormatter(logging.Formatter(\n        '%(asctime)s %(levelname)s: %(message)s '\n        '[in %(pathname)s:%(lineno)d]'\n    ))\n    file_handler.setLevel(logging.INFO)\n\n    # attach to Flask's logger\n    app.logger.addHandler(file_handler)\n\n    # optionally set the overall log level (default is WARNING)\n    app.logger.setLevel(logging.INFO)\n    app.logger.info('Application startup')\n\n    return app\n",
+      "step": 9,
+      "category": "config-missing_cookie_flags",
+      "ai_confidence": 0.85,
+      "fix_suggestion": "Add configuration: app.config['SESSION_COOKIE_SECURE'] = True (if HTTPS), app.config['SESSION_COOKIE_HTTPONLY'] = True, app.config['SESSION_COOKIE_SAMESITE'] = 'Lax' or 'Strict'",
+      "cwe": "CWE-614",
+      "cvss": 7.5
+    }
+  ],
+  "analysis_status": "partial"
+}
