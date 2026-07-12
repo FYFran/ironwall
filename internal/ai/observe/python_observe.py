@@ -302,4 +302,5 @@ if __name__ == "__main__":
         for c in s["concerns"]:
             result["concern_counts"][c] = result["concern_counts"].get(c, 0) + 1
 
+    sys.stdout.reconfigure(encoding="utf-8")
     json.dump(result, sys.stdout, ensure_ascii=False)
