@@ -501,6 +501,157 @@ def _detect_path_traversal(tree, filename):
     return findings
 
 
+# ── CWE-79: XSS via Reflected Input ──────────────────────────────────
+
+def _is_response_sink(node):
+    """Check if an expression feeds into HTTP response (return, RESPONSE+=, make_response)."""
+    if isinstance(node, ast.Return):
+        return True
+    return False
+
+
+def _detect_xss(tree, filename):
+    """Walk handlers for f-strings/concatenation with tainted vars returned to response."""
+    findings = []
+    RESPONSE_VARS = {"RESPONSE", "response", "html", "output"}
+
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        # Only check handler functions (ignore utility functions)
+        has_route = False
+        for deco in func.decorator_list:
+            deco_str = ast.unparse(deco) if hasattr(ast, 'unparse') else ''
+            if 'route' in deco_str.lower():
+                has_route = True
+                break
+        if not has_route:
+            continue
+
+        assignments = _build_assignments(func)
+
+        # Find all f-strings and concatenations containing tainted vars
+        for child in ast.walk(func):
+            # Check AugAssign: RESPONSE += f'{tainted_var}'
+            if isinstance(child, ast.AugAssign):
+                if isinstance(child.target, ast.Name) and child.target.id in RESPONSE_VARS:
+                    tainted_vars = _extract_path_vars(child.value)  # reuse path var extractor
+                    for var in tainted_vars:
+                        tainted, taint_line = _trace_to_source(var, assignments)
+                        if tainted:
+                            findings.append({
+                                "filename": filename,
+                                "test_id": "B904",
+                                "test_name": "xss_reflected",
+                                "issue_severity": "MEDIUM",
+                                "issue_confidence": "MEDIUM",
+                                "issue_text": (
+                                    f"XSS (CWE-79): reflected user input '{var}' "
+                                    f"(tainted at L{taint_line}) in HTTP response. "
+                                    f"Use html.escape() or template engine auto-escaping."
+                                ),
+                                "line_number": child.lineno,
+                                "code": ast.unparse(child)[:200] if hasattr(ast, 'unparse') else "see source",
+                                "more_info": "https://cwe.mitre.org/data/definitions/79.html",
+                            })
+                            break
+
+            # Check Return: return f'{tainted_var}'
+            if isinstance(child, ast.Return) and child.value:
+                val = child.value
+                tainted_vars = set()
+                # Check JoinedStr (f-string) in return
+                if isinstance(val, ast.JoinedStr):
+                    tainted_vars = _extract_path_vars(val)
+                # Check BinOp (concatenation) in return
+                elif isinstance(val, ast.BinOp) and isinstance(val.op, ast.Add):
+                    tainted_vars = _extract_path_vars(val)
+                # Check Name (var) in return
+                elif isinstance(val, ast.Name):
+                    tainted_vars = {val.id}
+                # Check Call in return
+                elif isinstance(val, ast.Call):
+                    tainted_vars = _extract_path_vars(val)
+
+                for var in tainted_vars:
+                    tainted, taint_line = _trace_to_source(var, assignments)
+                    if tainted:
+                        findings.append({
+                            "filename": filename,
+                            "test_id": "B904",
+                            "test_name": "xss_reflected",
+                            "issue_severity": "MEDIUM",
+                            "issue_confidence": "MEDIUM",
+                            "issue_text": (
+                                f"XSS (CWE-79): reflected user input '{var}' "
+                                f"(tainted at L{taint_line}) in HTTP response return. "
+                                f"Use html.escape() or template engine auto-escaping."
+                            ),
+                            "line_number": child.lineno,
+                            "code": ast.unparse(child)[:200] if hasattr(ast, 'unparse') else "see source",
+                            "more_info": "https://cwe.mitre.org/data/definitions/79.html",
+                        })
+                        break
+
+    return findings
+
+
+
+def _detect_open_redirect(tree, filename):
+    """Walk handlers for redirect() calls with tainted URL arguments."""
+    findings = []
+
+    for func in ast.walk(tree):
+        if not isinstance(func, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            continue
+        has_route = any(
+            'route' in (ast.unparse(d) if hasattr(ast, 'unparse') else '').lower()
+            for d in func.decorator_list
+        )
+        if not has_route:
+            continue
+
+        assignments = _build_assignments(func)
+
+        for child in ast.walk(func):
+            if not isinstance(child, ast.Call):
+                continue
+            # Match redirect(...) or flask.redirect(...)
+            call_str = ast.unparse(child) if hasattr(ast, 'unparse') else ''
+            if 'redirect' not in call_str.lower():
+                continue
+            if not child.args:
+                continue
+
+            arg = child.args[0]
+            tainted_vars = set()
+            if isinstance(arg, ast.Name):
+                tainted_vars = {arg.id}
+            elif isinstance(arg, ast.JoinedStr):
+                tainted_vars = _extract_path_vars(arg)
+
+            for var in tainted_vars:
+                tainted, taint_line = _trace_to_source(var, assignments)
+                if tainted:
+                    findings.append({
+                        "filename": filename,
+                        "test_id": "B905",
+                        "test_name": "open_redirect",
+                        "issue_severity": "MEDIUM",
+                        "issue_confidence": "MEDIUM",
+                        "issue_text": (
+                            f"Open Redirect (CWE-601): user-controlled URL '{var}' "
+                            f"(tainted at L{taint_line}) passed to redirect(). "
+                            f"Validate URL against whitelist or use url_for()."
+                        ),
+                        "line_number": child.lineno,
+                        "code": call_str[:200],
+                        "more_info": "https://cwe.mitre.org/data/definitions/601.html",
+                    })
+                    break
+    return findings
+
+
 # ── Scanner Runner ────────────────────────────────────────────────────
 
 def scan_file(filepath):
@@ -513,7 +664,7 @@ def scan_file(filepath):
         tree = ast.parse(source)
     except SyntaxError:
         return []
-    return _detect_trust_boundary(tree, filepath) + _detect_ldap_injection(tree, filepath) + _detect_path_traversal(tree, filepath)
+    return _detect_trust_boundary(tree, filepath) + _detect_ldap_injection(tree, filepath) + _detect_path_traversal(tree, filepath) + _detect_xss(tree, filepath) + _detect_open_redirect(tree, filepath)
 
 
 def scan_directory(target):

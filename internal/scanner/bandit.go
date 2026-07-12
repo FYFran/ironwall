@@ -140,6 +140,8 @@ var banditCWE = map[string]string{
 	"B901": "CWE-501", // trust_boundary_violation
 	"B902": "CWE-90",  // ldap_injection
 	"B903": "CWE-22",  // path_traversal
+	"B904": "CWE-79",  // xss_reflected
+	"B905": "CWE-601", // open_redirect
 }
 
 // ToFindings converts bandit findings to ironwall Finding structs.
