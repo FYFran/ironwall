@@ -396,15 +396,18 @@ def _detect_ldap_injection(tree, filename):
 
 # ── CWE-22: Path Traversal ────────────────────────────────────────────
 
-FILE_OPEN_FUNCS = {"open", "codecs.open", "io.open", "pathlib.Path.open"}
+FILE_OPEN_FUNCS = {"open", "codecs.open", "io.open", "pathlib.Path.open", "pathlib.Path.read_text", "pathlib.Path.read_bytes"}
+
+FILE_OPEN_ATTRS = {"open", "read_text", "read_bytes"}  # pathlib.Path().read_text()
 
 def _is_file_open_call(call_node):
-    """Check if call is a file open: open(...), codecs.open(...), etc."""
+    """Check if call is a file open: open(...), codecs.open(...), pathlib.Path().read_text(), etc."""
     func = call_node.func
     if isinstance(func, ast.Name) and func.id == "open":
         return True
     if isinstance(func, ast.Attribute):
-        if func.attr == "open":
+        # pathlib.Path().read_text(), file.read_bytes()
+        if func.attr in FILE_OPEN_ATTRS:
             return True
         # codecs.open -> func.value is Name('codecs'), func.attr is 'open'
         if isinstance(func.value, ast.Name):
