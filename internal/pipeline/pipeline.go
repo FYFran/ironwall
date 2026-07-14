@@ -82,7 +82,9 @@ func (p *Pipeline) Run(ctx context.Context, target string) (*report.ScanResult, 
 
 		for i := range findings {
 			if isTestFile(findings[i].FilePath) {
-				findings[i].Severity = downgradeTestSeverity(findings[i].Severity)
+				findings[i].Severity = report.SevInfo
+				findings[i].Title = "[TEST/EXAMPLE] " + findings[i].Title
+				findings[i].Description = "Found in test/example code. " + findings[i].Description
 			}
 			if findings[i].ID == "" {
 				findings[i].ID = fmt.Sprintf("IRON-%03d", result.Summary.Total+1)
@@ -149,25 +151,20 @@ func isToolAvailable(name string) bool {
 	return err == nil
 }
 
-// isTestFile checks if a file path is a test file or in a test directory.
+// isTestFile checks if a file path is a test file or in a test/example directory.
 func isTestFile(path string) bool {
 	lower := strings.ToLower(path)
-	return strings.Contains(lower, "_test.") || strings.HasPrefix(lower, "test_") ||
-		strings.Contains(lower, "/testdata/") || strings.Contains(lower, "\\testdata\\") ||
-		strings.Contains(lower, "/fixtures/") || strings.Contains(lower, "\\fixtures\\") ||
-		strings.Contains(lower, "/test/") || strings.Contains(lower, "\\test\\")
-}
-
-// downgradeTestSeverity drops severity by one level for test files.
-func downgradeTestSeverity(s report.Severity) report.Severity {
-	switch s {
-	case report.SevCritical:
-		return report.SevHigh
-	case report.SevHigh:
-		return report.SevMedium
-	case report.SevMedium:
-		return report.SevLow
-	default:
-		return report.SevInfo
+	// File-level patterns
+	if strings.Contains(lower, "_test.") || strings.HasPrefix(lower, "test_") {
+		return true
 	}
+	// Directory patterns — check both with leading separator and at path start
+	for _, dir := range []string{"testdata", "fixtures", "test", "_examples", "examples"} {
+		for _, sep := range []string{"/", "\\"} {
+			if strings.Contains(lower, sep+dir+sep) || strings.HasPrefix(lower, dir+sep) {
+				return true
+			}
+		}
+	}
+	return false
 }
