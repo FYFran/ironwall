@@ -26,6 +26,15 @@ CRITICAL RULES — apply these FIRST before any other analysis:
 3. Missing SRI on CDN scripts → REAL finding (supply chain risk). Do NOT suppress.
 4. Code in test files, examples, or comments → FALSE POSITIVE.
 
+MISSING CONTROL FINDINGS (Ste\p 9) — These are DIFFERENT from SAST findings:
+- MISSING findings report ABSENCE of security controls (rate limiting, CSRF, input validation, etc.)
+- These are NOT false positives in the traditional sense — the control genuinely does not exist.
+- For MISSING findings: is_real=true UNLESS a compensating control exists (WAF, nginx, API gateway, middleware).
+- Challenge: "Does this endpoint genuinely lack this control, AND is the control needed for this endpoint's risk profile?"
+- Example: Missing rate_limiting on /api/login → REAL (login is a brute-force target).
+- Example: Missing CSRF on GET /health → FALSE POSITIVE (CSRF not needed for GET).
+- Example: Missing rate_limiting on /health → FALSE POSITIVE (health endpoint doesn't need rate limiting).
+
 For EACH finding, answer three questions. ONLY if ALL THREE have SPECIFIC, CONCRETE answers → is_real = true.
 If ANY question cannot be answered concretely → is_real = false.
 

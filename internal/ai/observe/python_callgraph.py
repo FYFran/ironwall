@@ -44,6 +44,18 @@ SINK_PATTERNS = {
     "deserialize": [
         "loads", "dumps", "parse", "decode",
     ],
+    "weak_crypto": [
+        "md5", "sha1", "new",
+    ],
+    "xxe": [
+        "fromstring", "parse", "iterparse",
+    ],
+    "code_injection": [
+        "eval", "exec", "compile", "__import__",
+    ],
+    "open_redirect": [
+        "redirect", "RedirectResponse",
+    ],
 }
 
 

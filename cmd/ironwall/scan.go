@@ -190,6 +190,7 @@ func runScan(cfg *config.Config) error {
 		pipe.Register(&pipeline.Step6Server{})
 		pipe.Register(&pipeline.Step7Database{})
 		pipe.Register(&pipeline.Step8SupplyChain{})
+		pipe.Register(pipeline.NewStep9Missing(engine))
 	}
 
 	// Handle interrupt signal

@@ -607,12 +607,31 @@ func SinkType(funcName string) string {
 		strings.HasPrefix(lower, "template_render") || strings.Contains(lower, "rendertemplate") ||
 		strings.Contains(lower, "templaterender") || strings.Contains(lower, "renderpage"):
 		return "template"
+	// Go-specific: deserialization sinks (YAML, XML, JSON to interface{})
+	case strings.Contains(lower, "yaml.unmarshal") || strings.Contains(lower, "yaml.decode") ||
+		strings.Contains(lower, "yaml.newdecoder"):
+		return "deserialization"
+	case strings.Contains(lower, "xml.unmarshal") || strings.Contains(lower, "xml.decode") ||
+		strings.Contains(lower, "xml.newdecoder"):
+		return "xxe"
+	// Go-specific: expression/code injection
+	case strings.Contains(lower, "expr.eval") || strings.Contains(lower, "expr.compile") ||
+		strings.Contains(lower, "govaluate"):
+		return "code_injection"
+	// Go-specific: weak cryptographic hashes
+	case strings.Contains(lower, "md5.sum") || strings.Contains(lower, "md5.new") ||
+		strings.Contains(lower, "sha1.sum") || strings.Contains(lower, "sha1.new"):
+		return "weak_crypto"
+	// Go-specific: open redirect
+	case strings.Contains(lower, "http.redirect") || strings.Contains(lower, "redirect("):
+		return "open_redirect"
 	}
 
 	// Check against known dangerous patterns
 	dangerous := []string{
 		"sql", "queryrow", "command", "remove",
 		"write", "read", "template", "redirect", "dial",
+		"unmarshal", "decode", "eval", "compile", "md5", "sha1",
 	}
 	for _, d := range dangerous {
 		if lower == d || strings.HasPrefix(lower, d) {

@@ -126,6 +126,13 @@ func (e *Engine) runDeepVerifyWithClient(ctx context.Context, findings []report.
 	var reviewList []report.Finding
 	var passThrough []report.Finding
 	for _, f := range findings {
+		// Skip DeepVerify for MISSING detection findings — these are structural absences,
+		// not SAST false positives. AI models (especially DeepSeek) over-suppress these
+		// because they're trained to "challenge every finding."
+		if strings.HasPrefix(f.Category, "missing-") {
+			passThrough = append(passThrough, f)
+			continue
+		}
 		if f.Severity <= report.SevMedium && f.AIConfidence == 0 {
 			reviewList = append(reviewList, f)
 		} else {

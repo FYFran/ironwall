@@ -53,8 +53,8 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 			}
 		}
 		// Layer 3: Semgrep fallback — broad pattern matching
-		if err != nil && isToolAvailable("semgrep") {
-			semgrepFindings, semgrepErr := s.runSemgrep(ctx, target)
+		if isToolAvailable("semgrep") {
+			semgrepFindings, semgrepErr := s.runSemgrepWithRules(ctx, target, ".semgrep/")
 			if semgrepErr == nil {
 				allFindings = append(allFindings, semgrepFindings...)
 			}

@@ -1,51 +1,68 @@
-# 新对话启动 — Ironwall 实测数据已更新
+# 新会话启动 — Ironwall v0.7.1
 
-**日期**: 2026-07-12
+**日期**: 2026-07-13
 
 ---
 
 ## 启动指令
 
 ```
-1. MCP pete_recent_diary — 看最新日记(18条,6/30→7/12)
-2. MCP pete_recall — 查ironwall相关记忆(15+条)
-3. MCP pete_health — 系统健康
-4. MCP mempalace_list_drawers --room diary --limit 10 — MemPalace长格式
-5. Read f:/ClaudeFiles/_research/ironwall/docs/DEEP_ANALYSIS_V5.md — 市场分析
-6. Read f:/ClaudeFiles/_research/ironwall/docs/NEXT_SESSION.md — 原计划
-7. 调Brain B审查关键决策: Codex localhost:4000
+1. MCP pete_recent_diary — 读最新日记
+2. MCP pete_recall keyword=ironwall — 查ironwall记忆
+3. Read f:/ClaudeFiles/_research/ironwall/docs/NEW_SESSION_START.md (本文件)
+4. Read f:/ClaudeFiles/_research/ironwall/docs/DEEP_ANALYSIS_V5.md — 市场分析
+5. 查Brain B: curl -s http://localhost:4000/health
+6. 调Brain B审查下一步计划
 ```
 
----
+## Ironwall v0.7.1 状态
 
-## 核心数据 (全更新)
+### 核心指标
+- GitHub: https://github.com/FYFran/ironwall (14 commits, tag v0.7.1)
+- OWASP Benchmark: Recall 62%, semgrep 13% (4.9x)
+- 自定义扫描器: 5 CWE (路径遍历/XSS/重定向/LDAP/信任边界)
+- 测试集: 74 vulns, 7 projects
+- 成本: $0.02-0.03/scan (AI Phase B)
 
-### Ironwall 实测战绩
-| 目标 | 漏洞 | SAST | Phase B | 成本 |
-|------|------|------|---------|------|
-| go_target | 12 | 78% | **89%** | $0.016 |
-| python-vuln-target | 14 | — | **71%** | $0.032 |
-| go-vuln-target | 7 | — | **100%** | $0.019 |
-| **合计** | **33** | — | **85%** | **$0.067** |
+### AI Phase B 验证
+- go-vuln-target: 7/7 vulns found (TRACE R=100%)
+- campus_go: 11/11 SAST FP suppressed, 1 MISSING found
+- rewriter-go: 10/10 SAST FP suppressed, 30 MISSING (too noisy)
+- ecommerce-flask: 7 MISSING found, 4/10 GT covered
+- secure-file-mgmt: 76% FP suppressed, 10 unique findings
 
-### 之前日记有误
-"Recall 7%"是AAAk压缩格式错误。实测85%。CallGraph已接入TRACE，跨包追踪成功。
+### 已知问题
+- FP率: 75% SAST-only, ~24% after AI
+- MISSING噪声: rewriter-go 30 findings偏高 (内部API端点不需要CSRF/限流)
+- CONFIG: 读不到模块级代码 (只扫handler sections)
+- CWE-22: 23% recall (taint引擎需要系统升级)
+- GitHub push: 本地网络不通, 通过HK服务器(47.82.103.247)中转。服务器7月14日到期。
+- 无IDE集成, 无CI/CD, 无法直接卖给企业
 
-### 战略方向(不变)
-- 短期: python Recall 71%偏低需优化
-- 中期: MCP化 → Agent安全基础设施
-- 长期: AIGC安全验证网关
+### 诚实定位
+- 个人开发者的辅助安全工具
+- 不如CodeQL/Snyk/Semgrep Pro
+- 唯一独特价值: MISSING检测 (找到SAST检测不到的缺失安全控制)
+- 可变现方式: 闲鱼/Fiverr代码审计服务 $15-75/单
 
----
+## Brain B v3 状态
+- 双模型仲裁 (v4-pro + v4-flash + 共识合并)
+- Fresh Intel (Tavily搜索+LLM摘要, 5644 chars缓存)
+- ReviewDB (SQLite, 2审查11攻击点)
+- AutoLearner (WANN评分+隔离+3-confirmation)
+- sanity_check (Tier1 regex预检, 4/4 FP拦截)
+- 代理: localhost:4000, KB 11,396 chars
+- v4-pro thinking bug已修复 (thinking=disabled)
 
-## Brain B 状态
-- AGENTS.md v2: 4领域专家(记忆+安全+MCP+AI市场)
-- 工具: health/recall/propose/verify
-- 铁律: 证据强制追溯，禁止无证据推断
+## TokenLine
+- 服务器7月14日到期, 已决定不续
+- 0真实用户, 0收入 (19个账号全是测试号)
+- 数据已备份到 f:/ClaudeFiles/_server-backup/2026-07-12/
+- tokenline.db: 19 users, 15 tables
+- SSL证书, nginx配置, 运维脚本已拉取
 
----
-
-## PETE Memory 状态
-- 18条diary, 20+条fact, 全部覆盖6/30→7/12
-- MCP 9工具就绪
-- System2每周日3AM自动触发
+## 下一步讨论
+- 铁壁是否值得继续全力投入?
+- 要不要先接外包赚钱?
+- MISSING检测是真正的新东西, 但天花板低
+- 训练专用模型 vs 继续调prompt?

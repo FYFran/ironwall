@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Ironwall Pre-Commit Hook (#20)
+# Runs Ironwall scan on staged changes before every commit.
+# BLOCKs commits with CRITICAL or HIGH findings.
+#
+# Install: cp hooks/pre-commit .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit
+# Skip:    IRONWALL_SKIP=1 git commit -m "emergency hotfix"
+# ==============================================================================
+
+set -euo pipefail
+
+# --- Colors ---
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# --- Config ---
+IRONWALL_BIN="${IRONWALL_BIN:-ironwall}"
+BLOCK_SEVERITIES="${BLOCK_SEVERITIES:-CRITICAL,HIGH}"
+WARN_SEVERITIES="${WARN_SEVERITIES:-MEDIUM}"
+IRONWALL_SKIP="${IRONWALL_SKIP:-0}"
+
+# --- Skip check ---
+if [ "$IRONWALL_SKIP" = "1" ]; then
+    echo -e "${YELLOW}[ironwall] Skipped (IRONWALL_SKIP=1)${NC}"
+    exit 0
+fi
+
+# --- Check if ironwall is available ---
+if ! command -v "$IRONWALL_BIN" &> /dev/null; then
+    echo -e "${YELLOW}[ironwall] ironwall binary not found — install: go install github.com/FYFran/ironwall/cmd/ironwall@latest${NC}"
+    echo -e "${YELLOW}[ironwall] Skipping pre-commit scan.${NC}"
+    exit 0
+fi
+
+# --- Scan staged changes ---
+echo -e "${GREEN}[ironwall] Scanning staged changes...${NC}"
+
+# Get list of staged files
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM)
+if [ -z "$STAGED_FILES" ]; then
+    echo -e "${GREEN}[ironwall] No staged files.${NC}"
+    exit 0
+fi
+
+# Create temp directory with only staged versions
+TEMP_DIR=$(mktemp -d)
+trap "rm -rf $TEMP_DIR" EXIT
+
+# Copy staged files to temp dir (preserving structure)
+echo "$STAGED_FILES" | while IFS= read -r file; do
+    if [ -f "$file" ]; then
+        mkdir -p "$TEMP_DIR/$(dirname "$file")"
+        # Get staged version, not working tree version
+        git show ":$file" > "$TEMP_DIR/$file" 2>/dev/null || true
+    fi
+done
+
+# Run ironwall on temp directory
+SCAN_OUTPUT=$(mktemp)
+set +e
+"$IRONWALL_BIN" scan "$TEMP_DIR" --format terminal --severity "$BLOCK_SEVERITIES" > "$SCAN_OUTPUT" 2>&1
+SCAN_EXIT=$?
+set -e
+
+# --- Parse results ---
+CRITICAL_COUNT=$(grep -c "CRITICAL" "$SCAN_OUTPUT" 2>/dev/null || echo "0")
+HIGH_COUNT=$(grep -c "HIGH" "$SCAN_OUTPUT" 2>/dev/null || echo "0")
+MEDIUM_COUNT=$(grep -c "MEDIUM" "$SCAN_OUTPUT" 2>/dev/null || echo "0")
+TOTAL_BLOCK=$((CRITICAL_COUNT + HIGH_COUNT))
+
+echo -e "${GREEN}[ironwall] Scan complete:${NC}"
+echo -e "  CRITICAL: ${RED}$CRITICAL_COUNT${NC}"
+echo -e "  HIGH:     ${YELLOW}$HIGH_COUNT${NC}"
+echo -e "  MEDIUM:   $MEDIUM_COUNT"
+
+# --- Decision ---
+if [ "$TOTAL_BLOCK" -gt 0 ]; then
+    echo ""
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo -e "${RED}  COMMIT BLOCKED: $TOTAL_BLOCK blocking finding(s)${NC}"
+    echo -e "${RED}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+    echo ""
+    echo "Details:"
+    grep -E "(CRITICAL|HIGH)" "$SCAN_OUTPUT" | head -20
+    echo ""
+    echo "Options:"
+    echo "  1. Fix the findings and recommit"
+    echo "  2. Use IRONWALL_SKIP=1 git commit ... to bypass (NOT recommended)"
+    echo "  3. Use --severity MEDIUM flag to only block CRITICAL"
+    echo ""
+    cat "$SCAN_OUTPUT"
+    exit 1
+fi
+
+if [ "$MEDIUM_COUNT" -gt 0 ]; then
+    echo ""
+    echo -e "${YELLOW}[ironwall] ⚠️  $MEDIUM_COUNT MEDIUM finding(s) — review before pushing${NC}"
+fi
+
+echo -e "${GREEN}[ironwall] ✅ Pre-commit security scan passed${NC}"
+exit 0

@@ -132,13 +132,13 @@ func extractRoutes(path, target string) []routeInfo {
 
 	scanner := bufio.NewScanner(f)
 	lineNum := 0
-	recentLines := make([]string, 0, 10)
+	recentLines := make([]string, 0, 50)
 
 	for scanner.Scan() {
 		lineNum++
 		line := scanner.Text()
 		recentLines = append(recentLines, line)
-		if len(recentLines) > 10 {
+		if len(recentLines) > 50 {
 			recentLines = recentLines[1:]
 		}
 
