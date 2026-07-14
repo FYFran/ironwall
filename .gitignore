@@ -23,3 +23,4 @@ testdata/oss/
 Thumbs.db
 __pycache__/
 nul.json
+benchmark/field_test/*/
