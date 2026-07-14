@@ -183,6 +183,55 @@ var profiles = []FrameworkProfile{
 	},
 }
 
+// GenericProfile returns a framework-agnostic profile for unrecognized web frameworks.
+// Basic security controls that apply to any HTTP framework — limited coverage but better than silent skip.
+func GenericProfile() *FrameworkProfile {
+	return &FrameworkProfile{
+		Name: "generic",
+		RecommendedThirdParty: []SecurityControl{
+			{
+				Name: "rate_limiting", Category: "traffic",
+				SeverityIfMissing: report.SevHigh, CWE: "CWE-770",
+				Description: "Rate limiting prevents brute force and DoS attacks",
+				PresencePatterns:  []string{`(?i)rate.?limit`, `(?i)limiter`, `(?i)throttle`, `(?i)MaxRequests`},
+				DisablePatterns:   []string{},
+				DecorativePatterns: []string{`(?i)rate\.Inf\b`},
+				FixTemplate: "Add rate limiting middleware appropriate for your framework.",
+			},
+			{
+				Name: "csrf_protection", Category: "auth",
+				SeverityIfMissing: report.SevHigh, CWE: "CWE-352",
+				Description: "CSRF tokens for state-changing endpoints",
+				PresencePatterns:  []string{`(?i)csrf`, `(?i)xsrf`, `(?i)csrf_token`, `(?i)csrfToken`, `(?i)_csrf`},
+				DisablePatterns:   []string{`(?i)csrf\.disable`, `(?i)CSRF.*=.*false`, `(?i)SkipCSRF`},
+				FixTemplate: "Add CSRF protection middleware appropriate for your framework.",
+			},
+			{
+				Name: "security_headers", Category: "defense",
+				SeverityIfMissing: report.SevMedium, CWE: "CWE-693",
+				Description: "CSP, HSTS, X-Frame-Options, X-Content-Type-Options headers",
+				PresencePatterns:  []string{`Content-Security-Policy`, `X-Frame-Options`, `Strict-Transport-Security`, `(?i)helmet`, `(?i)secure`},
+				FixTemplate: "Add security headers middleware appropriate for your framework.",
+			},
+			{
+				Name: "input_validation", Category: "injection",
+				SeverityIfMissing: report.SevHigh, CWE: "CWE-20",
+				Description: "Input validation prevents injection and data corruption",
+				PresencePatterns:  []string{`(?i)validate`, `(?i)sanitize`, `(?i)schema`, `(?i)\.Bind`, `binding:"`},
+				FixTemplate: "Add input validation appropriate for your framework.",
+			},
+			{
+				Name: "request_size_limit", Category: "traffic",
+				SeverityIfMissing: report.SevMedium, CWE: "CWE-770",
+				Description: "Request body size limit prevents memory exhaustion",
+				PresencePatterns:  []string{`(?i)MaxBytesReader`, `(?i)maxMultipartMemory`, `(?i)body.?size.?limit`, `(?i)client_max_body_size`, `(?i)upload.?limit`},
+				FixTemplate: "Set a maximum request body size in your framework or reverse proxy.",
+			},
+		},
+		ExplicitlyNotBuiltin: []string{"rate_limiting", "csrf_protection", "security_headers", "input_validation"},
+	}
+}
+
 // DetectFramework identifies the web framework used in the target directory.
 func DetectFramework(target string) *FrameworkProfile {
 	for i := range profiles {

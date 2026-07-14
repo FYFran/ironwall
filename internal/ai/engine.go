@@ -18,6 +18,8 @@ const maxConcurrency = 2   // max concurrent API calls (conservative for chat mo
 type Engine struct {
 	triageClient *Client // Fast model (DeepSeek V3 / deepseek-chat) — used as fallback for deep verify
 	deepClient   *Client // Reasoning model (DeepSeek R1 / deepseek-reasoner)
+	localClient  *Client // Local Ollama model — fallback when external API is unavailable
+	offlineMode  bool    // If true, skip AI entirely (even local)
 	hasPython    bool    // Target contains Python files (enables Flask-specific FP rules)
 	hasGo        bool    // Target contains Go files
 }
@@ -30,13 +32,15 @@ func (e *Engine) SetLanguages(hasGo, hasPython bool) {
 }
 
 // NewEngine creates a new multi-stage AI engine.
-// triageClient: fast model, used as fallback when deepClient is unavailable
+// triageClient: fast model (DeepSeek/OpenAI), used as fallback when deepClient is unavailable
 // deepClient: reasoning model for adversarial verification
+// localClient: local Ollama model — fallback when external APIs are unreachable
 // Either can be nil — the engine degrades gracefully.
-func NewEngine(triageClient, deepClient *Client) *Engine {
+func NewEngine(triageClient, deepClient, localClient *Client) *Engine {
 	return &Engine{
 		triageClient: triageClient,
 		deepClient:   deepClient,
+		localClient:  localClient,
 	}
 }
 
@@ -55,10 +59,14 @@ func (e *Engine) CostSummary() string {
 	return strings.Join(parts, ", ")
 }
 
-// Available returns true if at least one AI client is configured.
+// Available returns true if at least one AI client is configured (including local).
 func (e *Engine) Available() bool {
+	if e.offlineMode {
+		return false
+	}
 	return (e.triageClient != nil && e.triageClient.Available()) ||
-		(e.deepClient != nil && e.deepClient.Available())
+		(e.deepClient != nil && e.deepClient.Available()) ||
+		(e.localClient != nil && e.localClient.Available())
 }
 
 // AnalysisStatus summarizes the AI analysis outcome.

@@ -476,9 +476,21 @@ func shouldSkipControl(ep EndpointInfo, ctrl SecurityControl, target string) boo
 		}
 	}
 
-	// Request size limit only needed for endpoints that accept uploads/body
-	if ctrl.Name == "request_size_limit" && (method == "GET" || method == "HEAD" || method == "OPTIONS" || method == "DELETE") {
-		return true
+	// Request size limit: only flag endpoints that accept file uploads or large payloads.
+	// For plain JSON/REST POST endpoints, size limit is defense-in-depth but not critical.
+	if ctrl.Name == "request_size_limit" {
+		if method == "GET" || method == "HEAD" || method == "OPTIONS" || method == "DELETE" {
+			return true // no request body
+		}
+		// For POST/PUT/PATCH: check if handler actually accepts file uploads
+		fullPath := filepath.Join(target, ep.FilePath)
+		if !fileContainsPattern(fullPath, []string{
+			`FormFile`, `MultipartForm`, `SaveUploadedFile`,
+			`multipart\.File`, `ParseMultipartForm`, `FileHeader`,
+			`request\.files`, `upload`, `\.Avatar`, `\.Image`,
+		}) {
+			return true // plain JSON endpoint — skip (would be noise)
+		}
 	}
 
 	// Auth not needed for login/register/password-reset (these ARE the auth endpoints)

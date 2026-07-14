@@ -26,11 +26,13 @@ func newScanCmd() *cobra.Command {
 		fullMode     bool
 		noColor      bool
 		verbose      bool
-		aiEnabled     bool
-		aiModel       string
-		timeout       int
-		deepAnalysis  bool
-	deepStrict   bool
+		aiEnabled    bool
+		aiModel      string
+		timeout      int
+		deepAnalysis bool
+		deepStrict   bool
+		localLLM     bool
+		offlineMode  bool
 	)
 
 	cmd := &cobra.Command{
@@ -39,14 +41,16 @@ func newScanCmd() *cobra.Command {
 		Long: `Run the 8-step security audit pipeline (semgrep + gosec + bandit + gitleaks + more).
 
 By default all steps run locally. Use --ai to enable AI noise filtering (requires DEEPSEEK_API_KEY).
-Use --deep to enable AI-powered deep analysis (OBSERVE→TRACE→VERIFY) that finds vulnerabilities SAST misses.
+Use --deep to enable AI-powered deep analysis (OBSERVE->TRACE->VERIFY) that finds vulnerabilities SAST misses.
 Use --quick for a fast scan (secrets + hardcoded patterns only).
 
 Examples:
   ironwall scan .
   ironwall scan ./my-project --ai --format markdown
   ironwall scan ./my-project --ai --deep
-  ironwall scan /path/to/code --quick --format json`,
+  ironwall scan /path/to/code --quick --format json
+  ironwall scan . --local --format terminal    # use local Ollama for AI
+  ironwall scan . --offline --format terminal  # pure static analysis, no AI`,
 		Args: cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			target := "."
@@ -67,13 +71,13 @@ Examples:
 			cfg.TimeoutSeconds = timeout
 			cfg.DeepAnalysis = deepAnalysis
 			cfg.DeepStrict = deepStrict
+			cfg.Offline = offlineMode
 			cfg.ResolveAIKey()
+			cfg.ResolveLocalLLM()
 
 			// When --deep is active, ensure timeout is long enough for Phase B AI pipeline.
-			// Phase B runs OBSERVE→TRACE→VERIFY→MISSING→CONFIG, each making multiple API calls.
-			// DeepSeek R1 can take 60-180s per call. Default: 900s (15 min) for deep mode.
 			if cfg.DeepAnalysis && cfg.TimeoutSeconds < 900 {
-				log.Printf("Deep analysis requires longer timeout. Overriding %ds → 900s (use --timeout to set higher).",
+				log.Printf("Deep analysis requires longer timeout. Overriding %ds -> 900s (use --timeout to set higher).",
 					cfg.TimeoutSeconds)
 				cfg.TimeoutSeconds = 900
 			}
@@ -93,6 +97,8 @@ Examples:
 	cmd.Flags().IntVar(&timeout, "timeout", 300, "Scan timeout in seconds")
 	cmd.Flags().BoolVar(&deepAnalysis, "deep", false, "Enable AI deep analysis: AST inspection + LLM data flow tracing (requires --ai)")
 	cmd.Flags().BoolVar(&deepStrict, "deep-strict", false, "Only report CRITICAL+HIGH Phase B findings (reduces noise)")
+	cmd.Flags().BoolVar(&localLLM, "local", false, "Use local Ollama LLM as fallback (http://localhost:11434)")
+	cmd.Flags().BoolVar(&offlineMode, "offline", false, "Pure static analysis — skip ALL AI (external + local)")
 
 	return cmd
 }
@@ -118,6 +124,7 @@ func newQuickCmd() *cobra.Command {
 			cfg.OutputFormat = formatFlag
 			cfg.OutputFile = outputFlag
 			cfg.ResolveAIKey()
+			cfg.ResolveLocalLLM()
 
 			return runScan(cfg)
 		},
@@ -162,16 +169,31 @@ func detectLanguages(target string) (hasGo, hasPython bool) {
 }
 
 func runScan(cfg *config.Config) error {
-	// Build AI engine if enabled (dual-model: triage + deep verify)
+	// Build AI engine (external API + local Ollama fallback + offline mode)
 	var engine *ai.Engine
-	if cfg.AIEnabled && cfg.AIKey != "" {
-		triageClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
-		deepClient := ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIDeepModel)
-		engine = ai.NewEngine(triageClient, deepClient)
+	if !cfg.Offline {
+		var triageClient, deepClient, localClient *ai.Client
 
-		// Auto-detect target languages for conditional prompt rules
-		hasGo, hasPython := detectLanguages(cfg.Target)
-		engine.SetLanguages(hasGo, hasPython)
+		// External API (DeepSeek/OpenAI)
+		if cfg.AIEnabled && cfg.AIKey != "" {
+			triageClient = ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIModel)
+			deepClient = ai.NewClient(cfg.AIEndpoint, cfg.AIKey, cfg.AIDeepModel)
+		}
+
+		// Local Ollama fallback
+		if cfg.LocalLLMURL != "" && cfg.LocalLLMModel != "" {
+			localClient = ai.NewOllamaClient(cfg.LocalLLMURL, cfg.LocalLLMModel)
+		}
+
+		if triageClient != nil || localClient != nil {
+			engine = ai.NewEngine(triageClient, deepClient, localClient)
+
+			// Auto-detect target languages for conditional prompt rules
+			hasGo, hasPython := detectLanguages(cfg.Target)
+			engine.SetLanguages(hasGo, hasPython)
+		}
+	} else {
+		log.Printf("[offline] AI analysis disabled — static analysis only")
 	}
 
 	// Build pipeline
@@ -211,7 +233,7 @@ func runScan(cfg *config.Config) error {
 		return fmt.Errorf("scan failed: %w", err)
 	}
 
-	// Phase B: AI deep analysis (OBSERVE→TRACE→VERIFY→MISSING→CONFIG)
+	// Phase B: AI deep analysis (OBSERVE->TRACE->VERIFY->MISSING->CONFIG)
 	if cfg.DeepAnalysis && engine != nil && engine.Available() {
 		log.Println("\n--- Phase B: AI Deep Analysis ---")
 		deepResult, deepErr := engine.AnalyzeDeep(ctx, cfg.Target)

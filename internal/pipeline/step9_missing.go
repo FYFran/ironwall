@@ -35,12 +35,22 @@ func (s *Step9Missing) Description() string { return "Detect absent security con
 func (s *Step9Missing) IsSkippable() bool   { return true }
 func (s *Step9Missing) RequiredTools() []string { return nil }
 
-func (s *Step9Missing) Run(ctx context.Context, target string) ([]report.Finding, error) {
+func (s *Step9Missing) Run(ctx context.Context, target string) (findings []report.Finding, err error) {
+	// Panic recovery: step9 must never crash the pipeline
+	defer func() {
+		if r := recover(); r != nil {
+			err = fmt.Errorf("[step9] panic recovered: %v — MISSING detection partial, review results carefully", r)
+			log.Printf("[step9] PANIC: %v", r)
+		}
+	}()
+
 	// Phase A: Detect framework
 	profile := missing.DetectFramework(target)
 	if profile == nil {
-		log.Printf("[step9] No recognized web framework — skipping MISSING detection")
-		return nil, nil
+		// FrameworkUnknown: use generic profile — basic checks that work on any HTTP framework.
+		// Do NOT silently skip. Run what we can, mark the rest clearly.
+		log.Printf("[step9] No recognized web framework — using generic profile (limited coverage)")
+		profile = missing.GenericProfile()
 	}
 	log.Printf("[step9] Framework: %s | builtin:%d recommended:%d",
 		profile.Name, len(profile.BuiltinControls), len(profile.RecommendedThirdParty))
@@ -61,7 +71,7 @@ func (s *Step9Missing) Run(ctx context.Context, target string) ([]report.Finding
 	missingFindings := checker.CheckAllEndpoints(endpoints)
 
 	// Phase C: Convert to report.Findings
-	var findings []report.Finding
+	findings = nil // reset named return
 	for _, mf := range missingFindings {
 		f := report.Finding{
 			Title:         fmt.Sprintf("Missing %s on %s", mf.MissingControl, mf.Endpoint),
@@ -101,8 +111,8 @@ func (s *Step9Missing) Run(ctx context.Context, target string) ([]report.Finding
 func (s *Step9Missing) extractEndpoints(target string) []missing.EndpointInfo {
 	var endpoints []missing.EndpointInfo
 
-	// Gin/Echo patterns: r.GET("/path", handler)
-	goRouteRe := regexp.MustCompile(`(\w+)\.(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s*\(\s*"([^"]+)"\s*,\s*(\w+)`)
+	// Gin/Echo/Macaron/Fiber patterns: r.GET("/path", handler) or m.Get("/path", handler)
+	goRouteRe := regexp.MustCompile(`(?i)(\w+)\.(GET|POST|PUT|DELETE|PATCH|HEAD|OPTIONS)\s*\(\s*"([^"]+)"\s*,\s*(\w+)`)
 	// Flask patterns: @app.route("/path", methods=["GET", "POST"])
 	flaskRouteRe := regexp.MustCompile(`@\w+\.route\s*\(\s*"([^"]+)"`)
 	flaskMethodsRe := regexp.MustCompile(`methods\s*=\s*\[([^\]]+)\]`)

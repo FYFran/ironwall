@@ -69,6 +69,21 @@ func NewClient(endpoint, apiKey, model string) *Client {
 	return NewClientWithTimeout(endpoint, apiKey, model, DefaultHTTPTimeout)
 }
 
+// NewOllamaClient creates an AI client for a local Ollama instance.
+// Ollama exposes an OpenAI-compatible API at /v1/chat/completions.
+// baseURL is the Ollama server URL (e.g. "http://localhost:11434/v1").
+// model is the local model name (e.g. "qwen2.5-coder:7b", "llama3.1:8b").
+func NewOllamaClient(baseURL, model string) *Client {
+	return &Client{
+		endpoint: strings.TrimRight(baseURL, "/"),
+		apiKey:   "ollama", // Ollama doesn't require auth locally
+		model:    model,
+		httpClient: &http.Client{
+			Timeout: ShortHTTPTimeout, // local models may be slower on CPU
+		},
+	}
+}
+
 // NewClientWithTimeout creates a new AI client with a custom HTTP timeout.
 // Use ShortHTTPTimeout (120s) for fast chat models, DefaultHTTPTimeout (300s) for reasoning models.
 func NewClientWithTimeout(endpoint, apiKey, model string, timeout time.Duration) *Client {

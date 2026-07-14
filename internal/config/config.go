@@ -28,12 +28,17 @@ type Config struct {
 	// Verbose enables debug-level logging.
 	Verbose bool
 
-	// AI config
+	// AI config (external API)
 	AIModel      string // Triage model (e.g. "deepseek-chat") — fast, cheap
 	AIDeepModel  string // Deep verify model (e.g. "deepseek-reasoner") — reasoning, adversarial
 	AIEndpoint   string // API endpoint base URL
 	AIKey        string // API key (from env: IRONWALL_AI_KEY or DEEPSEEK_API_KEY)
 	AIEnabled    bool   // Whether AI analysis is enabled
+
+	// Local LLM config (Ollama) — fallback when external API is unavailable or --local flag
+	LocalLLMURL   string // Ollama base URL (e.g. "http://localhost:11434/v1")
+	LocalLLMModel string // Local model name (e.g. "qwen2.5-coder:7b")
+	Offline       bool   // Skip ALL AI (external + local) — pure static analysis only
 
 	// TimeoutSeconds is the max time for the full scan (0 = no limit).
 	TimeoutSeconds int
@@ -60,6 +65,8 @@ func Defaults() *Config {
 		AIModel:        "deepseek-chat",
 		AIDeepModel:    "deepseek-chat",
 		AIEndpoint:     "https://api.deepseek.com/v1",
+		LocalLLMModel:  "qwen2.5-coder:7b",
+		LocalLLMURL:    "http://localhost:11434/v1",
 		TimeoutSeconds: 300,
 		GitCloneDepth:  0,
 	}
@@ -79,6 +86,19 @@ func (c *Config) ResolveAIKey() {
 		return
 	}
 	c.AIEnabled = false
+}
+
+// ResolveLocalLLM looks up local LLM (Ollama) configuration from environment variables.
+func (c *Config) ResolveLocalLLM() {
+	if c.LocalLLMURL != "" && c.LocalLLMURL != "http://localhost:11434/v1" {
+		return // already explicitly configured
+	}
+	if url := os.Getenv("OLLAMA_HOST"); url != "" {
+		c.LocalLLMURL = url + "/v1"
+	}
+	if model := os.Getenv("IRONWALL_LOCAL_MODEL"); model != "" {
+		c.LocalLLMModel = model
+	}
 }
 
 // ReportFilename generates a default report filename based on target and timestamp.
