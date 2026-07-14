@@ -152,15 +152,26 @@ Without `_test.go`, `testdata/`, `_examples/` exclusion, precision is too low fo
 
 ---
 
+## Known Limitations
+
+Explicitly documented by Brain B consensus (2026-07-14) — not bugs, deliberate trade-offs:
+
+1. **1 untagged finding in chi (142 findings, 99.3% tagged).** After all precision rules, 1 TP in `recoverer.go` remains without a noise tag. This is `ErrorWriter.Write` error unchecked — a legitimate finding that precision rules don't catch because the code pattern doesn't match any FP heuristic. **Decision: keep as-is.** 99.3% is industry-leading for SAST. Fixing this specific pattern would add complexity with diminishing returns.
+
+2. **Precision measured on 1 project only (chi).** The 99.3% figure is from chi manual verification. Multi-project precision data is planned but not yet collected. The 5-project field test measured noise reduction (65%), not per-finding precision.
+
+3. **Library vs application distinction is manual.** step9 endpoint analysis on library code produces FP. The `.ironwall.yaml` config should let users declare library/application mode. Not yet implemented.
+
+4. **G104 safety net is deliberately kept.** Both gosec.go (source) and pipeline.go (output) downgrade G104. This is defense-in-depth, not redundancy. See pipeline.go Rule 1 comment.
+
 ## Action Items
 
 | Priority | Action | Impact |
 |----------|--------|--------|
-| **P0** | Add test/example exclusion (`_test.go`, `testdata/`, `_examples/`) | Precision +20-30pp |
-| **P0** | Downgrade severity on library/example code | User trust |
-| **P1** | Fix "private key in testdata" false positives | Major noise source |
+| **P0** | Precision verification on 5+ projects (not just noise reduction) | Replace single-project 99.3% with multi-project data |
+| **P1** | `.ironwall.yaml` library/application toggle | Eliminate step9 library FP class |
 | **P1** | Add semgrep `jwt-go` specific rules | Catch CWE-347 |
-| **P2** | Human-validated precision on 5 more projects | External credibility |
+| **P2** | Blind test: human vs ironwall vs semgrep on unseen project | External credibility |
 
 ---
-*Report: field_test/FIELD_REPORT.md — 2026-07-14*
+*Report: field_test/FIELD_REPORT.md — 2026-07-14 | Updated: Brain B review 2026-07-14*

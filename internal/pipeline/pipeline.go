@@ -3,6 +3,7 @@ package pipeline
 import (
 	"context"
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 	"time"
@@ -177,13 +178,18 @@ func adjustFindingQuality(f *report.Finding) {
 	code := f.CodeSnippet
 	titleLower := strings.ToLower(f.Title)
 
-	// Rule 1: G104 on Write/Flush calls / os.Stderr — not security-critical
-	// TODO: remove this — G104 now downgraded at source in gosec.go
+	// Rule 1: G104 on Write/Flush calls / os.Stderr — not security-critical.
+	// DEFENSE-IN-DEPTH: G104 is already downgraded to INFO at source in gosec.go (line 81).
+	// This rule is a safety net. If the source fix ever breaks (gosec upgrade, config change),
+	// this catches the regression. Keep both layers. Do NOT remove.
+	// If this rule fires, the source-level downgrade has failed — investigate.
 	if strings.Contains(titleLower, "g104") {
 		if strings.Contains(code, ".Write(") || strings.Contains(code, ".Flush(") ||
 			strings.Contains(code, "os.Stderr") || strings.Contains(code, "os.Stdout") {
 			f.Severity = report.SevInfo
 			f.Title = "[LOW-RISK] " + f.Title
+			// Safety net triggered — source fix may have regressed
+			log.Printf("[WARN] adjustFindingQuality: G104 safety net triggered for %s (source downgrade may have failed)", f.FilePath)
 		}
 	}
 
