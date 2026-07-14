@@ -52,9 +52,9 @@ func (s *Step2SAST) Run(ctx context.Context, target string) ([]report.Finding, e
 				allFindings = append(allFindings, codeqlFindings...)
 			}
 		}
-		// Layer 3: Semgrep fallback — broad pattern matching
+		// Layer 3: Semgrep — community rules + custom .semgrep/ rules
 		if isToolAvailable("semgrep") {
-			semgrepFindings, semgrepErr := s.runSemgrepWithRules(ctx, target, ".semgrep/")
+			semgrepFindings, semgrepErr := s.runSemgrepWithRules(ctx, target, "auto,.semgrep/")
 			if semgrepErr == nil {
 				allFindings = append(allFindings, semgrepFindings...)
 			}
