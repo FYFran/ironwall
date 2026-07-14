@@ -9,15 +9,15 @@
 |  | Predicted + | Predicted - |
 |---|---|---|
 | **Actual +** | TP=6 | FN=1 |
-| **Actual -** | FP=0 | TN=3 |
+| **Actual -** | FP=1 | TN=2 |
 
 ## Metrics
 
 | Metric | AI (DeepSeek V3) | Offline (Rules) | Delta |
 |---|---|---|---|
-| Precision | 1.000 | 1.000 | +0.000 |
+| Precision | 0.857 | 1.000 | -0.143 |
 | Recall | 0.857 | 1.000 | -0.143 |
-| F1 | 0.923 | 1.000 | -0.077 |
+| F1 | 0.857 | 1.000 | -0.143 |
 
 ## Per-Finding Comparison
 
@@ -30,13 +30,13 @@
 | GOLDEN-005 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-006 | confirm | exploit | 1.00 | ✅ | ✅ |
 | GOLDEN-007 | confirm | exploit | 0.95 | ✅ | ✅ |
-| GOLDEN-008 | reject | NOT | 0.30 | ✅ | ✅ |
+| GOLDEN-008 | reject | exploit | 0.95 | ✅ | ❌ |
 | GOLDEN-009 | reject | NOT | 0.95 | ✅ | ✅ |
 | GOLDEN-010 | reject | NOT | 1.00 | ✅ | ✅ |
 
 ## Analysis
 
-✅ **AI engine performs excellently.** On par with or better than offline rules.
+⚠️ **AI needs prompt tuning.** Below offline baseline but above minimum threshold.
 
 ### Key Takeaways
 
