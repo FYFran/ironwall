@@ -86,6 +86,8 @@ func (p *Pipeline) Run(ctx context.Context, target string) (*report.ScanResult, 
 				findings[i].Title = "[TEST/EXAMPLE] " + findings[i].Title
 				findings[i].Description = "Found in test/example code. " + findings[i].Description
 			}
+			// Post-processing: reduce known false positive patterns
+			adjustFindingQuality(&findings[i])
 			if findings[i].ID == "" {
 				findings[i].ID = fmt.Sprintf("IRON-%03d", result.Summary.Total+1)
 			}
@@ -167,4 +169,47 @@ func isTestFile(path string) bool {
 		}
 	}
 	return false
+}
+
+// adjustFindingQuality reduces severity for known false-positive patterns.
+// Based on chi field test: G104 on Write/Stderr, G710 same-origin, step9 on library.
+func adjustFindingQuality(f *report.Finding) {
+	code := f.CodeSnippet
+	titleLower := strings.ToLower(f.Title)
+
+	// Rule 1: G104 on Write/Flush calls / os.Stderr — not security-critical
+	// Write errors on HTTP response or debug output are non-fatal
+	if strings.Contains(titleLower, "g104") {
+		if strings.Contains(code, ".Write(") || strings.Contains(code, ".Flush(") ||
+			strings.Contains(code, "os.Stderr") || strings.Contains(code, "os.Stdout") {
+			f.Severity = report.SevInfo
+			f.Title = "[LOW-RISK] " + f.Title
+		}
+	}
+
+	// Rule 2: G710 open redirect on same-origin paths — not exploitable
+	if strings.Contains(titleLower, "g710") || strings.Contains(titleLower, "open redirect") {
+		if !strings.Contains(code, "://") && !strings.Contains(code, "//") {
+			f.Severity = report.SevInfo
+			f.Title = "[SAME-ORIGIN] " + f.Title
+		}
+	}
+
+	// Rule 3: step9 missing-defense on library middleware files
+	if f.Step == 9 && strings.Contains(f.Category, "missing") {
+		fp := strings.ToLower(f.FilePath)
+		if strings.Contains(fp, "middleware/") || strings.Contains(fp, "middleware\\") {
+			f.Severity = report.SevInfo
+			f.Title = "[LIBRARY] " + f.Title
+			f.Description = "Library middleware code (not application endpoint). " + f.Description
+		}
+	}
+
+	// Rule 4: SBOM and supply-chain findings are informational, not security
+	if f.Category == "sbom" || f.Category == "supply-chain" {
+		f.Severity = report.SevInfo
+		if !strings.HasPrefix(f.Title, "[") {
+			f.Title = "[INFO] " + f.Title
+		}
+	}
 }
