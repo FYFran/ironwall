@@ -150,9 +150,27 @@ func mapGosecConfidence(s string) float64 {
 }
 
 func mapGosecRuleToCategory(ruleID string) string {
+	// Precise mapping per rule, not by prefix range (G1xx covers 15+ different rule types)
 	switch {
-	case strings.HasPrefix(ruleID, "G1"):
+	// G1xx: General checks — split by actual rule
+	case ruleID == "G101":
 		return "hardcoded-credentials"
+	case ruleID == "G102", ruleID == "G108":
+		return "insecure-configuration"
+	case ruleID == "G103", ruleID == "G104":
+		return "code-quality"
+	case ruleID == "G106", ruleID == "G107":
+		return "ssrf"
+	case ruleID == "G109", ruleID == "G115":
+		return "integer-overflow"
+	case ruleID == "G110", ruleID == "G111":
+		return "path-traversal"
+	case ruleID == "G112":
+		return "missing-defense"
+	case ruleID == "G113":
+		return "information-disclosure"
+	case ruleID == "G114":
+		return "insecure-configuration"
 	case strings.HasPrefix(ruleID, "G2"):
 		return "sql-injection"
 	case strings.HasPrefix(ruleID, "G3"):
