@@ -178,7 +178,7 @@ func adjustFindingQuality(f *report.Finding) {
 	titleLower := strings.ToLower(f.Title)
 
 	// Rule 1: G104 on Write/Flush calls / os.Stderr — not security-critical
-	// Write errors on HTTP response or debug output are non-fatal
+	// TODO: remove this — G104 now downgraded at source in gosec.go
 	if strings.Contains(titleLower, "g104") {
 		if strings.Contains(code, ".Write(") || strings.Contains(code, ".Flush(") ||
 			strings.Contains(code, "os.Stderr") || strings.Contains(code, "os.Stdout") {

@@ -77,6 +77,10 @@ func (r *GosecResult) ToFindings(target string) []report.Finding {
 	var findings []report.Finding
 	for i, iss := range r.Issues {
 		sev := mapGosecSeverityStr(iss.Severity)
+		// G104 "errors unhandled" is code quality, not security — fix at source
+		if iss.RuleID == "G104" {
+			sev = report.SevInfo
+		}
 		cwe := iss.Cwe.ID
 		category := mapGosecRuleToCategory(iss.RuleID)
 		lineNum, _ := strconv.Atoi(iss.Line)
